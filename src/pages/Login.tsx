@@ -14,7 +14,7 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
             const publicKey = await post("/api/login/start", { username });
             const data = await fido2Get(publicKey, username);
 
-            return fetch("/api/login/finish", {headers: {"Content-Type": "application/json"}, method: "POST", body: JSON.stringify(data) }).then((res) => res.json());
+            return post("/api/login/finish", data);
         },
     };
 

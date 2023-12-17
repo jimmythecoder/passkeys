@@ -15,7 +15,7 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
             const publicKey = await post("/api/register/start", { username });
             const response = await fido2Create(publicKey, username);
 
-            return fetch("/api/register/finish", { headers: {"Content-Type": "application/json"}, method: "POST", body: JSON.stringify(response) }).then((res) => res.json());
+            return post("/api/register/finish", response);
         },
     };
 
