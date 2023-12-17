@@ -2,7 +2,13 @@ import * as SimpleWebAuthnServer from "@simplewebauthn/server";
 import express from "express";
 import bodyParser from "body-parser";
 
-const users = {} as Record<string, unknown>;
+type User = {
+    credentialID: string;
+    credentialPublicKey: string;
+    counter: Uint8Array;
+};
+
+const users = {} as Record<string, User>;
 const challenges = {} as Record<string, string>;
 const rpId = 'localhost';
 const expectedOrigin =  ['http://localhost:3000'];
@@ -44,12 +50,11 @@ function getSavedAuthenticatorData(user: Record<string, string>) {
     }
 }
 
-function getRegistrationInfo(registrationInfo: Record<string, Uint8Array>) {
-    const {credentialPublicKey, counter, credentialID} = registrationInfo;
+function getRegistrationInfo(registrationInfo: Record<string, unknown>) {
     return {
-        credentialID: uintToString(credentialID),
-        credentialPublicKey: uintToString(credentialPublicKey),
-        counter,
+        credentialID: uintToString(registrationInfo.credentialID as Uint8Array),
+        credentialPublicKey: uintToString(registrationInfo.credentialPublicKey as Uint8Array),
+        counter: registrationInfo.counter as Uint8Array,
     }
 }
 
@@ -90,9 +95,9 @@ app.post("/register/finish", async (req, res) => {
         return res.status(400).send({ error: error.message });
     }
     const { verified, registrationInfo } = verification;
-    if (verified) {
+    if (verified && registrationInfo) {
         users[username] = getRegistrationInfo(registrationInfo);
-        return res.status(200).send(users[username]);
+        return res.status(200).json({ success: true, users });
     }
     res.status(500).send(false);
 });
@@ -100,7 +105,7 @@ app.post("/register/finish", async (req, res) => {
 app.post("/login/start", (req, res) => {
     const username = req.body.username;
     if (!users[username]) {
-        res.status(404).send(false);
+        res.status(404).json({ error: "User not found", users });
     }
     const challenge = getNewChallenge();
     challenges[username] = convertChallenge(challenge);

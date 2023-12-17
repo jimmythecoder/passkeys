@@ -1,5 +1,5 @@
 html, body {
-    margin: 0;
+    margin: 2rem 1rem;
     padding: 0;
     background-color: #EFEFEF;
     display: flex;
@@ -15,9 +15,32 @@ p {
 
 a {
     text-decoration: none;
+    font-weight: 600;
+    color: #442983;
+
+    &:hover {
+        border-bottom: 2px solid #1a1136;
+        color: #5F3DC4;
+
+        &::after {
+            content: "";
+        }
+    }
+
+    &:active {
+        color: #442983;
+    }
+
+    &.button {
+        border: 0;
+    }
 }
 
 h1, h2 {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    align-items: center;
     font-weight: 300;
     font-size: 2.5rem;
     margin: 0;
@@ -26,7 +49,8 @@ h1, h2 {
 }
 
 .container {
-    max-width: 1440px;
+    width: 500px;
+    max-width: 100%;
     margin: 2rem;
     padding: 1rem;
     background-color: #FFF;
@@ -50,11 +74,10 @@ form {
     display: flex;
     flex-direction: column;
     gap: 2rem;
-    min-width: 500px;
     margin: 3rem 1rem;
 
     label {
-        color: #442983
+        color: #231444
     }
 }
 
@@ -76,6 +99,7 @@ form {
 
         p {
             margin: 0;
+            color: #231444;
         }
     }
 }
