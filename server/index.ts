@@ -67,8 +67,8 @@ app.post("/register/start", (req, res) => {
         rp: { id: rpId, name: "webauthn-app" },
         user: { id: username, name: username, displayName: username },
         pubKeyCredParams: [
-            { type: "public-key", alg: -7 },
-            { type: "public-key", alg: -257 },
+            { type: "public-key", alg: -7 }, // ECDSA w/ SHA-256
+            { type: "public-key", alg: -257 }, // RSASSA-PKCS1-v1_5 using SHA-256
         ],
         authenticatorSelection: {
             authenticatorAttachment: "platform",
@@ -104,22 +104,23 @@ app.post("/register/finish", async (req, res) => {
 
 app.post("/login/start", (req, res) => {
     const username = req.body.username;
-    if (!users[username]) {
-        res.status(404).json({ error: "User not found", users });
-    }
+    // if (!users[username]) {
+    //     res.status(404).json({ error: "User not found", users });
+    // }
     const challenge = getNewChallenge();
     challenges[username] = convertChallenge(challenge);
     res.json({
         challenge,
         rpId,
-        allowCredentials: [
-            {
-                type: "public-key",
-                id: users[username].credentialID,
-                transports: ["internal"],
-            },
-        ],
-        userVerification: "discouraged",
+        // allowCredentials: [
+        //     {
+        //         type: "public-key",
+        //         // id: users[username].credentialID,
+        //         transports: ["internal"],
+        //     },
+        // ],
+        // authenticatorType: "auto",
+        // userVerification: "discouraged",
     });
 });
 
