@@ -11,7 +11,7 @@ const jsonAPI = (method = "POST") => {
         });
 
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}, ${response.statusText}}`);
+            throw new Error(`HTTP error! status: ${response.status}, ${response.statusText}`);
         }
 
         const json = await response.json();

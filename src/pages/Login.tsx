@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { fido2Get } from "@/utils/webauthn";
-import { bufferToBase64Url, ConvertPubKeyToLoginFormat, ConvertPubKeyToRegisterFormat } from "../utils/buffer";
 import { post } from "@/utils/api";
 import "./Login.scss";
 
@@ -12,46 +10,14 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
 
     const api = {
         async login(username: string) {
-            const publicKey = await post("/api/login/start", { username });
-            const data = await fido2Get(publicKey, username);
+            const publicKeyCredential = await post("/api/signin", { username });
+            console.debug("publicKeyCredential", publicKeyCredential);
 
-            return post("/api/login/finish", data);
+            return false;
         },
     };
 
     useEffect(() => {
-        async function checkMediation() {
-            const available = await PublicKeyCredential.isConditionalMediationAvailable();
-
-            if (available) {
-                try {
-                    // Retrieve authentication options for `navigator.credentials.get()`
-                    // from your server.
-                    const authOptions = await post("/api/login/start", { username: "james.harris@connexian.com" });
-                    const publicKey = ConvertPubKeyToLoginFormat(authOptions);
-                    // This call to `navigator.credentials.get()` is "set and forget."
-                    // The Promise will only resolve if the user successfully interacts
-                    // with the browser's autofill UI to select a passkey.
-                    const webAuthnResponse = await navigator.credentials.get({
-                        mediation: "conditional",
-                        publicKey: {
-                            ...publicKey,
-                            // see note about userVerification below
-                            userVerification: "preferred",
-                        },
-                    });
-
-                    console.debug("webAuthnResponse", webAuthnResponse);
-                    // Send the response to your server for verification and
-                    // authenticate the user if the response is valid.
-                    //await verifyAutoFillResponse(webAuthnResponse);
-                } catch (err) {
-                    console.error("Error with conditional UI:", err);
-                }
-            }
-        }
-
-        checkMediation();
     }, []);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -89,6 +55,7 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
             </header>
             <main>
                 <form onSubmit={handleSubmit} name="login">
+                    {error && <p className="error">{error}</p>}
                     <div className="element">
                         <label htmlFor="username">Email address</label>
                         <input type="email" name="username" id="username" autoComplete="username webauthn" placeholder="example@domain.com" required />
@@ -96,7 +63,7 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
                     </div>
 
                     <div className="element">
-                        <button type="submit">Sign in</button>
+                        <button type="submit" disabled={loading}>Sign in</button>
                     </div>
 
                     <div className="element signup">
