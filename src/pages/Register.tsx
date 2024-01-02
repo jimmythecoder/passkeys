@@ -73,7 +73,7 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
     };
 
     return (
-        <div>
+        <>
             <header>
                 <h1>
                     <svg xmlns="http://www.w3.org/2000/svg" height="44" viewBox="0 -960 960 960" width="44" fill="#442983">
@@ -85,7 +85,7 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
             <main>
                 <form onSubmit={handleSubmit} name="login">
                     {error && (
-                        <div className="element error">
+                        <div className="element form-error">
                             <p>{error}</p>
                         </div>
                     )}
@@ -107,7 +107,7 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
                     </div>
                 </form>
             </main>
-        </div>
+        </>
     );
 };
 

@@ -1,8 +1,8 @@
 import * as express from "express";
 import dotenv from "dotenv";
 import { generateRegistrationOptions, verifyRegistrationResponse, generateAuthenticationOptions, verifyAuthenticationResponse } from "@simplewebauthn/server";
-import { users, UserModel } from "@/data/users";
-import { authenticators, Authenticator } from "@/data/authenticators";
+import { users, UserModel, User } from "@/data/users";
+import { authenticators, Authenticator, UserAuthenticator } from "@/data/authenticators";
 import { UserNotFound, UserAlreadyExists, AuthenticatorNotFound, CustomError } from "@/exceptions";
 
 dotenv.config({ path: ".env.test" });
@@ -12,6 +12,7 @@ export const api = express.Router();
 const RP_ORIGIN = `${process.env.HTTPS ? "https" : "http   "}://${process.env.RP_ID}:${process.env.RP_PROXY_PORT ?? "3001"}`;
 const RP_ID = process.env.RP_ID ?? "localhost";
 const RP_NAME = process.env.RP_NAME ?? "Passkeys Example";
+const USE_METADATA_SERVICE = process.env.USE_METADATA_SERVICE === "true";
 
 api.get("/healthcheck", async (req, res) => {
     res.json({ status: "ok" });
@@ -23,7 +24,11 @@ api.get("/signin/new", async (req, res) => {
             throw new Error("Username is required");
         }
 
-        const user = users.find((user) => user.userName === req.query.username);
+        // const user = await User.get({ "userName": req.query.username as string });
+
+        const [user] = await User.query("userName").eq(req.query.username as string).exec();
+
+        // const user = users.find((user) => user.userName === req.query.username);
 
         if (!user) {
             throw new UserNotFound(`User not found`);
@@ -43,6 +48,44 @@ api.get("/signin/new", async (req, res) => {
                 type: "public-key",
                 transports: authenticator.transports,
             })),
+            userVerification: "preferred",
+        });
+
+        user.currentChallenge = options.challenge;
+
+        req.session.user = user;
+
+        console.debug("User signing in", req.session.user);
+
+        res.json(options);
+    } catch (error) {
+        if (error instanceof CustomError) {
+            console.error(error);
+            res.statusMessage = error.name;
+            return res.status(error.code).json(error);
+        }
+
+        if (error instanceof Error) {
+            console.error(error);
+            return res.status(400).json(error);
+        }
+
+        console.error(error);
+        return res.status(400).json(error);
+    }
+});
+
+api.get("/signin/passkey", async (req, res) => {
+    try {
+        const user = {
+            id: crypto.randomUUID(),
+            userName: `unknown@${RP_ID}`,
+            displayName: "Unknown User",
+            isVerified: false,
+        } as UserModel;
+
+        const options = await generateAuthenticationOptions({
+            rpID: RP_ID,
             userVerification: "preferred",
         });
 
@@ -92,6 +135,7 @@ api.post("/signin/verify", async (req, res) => {
             expectedOrigin: RP_ORIGIN,
             expectedRPID: RP_ID,
             authenticator,
+            requireUserVerification: true,
         });
 
         const { verified } = verification;
@@ -110,11 +154,14 @@ api.post("/signin/verify", async (req, res) => {
 
         if (error instanceof Error) {
             console.error(error);
-            return res.status(400).json(error);
+            return res.status(400).json({ message: "Invalid signature" });
         }
 
         console.error(error);
-        return res.status(400).json(error);
+        return res.status(400).json({message: "Unknown error"});
+    } finally {
+        // Prevent replay attacks with the same challenge
+        req.session.user.challenge = undefined;
     }
 });
 
@@ -126,7 +173,10 @@ api.get("/register/new", async (req, res) => {
             throw new Error("Username is required");
         }
 
-        if (users.find((user) => user.userName === username)) {
+        const users = await User.query("userName").eq(req.query.username as string).exec();
+
+        //if (users.find((user) => user.userName === username)) {
+        if (users.length) {
             throw new UserAlreadyExists(`User ${username} already exists`);
         }
 
@@ -137,7 +187,9 @@ api.get("/register/new", async (req, res) => {
             isVerified: false,
         } as UserModel;
 
-        const userAuthenticators = authenticators.filter((authenticator) => authenticator.userId === user.id);
+        const userAuthenticators = await UserAuthenticator.query("userId").eq(user.id).exec();
+
+        // const userAuthenticators = authenticators.filter((authenticator) => authenticator.userId === user.id);
 
         const options = await generateRegistrationOptions({
             rpName: RP_NAME,
@@ -146,7 +198,7 @@ api.get("/register/new", async (req, res) => {
             userName: user.userName,
             // Don't prompt users for additional information about the authenticator
             // (Recommended for smoother UX)
-            attestationType: "none",
+            attestationType: USE_METADATA_SERVICE ? "direct" : "none",
             // Prevent users from re-registering existing authenticators
             excludeCredentials: userAuthenticators.map((authenticator) => ({
                 id: authenticator.credentialID,
@@ -157,7 +209,7 @@ api.get("/register/new", async (req, res) => {
             // See "Guiding use of authenticators via authenticatorSelection" below
             authenticatorSelection: {
                 // Defaults
-                residentKey: "preferred",
+                residentKey: "required",
                 userVerification: "preferred",
                 // Optional
                 authenticatorAttachment: "platform",
@@ -200,6 +252,7 @@ api.post("/register/verify", async (req, res) => {
             expectedChallenge: req.session.user.currentChallenge,
             expectedOrigin: RP_ORIGIN,
             expectedRPID: RP_ID,
+            requireUserVerification: true,
         });
 
         const { verified } = verification;
@@ -207,6 +260,8 @@ api.post("/register/verify", async (req, res) => {
         req.session.user.isVerified = verified;
 
         users.push(req.session.user);
+
+        User.create(req.session.user);
 
         console.debug("New user registered", req.session.user);
 
@@ -224,6 +279,7 @@ api.post("/register/verify", async (req, res) => {
             };
 
             authenticators.push(newAuthenticator);
+            UserAuthenticator.create(newAuthenticator);
 
             console.debug("New authenticator registered", newAuthenticator);
         }
@@ -243,5 +299,7 @@ api.post("/register/verify", async (req, res) => {
 
         console.error(error);
         return res.status(400).json(error);
+    } finally {
+        req.session.user.challenge = undefined;
     }
 });

@@ -5,14 +5,13 @@ import { startAuthentication, browserSupportsWebAuthn } from "@simplewebauthn/br
 import "./Login.scss";
 
 export const Login: React.FC<React.PropsWithChildren> = () => {
-    const isWebAuthnSupported = browserSupportsWebAuthn();
-    const [error, setError] = useState(isWebAuthnSupported ? "" : "WebAuthn is not supported in this browser");
+    const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+    const useConditionalUI = false;
 
     const api = {
         async signin(username: string) {
-
             setLoading(true);
             setError("");
 
@@ -21,7 +20,7 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
                 console.debug("authenticationOptions", authenticationOptions);
 
                 // Pass the options to the authenticator and wait for a response
-                const attResp = await startAuthentication(authenticationOptions, true);
+                const attResp = await startAuthentication(authenticationOptions);
 
                 const isVerified = await post("/api/signin/verify", attResp);
 
@@ -36,7 +35,7 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
                     if (error.name === "InvalidStateError") {
                         console.error("Error: Authenticator was probably already registered by user", error.message);
                     } else {
-                        console.error(error.message);
+                        console.error(error);
                     }
 
                     setError(error.message);
@@ -50,7 +49,29 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
         },
     };
 
-    useEffect(() => {}, []);
+    useEffect(() => {
+        if (!browserSupportsWebAuthn()) {
+            setError("WebAuthn is not supported in this browser");
+        }
+
+        const abortController = new AbortController();
+
+        if (useConditionalUI) {
+            get("/api/signin/passkey", undefined, abortController.signal).then((options) => {
+                return startAuthentication(options, true).then((attResp) => {
+                    return post("/api/signin/verify", attResp, abortController.signal);
+                });
+            }).then((isVerified) => {
+                if (isVerified) {
+                    navigate("/success");
+                }
+            });
+        }
+
+        return () => {
+            abortController.abort();
+        };
+    }, [navigate, useConditionalUI]);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -76,7 +97,7 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
     };
 
     return (
-        <div>
+        <>
             <header>
                 <h1>
                     <svg xmlns="http://www.w3.org/2000/svg" height="44" viewBox="0 -960 960 960" width="44" fill="#442983">
@@ -88,7 +109,7 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
             <main>
                 <form onSubmit={handleSubmit} name="login">
                     {error && (
-                        <div className="element error">
+                        <div className="element form-error">
                             <p>{error}</p>
                         </div>
                     )}
@@ -112,7 +133,7 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
                     </div>
                 </form>
             </main>
-        </div>
+        </>
     );
 };
 

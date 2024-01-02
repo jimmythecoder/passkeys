@@ -1,3 +1,6 @@
+import dynamoose from "dynamoose";
+import { Item } from "dynamoose/dist/Item";
+
 /**
  * It is strongly advised that authenticators get their own DB
  * table, ideally with a foreign key to a specific UserModel.
@@ -30,3 +33,58 @@ export type Authenticator = {
 export type CredentialDeviceType = "singleDevice" | "multiDevice";
 
 export const authenticators = [] as Authenticator[];
+
+export type AuthenticatorType = Item & {
+    id: string;
+
+    userId: string;
+    
+    // SQL: Encode to base64url then store as `TEXT`. Index this column
+    credentialID: Uint8Array;
+    // SQL: Store raw bytes as `BYTEA`/`BLOB`/etc...
+    credentialPublicKey: Uint8Array;
+    // SQL: Consider `BIGINT` since some authenticators return atomic timestamps as counters
+    counter: number;
+    // SQL: `VARCHAR(32)` or similar, longest possible value is currently 12 characters
+    // Ex: 'singleDevice' | 'multiDevice'
+    credentialDeviceType: CredentialDeviceType;
+    // SQL: `BOOL` or whatever similar type is supported
+    credentialBackedUp: boolean;
+    // SQL: `VARCHAR(255)` and store string array as a CSV string
+    // Ex: ['usb' | 'ble' | 'nfc' | 'internal']
+    transports?: AuthenticatorTransport[];
+}
+
+export const UserAuthenticatorSchema = new dynamoose.Schema({
+    id: {
+        type: String,
+        hashKey: true,
+    },
+    userId: {
+        type: String,
+        index: {
+            type: "global",
+            name: "userIdIndex",
+        },
+    },
+    credentialID: {
+        type: String,
+    },
+    credentialPublicKey: {
+        type: String,
+    },
+    counter: {
+        type: Number,
+    },
+    credentialDeviceType: {
+        type: String,
+    },
+    credentialBackedUp: {
+        type: Boolean,
+    },
+    transports: {
+        type: Array,
+    },
+});
+
+export const UserAuthenticator = dynamoose.model<AuthenticatorType>("UserAuthenticator", UserAuthenticatorSchema);

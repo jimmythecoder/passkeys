@@ -1,3 +1,5 @@
+import dynamoose from "dynamoose";
+
 export type Session = {
     id: string;
     user_id: string;
@@ -23,3 +25,24 @@ export class Sessions {
         return this.sessions.find((session) => session.user_id === user_id);
     }
 }
+
+export const AuthCeremonySessionSchema = new dynamoose.Schema({
+    sessionId: {
+        type: String,
+        hashKey: true,
+    },
+    currentChallenge: {
+        type: String,
+    },
+    createdAt: {
+        type: Number,
+        default: Date.now,
+    },
+});
+
+export const User = dynamoose.model("AuthCeremonySession", AuthCeremonySessionSchema, {
+    expires: {
+        ttl: 86400,
+        attribute: "createdAt",
+    },
+});
