@@ -1,24 +1,56 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { post } from "@/utils/api";
+import { post, get } from "@/utils/api";
+import { startAuthentication, browserSupportsWebAuthn } from "@simplewebauthn/browser";
 import "./Login.scss";
 
 export const Login: React.FC<React.PropsWithChildren> = () => {
-    const [error, setError] = useState("");
+    const isWebAuthnSupported = browserSupportsWebAuthn();
+    const [error, setError] = useState(isWebAuthnSupported ? "" : "WebAuthn is not supported in this browser");
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
     const api = {
-        async login(username: string) {
-            const publicKeyCredential = await post("/api/signin", { username });
-            console.debug("publicKeyCredential", publicKeyCredential);
+        async signin(username: string) {
+
+            setLoading(true);
+            setError("");
+
+            try {
+                const authenticationOptions = await get("/api/signin/new", { username });
+                console.debug("authenticationOptions", authenticationOptions);
+
+                // Pass the options to the authenticator and wait for a response
+                const attResp = await startAuthentication(authenticationOptions, true);
+
+                const isVerified = await post("/api/signin/verify", attResp);
+
+                if (!isVerified) {
+                    throw new Error("Invalid login");
+                }
+
+                console.debug("Login verified");
+                return true;
+            } catch (error) {
+                if (error instanceof Error) {
+                    if (error.name === "InvalidStateError") {
+                        console.error("Error: Authenticator was probably already registered by user", error.message);
+                    } else {
+                        console.error(error.message);
+                    }
+
+                    setError(error.message);
+                } else {
+                    setError("Unknown server error");
+                    console.error(error);
+                }
+            }
 
             return false;
         },
     };
 
-    useEffect(() => {
-    }, []);
+    useEffect(() => {}, []);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -27,11 +59,11 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
 
         try {
             const username = (e.currentTarget.elements.namedItem("username") as HTMLInputElement).value;
-            const success = await api.login(username);
+            const success = await api.signin(username);
             console.debug("Login response", success);
 
             if (success) {
-                navigate("/success?from=login");
+                navigate("/success");
             }
         } catch (err) {
             if (err instanceof Error) {
@@ -55,7 +87,12 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
             </header>
             <main>
                 <form onSubmit={handleSubmit} name="login">
-                    {error && <p className="error">{error}</p>}
+                    {error && (
+                        <div className="element error">
+                            <p>{error}</p>
+                        </div>
+                    )}
+
                     <div className="element">
                         <label htmlFor="username">Email address</label>
                         <input type="email" name="username" id="username" autoComplete="username webauthn" placeholder="example@domain.com" required />
@@ -63,7 +100,9 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
                     </div>
 
                     <div className="element">
-                        <button type="submit" disabled={loading}>Sign in</button>
+                        <button type="submit" disabled={loading}>
+                            Sign in
+                        </button>
                     </div>
 
                     <div className="element signup">

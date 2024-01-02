@@ -1,25 +1,51 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { post } from "@/utils/api";
+import { post, get } from "@/utils/api";
+import { startRegistration, browserSupportsWebAuthn } from "@simplewebauthn/browser";
 import "./Register.scss";
 
 export const Register: React.FC<React.PropsWithChildren> = () => {
-    const [token, setToken] = useState("");
-    const [error, setError] = useState("");
+    const isWebAuthnSupported = browserSupportsWebAuthn();
+    const [error, setError] = useState(isWebAuthnSupported ? "" : "WebAuthn is not supported in this browser");
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
     const api = {
         async register(username: string) {
-            const publicKey = await post("/api/register", { username });
 
-            const credential = await navigator.credentials.create({
-                publicKey,
-            });
+            setLoading(true);
+            setError("");
 
-            if (credential) {
-                const attestation = credential.response as AuthenticatorAttestationResponse;
+            try {
+                const registrationOptions = await get("/api/register/new", { username });
+    
+                // Pass the options to the authenticator and wait for a response
+                const attResp = await startRegistration(registrationOptions);
+
+                const isVerified = await post("/api/register/verify", attResp);
+
+                if (!isVerified) {
+                    throw new Error(`Registration failed`);
+                }
+
+                console.debug("User registered");
+                return true;
+            } catch (error) {
+                if (error instanceof Error) {
+                    if (error.name === "InvalidStateError") {
+                        console.error("Error: Authenticator was probably already registered by user", error.message);
+                    } else {
+                        console.error(error.message);
+                    }
+
+                    setError(error.message);
+                } else {
+                    setError("Unknown server error");
+                    console.error(error);
+                }
             }
+
+            return false;
         },
     };
 
@@ -30,10 +56,13 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
 
         try {
             const username = (e.currentTarget.elements.namedItem("username") as HTMLInputElement).value;
-            const data = await api.register(username);
-            console.debug("Successfully created using webAuthn", data);
+            const success = await api.register(username);
 
-            navigate("/success?from=register");
+            if(success) {
+                console.debug("User registered");
+
+                navigate("/success");
+            }
         } catch (err) {
             if (err instanceof Error) {
                 setError(err.message);
@@ -55,6 +84,12 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
             </header>
             <main>
                 <form onSubmit={handleSubmit} name="login">
+                    {error && (
+                        <div className="element error">
+                            <p>{error}</p>
+                        </div>
+                    )}
+
                     <div className="element">
                         <label htmlFor="username">Email address</label>
                         <input type="email" name="username" id="username" autoComplete="email" placeholder="example@domain.com" required />
@@ -62,7 +97,7 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
                     </div>
 
                     <div className="element">
-                        <button type="submit">Sign up</button>
+                        <button disabled={loading} type="submit">Sign up</button>
                     </div>
 
                     <div className="element signup">

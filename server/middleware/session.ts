@@ -17,7 +17,7 @@ export const session = (name: string, secret: string, maxAge: number) =>
         saveUninitialized: true,
         name,
         cookie: {
-            secure: true,
+            secure: false,
             httpOnly: true,
             sameSite: "strict",
             maxAge,

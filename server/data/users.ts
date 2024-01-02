@@ -1,39 +1,9 @@
-export type UserType = {
+export type UserModel = {
     id: string;
-    name: string;
+    userName: string;
     displayName: string;
-    username: string;
+    currentChallenge?: string;
+    isVerified?: boolean;
 };
 
-export class User implements UserType {
-    constructor(public id: string, public name: string, public displayName: string, public username: string) {}
-
-    encode() {
-        return {
-            id: new TextEncoder().encode(this.id),
-            name: this.name,
-            displayName: this.displayName,
-            username: this.username,
-        };
-    }
-}
-
-export class Users {
-    private users: User[] = [];
-
-    insert(user: Omit<UserType, "id">): User {
-        const id = crypto.randomUUID();
-        const newUser = new User(id, user.name, user.displayName, user.username);
-        this.users.push(newUser);
-
-        return newUser;
-    }
-
-    getById(id: string) {
-        return this.users.find((user) => user.id === id);
-    }
-
-    getByUsername(username: string) {
-        return this.users.find((user) => user.username === username);
-    }
-}
+export const users = [] as UserModel[];
