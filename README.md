@@ -1,6 +1,6 @@
 # Passkeys
 
-Authentication with passkeys React UI + express API server
+Authentication with passkeys React UI + fastify express API
 
 A working demo integrating the latest Passkey WebAuthn technology into a modern frontend stack. 
 

@@ -4,11 +4,11 @@ import { expressjwt, Request as JWTRequest } from "express-jwt";
 import jwt from "jsonwebtoken";
 import { generateRegistrationOptions, verifyRegistrationResponse, generateAuthenticationOptions, verifyAuthenticationResponse } from "@simplewebauthn/server";
 import { isoBase64URL } from "@simplewebauthn/server/helpers";
-import { UserModel, User, UserType, AuthChallenge } from "@/data/users";
-import { Authenticator, AuthenticatorModel } from "@/data/authenticators";
+import { UserModel, User, UserType, AuthChallenge } from "@/models/users";
+import { Authenticator, AuthenticatorModel } from "@/models/authenticators";
 import { UserNotFound, UserAlreadyExists, Unauthorized, ChallengeError, AuthenticatorNotFound, CustomError, AuthenticatorMismatch } from "@/exceptions";
 
-dotenv.config({ path: ".env.test" });
+dotenv.config();
 
 export const api = express.Router();
 
@@ -31,11 +31,11 @@ enum HttpStatusCode {
 
 const jwtAuthorizer = expressjwt({ secret: TOKEN_SECRET, algorithms: TOKEN_ALGORITHIMS });
 
-api.get("/healthcheck", async (req, res) => {
+api.get("/healthcheck", async (_, res) => {
     res.json({ status: "ok" });
 });
 
-api.get("/signin/test", jwtAuthorizer, async (req: JWTRequest<UserType>, res) => {
+api.get("/signin/test", jwtAuthorizer, async (_, res) => {
     try {
         res.json({ status: "ok" });
     } catch (error) {

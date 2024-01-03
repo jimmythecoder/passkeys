@@ -10,8 +10,9 @@ import { api } from "./middleware/api";
 import { MetadataService } from "@simplewebauthn/server";
 import dynamoose from "dynamoose";
 
-dotenv.config({ path: ".env.test" });
+dotenv.config();
 
+const USE_LOCAL_DB = process.env.USE_LOCAL_DB === "true";
 const USE_METADATA_SERVICE = process.env.USE_METADATA_SERVICE === "true";
 
 const fastify = Fastify({
@@ -36,11 +37,13 @@ const startServer = async () => {
             });
         }
 
-        // const ddb = new dynamoose.aws.ddb.DynamoDB({
-        //     region: process.env.AWS_REGION
-        // });
-
-        dynamoose.aws.ddb.local();
+        if (USE_LOCAL_DB) {
+            dynamoose.aws.ddb.local();
+        } else {
+            new dynamoose.aws.ddb.DynamoDB({
+                region: process.env.AWS_REGION
+            });
+        }
     });
 
     fastify.get("/", async (_, reply) => {
