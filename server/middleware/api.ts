@@ -10,7 +10,8 @@ dotenv.config({ path: ".env.test" });
 
 export const api = express.Router();
 
-const RP_ORIGIN = `${process.env.HTTPS ? "https" : "http   "}://${process.env.RP_ID}:${process.env.RP_PROXY_PORT ?? "3001"}`;
+const IS_HTTPS = process.env.HTTPS === "true";
+const RP_ORIGIN = `${IS_HTTPS ? "https" : "http"}://${process.env.RP_ID}:${process.env.RP_PROXY_PORT ?? "3000"}`;
 const RP_ID = process.env.RP_ID ?? "localhost";
 const RP_NAME = process.env.RP_NAME ?? "Passkeys Example";
 const USE_METADATA_SERVICE = process.env.USE_METADATA_SERVICE === "true";
@@ -164,7 +165,7 @@ api.post("/signin/verify", async (req, res) => {
 
         console.debug("User signed in", user);
 
-        res.status(HttpStatusCode.OK).json(verified);
+        res.status(HttpStatusCode.Created).json(verified);
     } catch (error) {
         if (error instanceof CustomError) {
             console.error(error);
@@ -295,7 +296,7 @@ api.post("/register/verify", async (req, res) => {
         if (verification.registrationInfo) {
             const newAuthenticator = new Authenticator({
                 id: crypto.randomUUID(),
-                userId: req.session.user.id,
+                userId: user.id,
                 credentialID: Buffer.from(verification.registrationInfo.credentialID),
                 credentialPublicKey: Buffer.from(verification.registrationInfo.credentialPublicKey),
                 counter: verification.registrationInfo.counter,

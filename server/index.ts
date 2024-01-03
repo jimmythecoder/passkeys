@@ -48,7 +48,7 @@ const startServer = async () => {
         return { hello: "world" };
     });
 
-    fastify.use(api);
+    fastify.use("/api", api);
 
     return fastify;
 };
