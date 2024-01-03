@@ -2,9 +2,12 @@ import jwtSession from "express-session-jwt";
 import { readFileSync } from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import dotenv from "dotenv";
 
+dotenv.config();
 const fileName = fileURLToPath(import.meta.url);
 const dirName = path.dirname(fileName);
+const isSecure = process.env.HTTPS === "true";
 
 export const session = (name: string, secret: string, maxAge: number) =>
     jwtSession({
@@ -17,7 +20,7 @@ export const session = (name: string, secret: string, maxAge: number) =>
         saveUninitialized: true,
         name,
         cookie: {
-            secure: false,
+            secure: isSecure,
             httpOnly: true,
             sameSite: "strict",
             maxAge,

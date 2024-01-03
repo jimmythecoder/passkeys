@@ -201,7 +201,7 @@ api.post("/signin/verify", async (req, res) => {
         return res.status(HttpStatusCode.BadRequest).json({ message: "Unknown error" });
     } finally {
         // Prevent replay attacks with the same challenge
-        delete req.session.user.challenge;
+        delete req.session.challenge;
     }
 });
 
@@ -353,6 +353,6 @@ api.post("/register/verify", async (req, res) => {
         console.error(error);
         return res.status(HttpStatusCode.BadRequest).json(error);
     } finally {
-        delete req.session.user.challenge;
+        delete req.session.challenge;
     }
 });

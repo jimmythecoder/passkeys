@@ -18,11 +18,9 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
 
             try {
                 const authenticationOptions = await post(endpoints.auth.signin.getCredentials, { username });
-                console.debug("authenticationOptions", authenticationOptions);
 
                 // Pass the options to the authenticator and wait for a response
                 const attResp = await startAuthentication(authenticationOptions);
-
                 const response = await post(endpoints.auth.signin.verify, attResp);
 
                 sessionStorage.setItem("auth_token", response.token);
