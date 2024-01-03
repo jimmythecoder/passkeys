@@ -16,7 +16,7 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
             setError("");
 
             try {
-                const authenticationOptions = await get("/api/signin/new", { username });
+                const authenticationOptions = await post("/api/signin/new", { username });
                 console.debug("authenticationOptions", authenticationOptions);
 
                 // Pass the options to the authenticator and wait for a response

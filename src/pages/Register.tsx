@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { post, get } from "@/utils/api";
+import { post } from "@/utils/api";
 import { startRegistration, browserSupportsWebAuthn } from "@simplewebauthn/browser";
 import "./Register.scss";
 
@@ -11,14 +11,13 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
     const navigate = useNavigate();
 
     const api = {
-        async register(username: string) {
-
+        async register(displayName: string, username: string) {
             setLoading(true);
             setError("");
 
             try {
-                const registrationOptions = await get("/api/register/new", { username });
-    
+                const registrationOptions = await post("/api/register/new", { displayName, username });
+
                 // Pass the options to the authenticator and wait for a response
                 const attResp = await startRegistration(registrationOptions);
 
@@ -55,10 +54,13 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
         setError("");
 
         try {
-            const username = (e.currentTarget.elements.namedItem("username") as HTMLInputElement).value;
-            const success = await api.register(username);
+            const formData = new FormData(e.currentTarget);
+            const displayName = formData.get("displayName") as string;
+            const username = formData.get("username") as string;
 
-            if(success) {
+            const success = await api.register(displayName, username);
+
+            if (success) {
                 console.debug("User registered");
 
                 navigate("/success");
@@ -91,13 +93,21 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
                     )}
 
                     <div className="element">
+                        <label htmlFor="displayName">Name</label>
+                        <input type="text" name="displayName" id="displayName" autoFocus autoComplete="given-name" placeholder="John Doe" required />
+                        <p className="error">Your name is required</p>
+                    </div>
+
+                    <div className="element">
                         <label htmlFor="username">Email address</label>
                         <input type="email" name="username" id="username" autoComplete="email" placeholder="example@domain.com" required />
                         <p className="error">Your email is not valid</p>
                     </div>
 
                     <div className="element">
-                        <button disabled={loading} type="submit">Sign up</button>
+                        <button disabled={loading} type="submit">
+                            Sign up
+                        </button>
                     </div>
 
                     <div className="element signup">

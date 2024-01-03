@@ -19,6 +19,12 @@ export class UserNotFound extends CustomError {
     }
 }
 
+export class ChallengeError extends CustomError {
+    constructor(message: string) {
+        super(message, 401);
+    }
+}
+
 export class UserAlreadyExists extends CustomError {
     constructor(message: string) {
         super(message, 400);
@@ -26,6 +32,15 @@ export class UserAlreadyExists extends CustomError {
 }
 
 export class AuthenticatorNotFound extends CustomError {
+    constructor(message: string) {
+        super(message, 401);
+    }
+}
+
+/**
+ * This error is thrown when a user attempts to use an authenticator that is not the one they registered with.
+ */
+export class AuthenticatorMismatch extends CustomError {
     constructor(message: string) {
         super(message, 401);
     }

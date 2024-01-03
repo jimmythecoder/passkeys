@@ -1,9 +1,10 @@
 import * as express from "express";
 import dotenv from "dotenv";
 import { generateRegistrationOptions, verifyRegistrationResponse, generateAuthenticationOptions, verifyAuthenticationResponse } from "@simplewebauthn/server";
-import { users, UserModel, User } from "@/data/users";
-import { authenticators, Authenticator, UserAuthenticator } from "@/data/authenticators";
-import { UserNotFound, UserAlreadyExists, AuthenticatorNotFound, CustomError } from "@/exceptions";
+import { isoBase64URL } from "@simplewebauthn/server/helpers";
+import { UserModel, User, AuthChallenge } from "@/data/users";
+import { Authenticator, AuthenticatorModel } from "@/data/authenticators";
+import { UserNotFound, UserAlreadyExists, ChallengeError, AuthenticatorNotFound, CustomError, AuthenticatorMismatch } from "@/exceptions";
 
 dotenv.config({ path: ".env.test" });
 
@@ -14,27 +15,36 @@ const RP_ID = process.env.RP_ID ?? "localhost";
 const RP_NAME = process.env.RP_NAME ?? "Passkeys Example";
 const USE_METADATA_SERVICE = process.env.USE_METADATA_SERVICE === "true";
 
+enum HttpStatusCode {
+    OK = 200,
+    Created = 201,
+    BadRequest = 400,
+    Unauthorized = 401,
+    NotFound = 404,
+}
+
 api.get("/healthcheck", async (req, res) => {
     res.json({ status: "ok" });
 });
 
-api.get("/signin/new", async (req, res) => {
+api.post("/signin/new", async (req, res) => {
     try {
-        if (!req.query.username) {
+        const username = req.body.username as string;
+        if (!username) {
             throw new Error("Username is required");
         }
 
-        // const user = await User.get({ "userName": req.query.username as string });
+        const [userEntity] = await UserModel.query("userName")
+            .eq(username)
+            .exec();
 
-        const [user] = await User.query("userName").eq(req.query.username as string).exec();
-
-        // const user = users.find((user) => user.userName === req.query.username);
-
-        if (!user) {
+        if (!userEntity) {
             throw new UserNotFound(`User not found`);
         }
 
-        const userAuthenticators = authenticators.filter((authenticator) => authenticator.userId === user.id);
+        const user = new User(userEntity);
+
+        const userAuthenticators = await AuthenticatorModel.query("userId").eq(user.id).exec();
 
         if (!userAuthenticators.length) {
             throw new AuthenticatorNotFound(`User has no registered authenticators`);
@@ -51,13 +61,14 @@ api.get("/signin/new", async (req, res) => {
             userVerification: "preferred",
         });
 
-        user.currentChallenge = options.challenge;
+        const challenge = new AuthChallenge({challenge: options.challenge});
 
         req.session.user = user;
+        req.session.challenge = challenge;
 
         console.debug("User signing in", req.session.user);
 
-        res.json(options);
+        res.status(HttpStatusCode.OK).json(options);
     } catch (error) {
         if (error instanceof CustomError) {
             console.error(error);
@@ -67,35 +78,31 @@ api.get("/signin/new", async (req, res) => {
 
         if (error instanceof Error) {
             console.error(error);
-            return res.status(400).json(error);
+            return res.status(HttpStatusCode.BadRequest).json(error);
         }
 
         console.error(error);
-        return res.status(400).json(error);
+        return res.status(HttpStatusCode.BadRequest).json(error);
     }
 });
 
 api.get("/signin/passkey", async (req, res) => {
     try {
-        const user = {
-            id: crypto.randomUUID(),
-            userName: `unknown@${RP_ID}`,
-            displayName: "Unknown User",
-            isVerified: false,
-        } as UserModel;
+        const user = new User();
 
         const options = await generateAuthenticationOptions({
             rpID: RP_ID,
             userVerification: "preferred",
         });
 
-        user.currentChallenge = options.challenge;
+        const challenge = new AuthChallenge({challenge: options.challenge});
 
         req.session.user = user;
+        req.session.challenge = challenge;
 
         console.debug("User signing in", req.session.user);
 
-        res.json(options);
+        res.status(HttpStatusCode.OK).json(options);
     } catch (error) {
         if (error instanceof CustomError) {
             console.error(error);
@@ -105,11 +112,11 @@ api.get("/signin/passkey", async (req, res) => {
 
         if (error instanceof Error) {
             console.error(error);
-            return res.status(400).json(error);
+            return res.status(HttpStatusCode.BadRequest).json(error);
         }
 
         console.error(error);
-        return res.status(400).json(error);
+        return res.status(HttpStatusCode.BadRequest).json(error);
     }
 });
 
@@ -119,19 +126,30 @@ api.post("/signin/verify", async (req, res) => {
             throw new UserNotFound("User not found");
         }
 
-        if (!req.session.user?.currentChallenge) {
-            throw new Error("User missing expected challenge, sign-in again");
+        const user = new User(req.session.user);
+        const challenge = new AuthChallenge(req.session.challenge);
+
+        if (!challenge.currentChallenge) {
+            throw new ChallengeError("Missing challenge, sign-in again");
         }
 
-        const authenticator = authenticators.find((authenticator) => authenticator.userId === req.session.user.id);
+        const credentialID = isoBase64URL.toBuffer(req.body.rawId);
+
+        if (!credentialID) {
+            throw new Error("Missing credential ID");
+        }
+
+        const [authenticator] = await AuthenticatorModel.query("credentialID").eq(credentialID).exec();
 
         if (!authenticator) {
-            throw new AuthenticatorNotFound(`User has no registered authenticators`);
+            throw new AuthenticatorMismatch(`Authenticator not found for userID`);
         }
+
+        console.debug("Authenticator found", authenticator);
 
         const verification = await verifyAuthenticationResponse({
             response: req.body,
-            expectedChallenge: req.session.user.currentChallenge,
+            expectedChallenge: challenge.currentChallenge,
             expectedOrigin: RP_ORIGIN,
             expectedRPID: RP_ID,
             authenticator,
@@ -140,11 +158,13 @@ api.post("/signin/verify", async (req, res) => {
 
         const { verified } = verification;
 
-        req.session.user.isVerified = verified;
+        user.isVerified = verified;
 
-        console.debug("User signed in", req.session.user);
+        req.session.user = user;
 
-        res.json(verified);
+        console.debug("User signed in", user);
+
+        res.status(HttpStatusCode.OK).json(verified);
     } catch (error) {
         if (error instanceof CustomError) {
             console.error(error);
@@ -154,42 +174,45 @@ api.post("/signin/verify", async (req, res) => {
 
         if (error instanceof Error) {
             console.error(error);
-            return res.status(400).json({ message: "Invalid signature" });
+            return res.status(HttpStatusCode.BadRequest).json({ message: "Invalid signature" });
         }
 
         console.error(error);
-        return res.status(400).json({message: "Unknown error"});
+        return res.status(HttpStatusCode.BadRequest).json({ message: "Unknown error" });
     } finally {
         // Prevent replay attacks with the same challenge
-        req.session.user.challenge = undefined;
+        delete req.session.user.challenge;
     }
 });
 
-api.get("/register/new", async (req, res) => {
+api.post("/register/new", async (req, res) => {
     try {
-        const username = req.query.username;
+        const username = req.body.username as string;
+        const displayName = req.body.displayName as string;
+
+        if (!displayName) {
+            throw new Error("Name is required");
+        }
 
         if (!username) {
             throw new Error("Username is required");
         }
 
-        const users = await User.query("userName").eq(req.query.username as string).exec();
+        const users = await UserModel.query("userName")
+            .eq(username)
+            .limit(1)
+            .exec();
 
-        //if (users.find((user) => user.userName === username)) {
         if (users.length) {
             throw new UserAlreadyExists(`User ${username} already exists`);
         }
 
-        const user = {
-            id: crypto.randomUUID(),
+        const user = new User({
             userName: username,
-            displayName: username,
-            isVerified: false,
-        } as UserModel;
+            displayName: displayName,
+        });
 
-        const userAuthenticators = await UserAuthenticator.query("userId").eq(user.id).exec();
-
-        // const userAuthenticators = authenticators.filter((authenticator) => authenticator.userId === user.id);
+        const userAuthenticators = [] as Authenticator[];
 
         const options = await generateRegistrationOptions({
             rpName: RP_NAME,
@@ -216,13 +239,14 @@ api.get("/register/new", async (req, res) => {
             },
         });
 
-        user.currentChallenge = options.challenge;
+        const challenge = new AuthChallenge({challenge: options.challenge});
 
         req.session.user = user;
+        req.session.challenge = challenge;
 
-        console.debug("New user registering", req.session.user);
+        console.debug("New user registering", user, challenge);
 
-        res.json(options);
+        res.status(HttpStatusCode.OK).json(options);
     } catch (error) {
         if (error instanceof CustomError) {
             console.error(error.message);
@@ -233,23 +257,26 @@ api.get("/register/new", async (req, res) => {
         if (error instanceof Error) {
             console.error(error);
             res.statusMessage = error.message;
-            return res.status(400).json(error);
+            return res.status(HttpStatusCode.BadRequest).json(error);
         }
 
         console.error(error);
-        return res.status(400).json(error);
+        return res.status(HttpStatusCode.BadRequest).json(error);
     }
 });
 
 api.post("/register/verify", async (req, res) => {
     try {
-        if (!req.session.user?.currentChallenge) {
-            throw new Error("User msising expected challenge, please re-register.");
+        const user = new User(req.session.user);
+        const challenge = new AuthChallenge(req.session.challenge);
+
+        if (!challenge.isValid()) {
+            throw new ChallengeError("Challenge not found or expired, re-register");
         }
 
         const verification = await verifyRegistrationResponse({
             response: req.body,
-            expectedChallenge: req.session.user.currentChallenge,
+            expectedChallenge: challenge.challenge,
             expectedOrigin: RP_ORIGIN,
             expectedRPID: RP_ID,
             requireUserVerification: true,
@@ -257,34 +284,32 @@ api.post("/register/verify", async (req, res) => {
 
         const { verified } = verification;
 
-        req.session.user.isVerified = verified;
+        user.isVerified = verified;
 
-        users.push(req.session.user);
+        UserModel.create(user);
 
-        User.create(req.session.user);
+        req.session.user = user;
 
-        console.debug("New user registered", req.session.user);
+        console.debug("New user registered", user);
 
         if (verification.registrationInfo) {
-            const newAuthenticator: Authenticator = {
+            const newAuthenticator = new Authenticator({
                 id: crypto.randomUUID(),
                 userId: req.session.user.id,
-                credentialID: verification.registrationInfo.credentialID,
-                credentialPublicKey: verification.registrationInfo.credentialPublicKey,
+                credentialID: Buffer.from(verification.registrationInfo.credentialID),
+                credentialPublicKey: Buffer.from(verification.registrationInfo.credentialPublicKey),
                 counter: verification.registrationInfo.counter,
                 credentialDeviceType: verification.registrationInfo.credentialDeviceType,
                 credentialBackedUp: verification.registrationInfo.credentialBackedUp,
-                // `body` here is from Step 2
                 transports: req.body.response.transports,
-            };
+            });
 
-            authenticators.push(newAuthenticator);
-            UserAuthenticator.create(newAuthenticator);
+            AuthenticatorModel.create(newAuthenticator);
 
             console.debug("New authenticator registered", newAuthenticator);
         }
 
-        res.json(verified);
+        res.status(HttpStatusCode.Created).json(verified);
     } catch (error) {
         if (error instanceof CustomError) {
             console.error(error);
@@ -294,12 +319,12 @@ api.post("/register/verify", async (req, res) => {
 
         if (error instanceof Error) {
             console.error(error);
-            return res.status(400).json(error);
+            return res.status(HttpStatusCode.BadRequest).json(error);
         }
 
         console.error(error);
-        return res.status(400).json(error);
+        return res.status(HttpStatusCode.BadRequest).json(error);
     } finally {
-        req.session.user.challenge = undefined;
+        delete req.session.user.challenge;
     }
 });

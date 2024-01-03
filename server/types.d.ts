@@ -6,7 +6,7 @@ declare module "express-session-jwt" {
 
 declare global {
     declare module "express-session" {
-        import { UserModel } from "./data/users";
+        import { UserModel, AuthChallenge } from "@/data/users";
         
         interface SessionOptions {
             keys: {
@@ -17,6 +17,7 @@ declare global {
 
         interface SessionData {
             user?: UserModel;
+            challenge?: AuthChallenge;
         }
     }
 }
