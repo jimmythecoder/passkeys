@@ -6,7 +6,8 @@ import { generateRegistrationOptions, verifyRegistrationResponse, generateAuthen
 import { isoBase64URL } from "@simplewebauthn/server/helpers";
 import { UserModel, User, UserType, AuthChallenge } from "@/models/users";
 import { Authenticator, AuthenticatorModel } from "@/models/authenticators";
-import { UserNotFound, UserAlreadyExists, Unauthorized, ChallengeError, AuthenticatorNotFound, CustomError, AuthenticatorMismatch } from "@/exceptions";
+import { UserNotFound, UserAlreadyExists, ValidationError, VerificationError, Unauthorized, ChallengeError, AuthenticatorNotFound, CustomError, AuthenticatorMismatch } from "@/exceptions";
+import { HttpStatusCode } from "@/util/constants";
 
 dotenv.config();
 
@@ -20,14 +21,6 @@ const RP_ORIGIN = `${IS_HTTPS ? "https" : "http"}://${process.env.RP_ID}:${proce
 const RP_ID = process.env.RP_ID ?? "localhost";
 const RP_NAME = process.env.RP_NAME ?? "Passkeys Example";
 const USE_METADATA_SERVICE = process.env.USE_METADATA_SERVICE === "true";
-
-enum HttpStatusCode {
-    OK = 200,
-    Created = 201,
-    BadRequest = 400,
-    Unauthorized = 401,
-    NotFound = 404,
-}
 
 const jwtAuthorizer = expressjwt({ secret: TOKEN_SECRET, algorithms: TOKEN_ALGORITHIMS });
 
@@ -94,7 +87,7 @@ api.post("/signin/new", async (req, res) => {
     try {
         const username = req.body.username as string;
         if (!username) {
-            throw new Error("Username is required");
+            throw new ValidationError("Username is required");
         }
 
         const [userEntity] = await UserModel.query("userName").eq(username).exec();
@@ -197,7 +190,7 @@ api.post("/signin/verify", async (req, res) => {
         const credentialID = isoBase64URL.toBuffer(req.body.rawId);
 
         if (!credentialID) {
-            throw new Error("Missing credential ID");
+            throw new ValidationError("Missing credential ID");
         }
 
         const [authenticator] = await AuthenticatorModel.query("credentialID").eq(credentialID).and().where("userId").eq(user.id).exec();
@@ -217,9 +210,9 @@ api.post("/signin/verify", async (req, res) => {
             requireUserVerification: true,
         });
 
-        const { verified } = verification;
-
-        user.isVerified = verified;
+        if (!verification.verified) {
+            throw new VerificationError("Verification failed");
+        }
 
         req.session.user = user;
 
@@ -229,7 +222,7 @@ api.post("/signin/verify", async (req, res) => {
             expiresIn: TOKEN_EXPIRATION,
         });
 
-        res.status(HttpStatusCode.Created).json({ verified, token });
+        res.status(HttpStatusCode.Created).json({ token });
     } catch (error) {
         if (error instanceof CustomError) {
             console.error(error);
@@ -256,11 +249,11 @@ api.post("/register/new", async (req, res) => {
         const displayName = req.body.displayName as string;
 
         if (!displayName) {
-            throw new Error("Name is required");
+            throw new ValidationError("Name is required");
         }
 
         if (!username) {
-            throw new Error("Username is required");
+            throw new ValidationError("Username is required");
         }
 
         const users = await UserModel.query("userName").eq(username).limit(1).exec();
@@ -344,9 +337,9 @@ api.post("/register/verify", async (req, res) => {
             requireUserVerification: true,
         });
 
-        const { verified } = verification;
-
-        user.isVerified = verified;
+        if (!verification.verified) {
+            throw new VerificationError("Verification failed");
+        }
 
         UserModel.create(user);
 
@@ -375,7 +368,7 @@ api.post("/register/verify", async (req, res) => {
             expiresIn: TOKEN_EXPIRATION,
         });
 
-        res.status(HttpStatusCode.Created).json({ verified, token });
+        res.status(HttpStatusCode.Created).json({ token });
     } catch (error) {
         if (error instanceof CustomError) {
             console.error(error);

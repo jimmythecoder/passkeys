@@ -1,3 +1,5 @@
+import { HttpStatusCode } from "@/util/constants";
+
 export class CustomError extends Error {
     constructor(message: string, public code: number) {
         super(message);
@@ -15,25 +17,38 @@ export class CustomError extends Error {
 
 export class UserNotFound extends CustomError {
     constructor(message: string) {
-        super(message, 404);
+        super(message, HttpStatusCode.NotFound);
     }
 }
 
 export class ChallengeError extends CustomError {
     constructor(message: string) {
-        super(message, 401);
+        super(message, HttpStatusCode.Fobidden);
     }
 }
 
+export class VerificationError extends CustomError {
+    constructor(message: string) {
+        super(message, HttpStatusCode.BadRequest);
+    }
+}
+
+export class ValidationError extends CustomError {
+    constructor(message: string) {
+        super(message, HttpStatusCode.BadRequest);
+    }
+}
+
+
 export class UserAlreadyExists extends CustomError {
     constructor(message: string) {
-        super(message, 400);
+        super(message, HttpStatusCode.Fobidden);
     }
 }
 
 export class AuthenticatorNotFound extends CustomError {
     constructor(message: string) {
-        super(message, 401);
+        super(message, HttpStatusCode.Fobidden);
     }
 }
 
@@ -42,18 +57,24 @@ export class AuthenticatorNotFound extends CustomError {
  */
 export class AuthenticatorMismatch extends CustomError {
     constructor(message: string) {
-        super(message, 401);
+        super(message, HttpStatusCode.Fobidden);
     }
 }
 
 export class Unauthorized extends CustomError {
     constructor(message: string) {
-        super(message, 401);
+        super(message, HttpStatusCode.Unauthorized);
     }
 }
 
 export class AuthenticatorAlreadyExists extends CustomError {
+    constructor(message: string) {
+        super(message, HttpStatusCode.Fobidden);
+    }
 }
 
 export class SessionNotFound extends CustomError {
+    constructor(message: string) {
+        super(message, HttpStatusCode.Unauthorized);
+    }
 }
