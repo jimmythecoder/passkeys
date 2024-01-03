@@ -6,7 +6,9 @@ import multer from "multer";
 import dotenv from "dotenv";
 import { cors } from "./middleware/cors";
 import { session } from "./middleware/session";
-import { api } from "./middleware/api";
+import { api as authApi } from "./middleware/api/auth";
+import { api as healthApi } from "./middleware/api/health";
+import { api as testApi } from "./middleware/api/test";
 import { MetadataService } from "@simplewebauthn/server";
 import dynamoose from "dynamoose";
 
@@ -51,7 +53,9 @@ const startServer = async () => {
         return { hello: "world" };
     });
 
-    fastify.use("/api", api);
+    fastify.use("/api/auth", authApi);
+    fastify.use("/api/health", healthApi);
+    fastify.use("/api/test", testApi);
 
     return fastify;
 };

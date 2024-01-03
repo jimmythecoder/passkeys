@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate, NavLink } from "react-router-dom";
-import { post, get } from "@/utils/api";
+import { post, get, endpoints } from "@/utils/api";
 import { startAuthentication, browserSupportsWebAuthn } from "@simplewebauthn/browser";
+import { paths } from "@/Routes";
 import "./Login.scss";
 
 export const Login: React.FC<React.PropsWithChildren> = () => {
@@ -16,17 +17,13 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
             setError("");
 
             try {
-                const authenticationOptions = await post("/api/signin/new", { username });
+                const authenticationOptions = await post(endpoints.auth.signin.getCredentials, { username });
                 console.debug("authenticationOptions", authenticationOptions);
 
                 // Pass the options to the authenticator and wait for a response
                 const attResp = await startAuthentication(authenticationOptions);
 
-                const response = await post("/api/signin/verify", attResp);
-
-                if (!response.verified) {
-                    throw new Error("Invalid login");
-                }
+                const response = await post(endpoints.auth.signin.verify, attResp);
 
                 sessionStorage.setItem("auth_token", response.token);
 
@@ -59,13 +56,13 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
         const abortController = new AbortController();
 
         if (useConditionalUI) {
-            get("/api/signin/passkey", undefined, abortController.signal).then((options) => {
+            get(endpoints.auth.signin.getAllCredentails, undefined, abortController.signal).then((options) => {
                 return startAuthentication(options, true).then((attResp) => {
                     return post("/api/signin/verify", attResp, abortController.signal);
                 });
             }).then((isVerified) => {
                 if (isVerified) {
-                    navigate("/success");
+                    navigate(paths.signinSuccess);
                 }
             });
         }
@@ -86,7 +83,7 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
             console.debug("Login response", success);
 
             if (success) {
-                navigate("/signin/success");
+                navigate(paths.signinSuccess);
             }
         } catch (err) {
             if (err instanceof Error) {
@@ -130,7 +127,7 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
 
                     <div className="element signup">
                         <p>
-                            Don&rsquo;t have an account yet? <NavLink to="/signup">Sign up &#9997;</NavLink>
+                            Don&rsquo;t have an account yet? <NavLink to={paths.register}>Sign up &#9997;</NavLink>
                         </p>
                     </div>
                 </form>

@@ -1,4 +1,5 @@
 import { useRouteError, NavLink } from "react-router-dom";
+import { paths } from "@/Routes";
 
 export const ErrorBoundary: React.FC<React.PropsWithChildren> = () => {
     const error = useRouteError() as Error;
@@ -22,7 +23,7 @@ export const ErrorBoundary: React.FC<React.PropsWithChildren> = () => {
                 </p>
 
                 <p>
-                    <NavLink to="/">Back to home</NavLink>
+                    <NavLink to={paths.signin}>Back to home</NavLink>
                 </p>
             </main>
         </>

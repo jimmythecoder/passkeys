@@ -29,6 +29,30 @@ const jsonAPI = (apiURL: string, method = "POST") => {
     }
 };
 
+export const endpoints = {
+    auth: {
+        signin: {
+            getCredentials: "/api/auth/signin",
+            verify: "/api/auth/signin/verify",
+            getAllCredentails: "/api/auth/signin/passkey",
+        },
+        signout: "/api/auth/signout",
+        register: {
+            getCredentials: "/api/auth/register",
+            verify: "/api/auth/register/verify",
+        },
+    },
+    health: {
+        status: "/api/health/status",
+    },
+    test: {
+        authorizer: {
+            basic: "/api/test/authorized",
+            admin: "/api/test/authorized/admin",
+        }
+    }
+};
+
 function isEmpty(value: unknown) {
     return value == null || value === "";
 }
@@ -41,5 +65,6 @@ export const get = jsonAPI(API_URL, "GET");
 
 export default {
     get,
-    post
+    post,
+    endpoints,
 };

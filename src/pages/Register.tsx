@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate, NavLink } from "react-router-dom";
-import { post } from "@/utils/api";
+import { post, endpoints } from "@/utils/api";
 import { startRegistration, browserSupportsWebAuthn } from "@simplewebauthn/browser";
+import { paths } from "@/Routes";
 import "./Register.scss";
 
 export const Register: React.FC<React.PropsWithChildren> = () => {
@@ -16,16 +17,12 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
             setError("");
 
             try {
-                const registrationOptions = await post("/api/register/new", { displayName, username });
+                const registrationOptions = await post(endpoints.auth.register.getCredentials, { displayName, username });
 
                 // Pass the options to the authenticator and wait for a response
                 const attResp = await startRegistration(registrationOptions);
 
-                const response = await post("/api/register/verify", attResp);
-
-                if (!response.verified) {
-                    throw new Error(`Registration failed`);
-                }
+                const response = await post(endpoints.auth.register.verify, attResp);
 
                 sessionStorage.setItem("auth_token", response.token);
 
@@ -65,7 +62,7 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
             if (success) {
                 console.debug("User registered");
 
-                navigate("/register/success");
+                navigate(paths.registerSuccess);
             }
         } catch (err) {
             if (err instanceof Error) {
@@ -114,7 +111,7 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
 
                     <div className="element signup">
                         <p>
-                            Already have an account? <NavLink to="/">Sign in</NavLink>
+                            Already have an account? <NavLink to={paths.signin}>Sign in</NavLink>
                         </p>
                     </div>
                 </form>

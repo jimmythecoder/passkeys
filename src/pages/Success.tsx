@@ -2,7 +2,8 @@ import "./Success.scss";
 import { useMemo } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { parseJwt } from "@/utils/jwt";
-import { post } from "@/utils/api";
+import { post, endpoints } from "@/utils/api";
+import { paths } from "@/Routes";
 import type { JwtPayload } from "@/types/webauthn";
 
 export type SuccessProps = {
@@ -24,11 +25,11 @@ export const Success: React.FC<React.PropsWithChildren<SuccessProps>> = (props) 
     const handleSignout = async () => {
 
         try {
-            await post("/api/signout");
+            await post(endpoints.auth.signout);
 
             sessionStorage.removeItem("auth_token");
 
-            navigate("/");
+            navigate(paths.signin);
         } catch(error) {
             console.error(error);
         }
@@ -68,7 +69,7 @@ export const Success: React.FC<React.PropsWithChildren<SuccessProps>> = (props) 
                 </dl>
 
                 <p>
-                    <NavLink to="/">
+                    <NavLink to={paths.signin}>
                         <button className="primary block">Continue</button>
                     </NavLink>
                 </p>
