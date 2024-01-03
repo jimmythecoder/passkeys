@@ -22,11 +22,13 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
                 // Pass the options to the authenticator and wait for a response
                 const attResp = await startAuthentication(authenticationOptions);
 
-                const isVerified = await post("/api/signin/verify", attResp);
+                const response = await post("/api/signin/verify", attResp);
 
-                if (!isVerified) {
+                if (!response.verified) {
                     throw new Error("Invalid login");
                 }
+
+                sessionStorage.setItem("auth_token", response.token);
 
                 console.debug("Login verified");
                 return true;

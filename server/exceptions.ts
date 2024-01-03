@@ -46,6 +46,12 @@ export class AuthenticatorMismatch extends CustomError {
     }
 }
 
+export class Unauthorized extends CustomError {
+    constructor(message: string) {
+        super(message, 401);
+    }
+}
+
 export class AuthenticatorAlreadyExists extends CustomError {
 }
 

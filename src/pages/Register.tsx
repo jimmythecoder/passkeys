@@ -21,11 +21,13 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
                 // Pass the options to the authenticator and wait for a response
                 const attResp = await startRegistration(registrationOptions);
 
-                const isVerified = await post("/api/register/verify", attResp);
+                const response = await post("/api/register/verify", attResp);
 
-                if (!isVerified) {
+                if (!response.verified) {
                     throw new Error(`Registration failed`);
                 }
+
+                sessionStorage.setItem("auth_token", response.token);
 
                 console.debug("User registered");
                 return true;

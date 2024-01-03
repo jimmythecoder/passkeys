@@ -1,16 +1,20 @@
 import * as express from "express";
 import dotenv from "dotenv";
+import { expressjwt, Request as JWTRequest } from "express-jwt";
+import jwt from "jsonwebtoken";
 import { generateRegistrationOptions, verifyRegistrationResponse, generateAuthenticationOptions, verifyAuthenticationResponse } from "@simplewebauthn/server";
 import { isoBase64URL } from "@simplewebauthn/server/helpers";
-import { UserModel, User, AuthChallenge } from "@/data/users";
+import { UserModel, User, UserType, AuthChallenge } from "@/data/users";
 import { Authenticator, AuthenticatorModel } from "@/data/authenticators";
-import { UserNotFound, UserAlreadyExists, ChallengeError, AuthenticatorNotFound, CustomError, AuthenticatorMismatch } from "@/exceptions";
+import { UserNotFound, UserAlreadyExists, Unauthorized, ChallengeError, AuthenticatorNotFound, CustomError, AuthenticatorMismatch } from "@/exceptions";
 
 dotenv.config({ path: ".env.test" });
 
 export const api = express.Router();
 
 const IS_HTTPS = process.env.HTTPS === "true";
+const TOKEN_SECRET = process.env.AUTH_TOKEN_SECRET ?? "catfish";
+const TOKEN_ALGORITHIMS = [(process.env.TOKEN_ALGORITHIM as jwt.Algorithm) ?? "HS256"] satisfies jwt.Algorithm[];
 const RP_ORIGIN = `${IS_HTTPS ? "https" : "http"}://${process.env.RP_ID}:${process.env.RP_PROXY_PORT ?? "3000"}`;
 const RP_ID = process.env.RP_ID ?? "localhost";
 const RP_NAME = process.env.RP_NAME ?? "Passkeys Example";
@@ -24,8 +28,29 @@ enum HttpStatusCode {
     NotFound = 404,
 }
 
+const jwtAuthorizer = expressjwt({ secret: TOKEN_SECRET, algorithms: TOKEN_ALGORITHIMS });
+
 api.get("/healthcheck", async (req, res) => {
     res.json({ status: "ok" });
+});
+
+api.get("/admin/test", jwtAuthorizer, async (req: JWTRequest<UserType>, res) => {
+    try {
+        if (!req.auth.roles.includes("admin")) {
+            throw new Unauthorized("Missing admin role");
+        }
+
+        res.json({ status: "ok" });
+    } catch (error) {
+        if (error instanceof CustomError) {
+            console.error("Authorization failed", error.message);
+            res.statusMessage = error.name;
+            return res.status(error.code).json(error);
+        }
+
+        console.error(error);
+        return res.status(HttpStatusCode.Unauthorized).json(error);
+    }
 });
 
 api.post("/signin/new", async (req, res) => {
@@ -35,9 +60,7 @@ api.post("/signin/new", async (req, res) => {
             throw new Error("Username is required");
         }
 
-        const [userEntity] = await UserModel.query("userName")
-            .eq(username)
-            .exec();
+        const [userEntity] = await UserModel.query("userName").eq(username).exec();
 
         if (!userEntity) {
             throw new UserNotFound(`User not found`);
@@ -62,7 +85,7 @@ api.post("/signin/new", async (req, res) => {
             userVerification: "preferred",
         });
 
-        const challenge = new AuthChallenge({challenge: options.challenge});
+        const challenge = new AuthChallenge({ challenge: options.challenge });
 
         req.session.user = user;
         req.session.challenge = challenge;
@@ -96,7 +119,7 @@ api.get("/signin/passkey", async (req, res) => {
             userVerification: "preferred",
         });
 
-        const challenge = new AuthChallenge({challenge: options.challenge});
+        const challenge = new AuthChallenge({ challenge: options.challenge });
 
         req.session.user = user;
         req.session.challenge = challenge;
@@ -165,7 +188,11 @@ api.post("/signin/verify", async (req, res) => {
 
         console.debug("User signed in", user);
 
-        res.status(HttpStatusCode.Created).json(verified);
+        const token = jwt.sign({ ...user }, TOKEN_SECRET, {
+            expiresIn: "1h",
+        });
+
+        res.status(HttpStatusCode.Created).json({ verified, token });
     } catch (error) {
         if (error instanceof CustomError) {
             console.error(error);
@@ -199,10 +226,7 @@ api.post("/register/new", async (req, res) => {
             throw new Error("Username is required");
         }
 
-        const users = await UserModel.query("userName")
-            .eq(username)
-            .limit(1)
-            .exec();
+        const users = await UserModel.query("userName").eq(username).limit(1).exec();
 
         if (users.length) {
             throw new UserAlreadyExists(`User ${username} already exists`);
@@ -240,7 +264,7 @@ api.post("/register/new", async (req, res) => {
             },
         });
 
-        const challenge = new AuthChallenge({challenge: options.challenge});
+        const challenge = new AuthChallenge({ challenge: options.challenge });
 
         req.session.user = user;
         req.session.challenge = challenge;
@@ -310,7 +334,11 @@ api.post("/register/verify", async (req, res) => {
             console.debug("New authenticator registered", newAuthenticator);
         }
 
-        res.status(HttpStatusCode.Created).json(verified);
+        const token = jwt.sign({ ...user }, TOKEN_SECRET, {
+            expiresIn: "1h",
+        });
+
+        res.status(HttpStatusCode.Created).json({ verified, token });
     } catch (error) {
         if (error instanceof CustomError) {
             console.error(error);

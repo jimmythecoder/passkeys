@@ -4,6 +4,7 @@ const jsonAPI = (apiURL: string, method = "POST") => {
         const body = !isEmpty(data) && method !== "GET" ? JSON.stringify(data) : null;
         const params = !isEmpty(data) && method === "GET" ? new URLSearchParams(data as Record<string, string>) : null;
         const url = `${apiURL}${path}${params ? `?${params}` : ""}`;
+        const token = sessionStorage.getItem("token");
 
         console.debug(`API ${method} ${url}`);
 
@@ -12,6 +13,7 @@ const jsonAPI = (apiURL: string, method = "POST") => {
             method,
             headers: {
                 "Content-Type": "application/json",
+                Authorization: token ? `Bearer ${token}` : "",
             },
             credentials: "include",
             body,
