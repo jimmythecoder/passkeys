@@ -139,7 +139,7 @@ api.post("/signin/verify", async (req, res) => {
             throw new Error("Missing credential ID");
         }
 
-        const [authenticator] = await AuthenticatorModel.query("credentialID").eq(credentialID).exec();
+        const [authenticator] = await AuthenticatorModel.query("credentialID").eq(credentialID).and().where("userId").eq(user.id).exec();
 
         if (!authenticator) {
             throw new AuthenticatorMismatch(`Authenticator not found for userID`);
