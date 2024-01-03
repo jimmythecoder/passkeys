@@ -14,6 +14,7 @@ export const api = express.Router();
 
 const IS_HTTPS = process.env.HTTPS === "true";
 const TOKEN_SECRET = process.env.AUTH_TOKEN_SECRET ?? "catfish";
+const TOKEN_EXPIRATION = process.env.AUTH_TOKEN_EXPIRATION ?? "1h";
 const TOKEN_ALGORITHIMS = [(process.env.TOKEN_ALGORITHIM as jwt.Algorithm) ?? "HS256"] satisfies jwt.Algorithm[];
 const RP_ORIGIN = `${IS_HTTPS ? "https" : "http"}://${process.env.RP_ID}:${process.env.RP_PROXY_PORT ?? "3000"}`;
 const RP_ID = process.env.RP_ID ?? "localhost";
@@ -32,6 +33,42 @@ const jwtAuthorizer = expressjwt({ secret: TOKEN_SECRET, algorithms: TOKEN_ALGOR
 
 api.get("/healthcheck", async (req, res) => {
     res.json({ status: "ok" });
+});
+
+api.get("/signin/test", jwtAuthorizer, async (req: JWTRequest<UserType>, res) => {
+    try {
+        res.json({ status: "ok" });
+    } catch (error) {
+        if (error instanceof CustomError) {
+            console.error("Authorization failed", error.message);
+            res.statusMessage = error.name;
+            return res.status(error.code).json(error);
+        }
+
+        console.error(error);
+        return res.status(HttpStatusCode.Unauthorized).json(error);
+    }
+});
+
+api.post("/signout", jwtAuthorizer, async (req: JWTRequest<UserType>, res) => {
+    try {
+        req.session.destroy((error: string) => {
+            if (error) {
+                throw new Error(error);
+            }
+
+            res.json({ status: "ok" });
+        });
+    } catch (error) {
+        if (error instanceof CustomError) {
+            console.error("Not signed in", error.message);
+            res.statusMessage = error.name;
+            return res.status(error.code).json(error);
+        }
+
+        console.error(error);
+        return res.status(HttpStatusCode.Unauthorized).json(error);
+    }
 });
 
 api.get("/admin/test", jwtAuthorizer, async (req: JWTRequest<UserType>, res) => {
@@ -189,7 +226,7 @@ api.post("/signin/verify", async (req, res) => {
         console.debug("User signed in", user);
 
         const token = jwt.sign({ ...user }, TOKEN_SECRET, {
-            expiresIn: "1h",
+            expiresIn: TOKEN_EXPIRATION,
         });
 
         res.status(HttpStatusCode.Created).json({ verified, token });
@@ -335,7 +372,7 @@ api.post("/register/verify", async (req, res) => {
         }
 
         const token = jwt.sign({ ...user }, TOKEN_SECRET, {
-            expiresIn: "1h",
+            expiresIn: TOKEN_EXPIRATION,
         });
 
         res.status(HttpStatusCode.Created).json({ verified, token });

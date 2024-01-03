@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, NavLink } from "react-router-dom";
 import { post } from "@/utils/api";
 import { startRegistration, browserSupportsWebAuthn } from "@simplewebauthn/browser";
 import "./Register.scss";
@@ -65,7 +65,7 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
             if (success) {
                 console.debug("User registered");
 
-                navigate("/success");
+                navigate("/register/success");
             }
         } catch (err) {
             if (err instanceof Error) {
@@ -114,7 +114,7 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
 
                     <div className="element signup">
                         <p>
-                            Already have an account? <a href="/">Sign in</a>
+                            Already have an account? <NavLink to="/">Sign in</NavLink>
                         </p>
                     </div>
                 </form>

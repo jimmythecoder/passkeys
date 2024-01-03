@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, NavLink } from "react-router-dom";
 import { post, get } from "@/utils/api";
 import { startAuthentication, browserSupportsWebAuthn } from "@simplewebauthn/browser";
 import "./Login.scss";
@@ -86,7 +86,7 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
             console.debug("Login response", success);
 
             if (success) {
-                navigate("/success");
+                navigate("/signin/success");
             }
         } catch (err) {
             if (err instanceof Error) {
@@ -130,7 +130,7 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
 
                     <div className="element signup">
                         <p>
-                            Don&rsquo;t have an account yet? <a href="/signup">Sign up &#9997;</a>
+                            Don&rsquo;t have an account yet? <NavLink to="/signup">Sign up &#9997;</NavLink>
                         </p>
                     </div>
                 </form>

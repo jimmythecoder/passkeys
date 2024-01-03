@@ -94,6 +94,20 @@ form {
     }
 }
 
+.alert {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    justify-content: center;
+    
+    &.error {
+        background-color: rgb(195, 39, 39);
+        color: #FFF;
+    }
+}
+
 .element {
     display: flex;
     flex-direction: column;
@@ -138,6 +152,29 @@ button {
     &:active {
         background-color: #442983;
     }
+
+    &.secondary {
+        background-color: #FFF;
+        color: #442983;
+        border: 1px solid #442983;
+
+        &:hover {
+            background-color: #EFEFEF;
+        }
+
+        &:active {
+            background-color: #FFF;
+        }
+    }
+
+    &.small {
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+    }
+
+    &.block {
+        width: 100%;
+    }
 }
 
 input {
@@ -171,5 +208,56 @@ input {
 
     &:user-invalid:not(:focus):not(:hover) {
         border-color: rgb(195, 39, 39);
+    }
+}
+
+.divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 1rem 0;
+
+    &::before, &::after {
+        content: "";
+        flex: 1;
+        border-bottom: 1px solid #CCC;
+    }
+
+    &::before {
+        margin-right: 1rem;
+    }
+
+    &::after {
+        margin-left: 1rem;
+    }
+}
+
+.m {
+    &-t {
+        &-1 {
+            margin-top: 1rem;
+        }
+
+        &-2 {
+            margin-top: 2rem;
+        }
+
+        &-3 {
+            margin-top: 3rem;
+        }
+    }
+
+    &-b {
+        &-1 {
+            margin-bottom: 1rem;
+        }
+
+        &-2 {
+            margin-bottom: 2rem;
+        }
+
+        &-3 {
+            margin-bottom: 3rem;
+        }
     }
 }

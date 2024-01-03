@@ -1,30 +1,87 @@
 import "./Success.scss";
-import { useLocation } from "react-router-dom";
+import { useMemo } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
+import { parseJwt } from "@/utils/jwt";
+import { post } from "@/utils/api";
+import type { JwtPayload } from "@/types/webauthn";
 
-export const Success: React.FC<React.PropsWithChildren> = () => {
-    const location = useLocation();
-    const params = new URLSearchParams(location.search);
-    const from = params.get("from");
+export type SuccessProps = {
+    from: "signin" | "register";
+};
+
+export const Success: React.FC<React.PropsWithChildren<SuccessProps>> = (props) => {
+    const authToken = sessionStorage.getItem("auth_token");
+
+    if (!authToken) {
+        throw new Error("No auth token found");
+    }
+
+    const jwt = useMemo(() => parseJwt<JwtPayload>(authToken!), [authToken]);
+    const issuedAt = useMemo(() => new Date(jwt.iat * 1000), [jwt.iat]);
+    const expiresAt = useMemo(() => new Date(jwt.exp * 1000), [jwt.exp]);
+    const navigate = useNavigate();
+
+    const handleSignout = async () => {
+
+        try {
+            await post("/api/signout");
+
+            sessionStorage.removeItem("auth_token");
+
+            navigate("/");
+        } catch(error) {
+            console.error(error);
+        }
+    }
 
     return (
-        <div>
+        <>
             <header>
                 <h1>
-                    <svg xmlns="http://www.w3.org/2000/svg" height="44" viewBox="0 -960 960 960" width="44" fill="#442983">
-                        <path d="M140.001-180.001v-88.922q0-29.384 15.962-54.422 15.961-25.039 42.653-38.5 59.308-29.077 119.654-43.615 60.346-14.539 121.73-14.539 21.058 0 42.116 1.885 21.057 1.885 42.115 5.654-1.692 51.461 20.808 96.807Q567.539-270.307 609-240v59.999H140.001Zm613.845 107.69-53.343-53.138v-164.73q-39.118-11.514-63.849-43.975-24.73-32.461-24.73-74.691 0-51.467 36.38-87.848 36.381-36.382 87.846-36.382t87.657 36.397q36.192 36.397 36.192 87.885 0 39.947-22.423 70.716-22.423 30.769-57.192 44.231l44.23 44.23-53.076 53.192 53.076 53.192-70.768 70.922ZM440-484.615q-57.749 0-98.874-41.124-41.125-41.125-41.125-98.874 0-57.75 41.125-98.874 41.125-41.125 98.874-41.125 57.749 0 98.874 41.125 41.125 41.124 41.125 98.874 0 57.749-41.125 98.874-41.125 41.124-98.874 41.124Zm296.154 93.463q14.692 0 25.038-10.539 10.346-10.538 10.346-25.23t-10.346-25.038q-10.346-10.346-25.038-10.346-14.693 0-25.231 10.346-10.538 10.346-10.538 25.038t10.538 25.23q10.538 10.539 25.231 10.539Z"/>
-                    </svg> 
-                    <span>Success</span>
+                    Welcome <span>{jwt.displayName}</span>
                 </h1>
             </header>
             <main className="success">
-                {from === "register" && <p>You have registered Successfully!</p>}
-                {from === "login" && <p>You have signed in Successfully!</p>}
+                <p className="centered">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="96" viewBox="0 -960 960 960" width="96" fill="green">
+                        <path d="m423.231-309.847 268.922-268.922L650-620.922 423.231-394.153l-114-114L267.078-466l156.153 156.153Zm56.836 209.846q-78.836 0-148.204-29.92-69.369-29.92-120.682-81.21-51.314-51.291-81.247-120.629-29.933-69.337-29.933-148.173t29.92-148.204q29.92-69.369 81.21-120.682 51.291-51.314 120.629-81.247 69.337-29.933 148.173-29.933t148.204 29.92q69.369 29.92 120.682 81.21 51.314 51.291 81.247 120.629 29.933 69.337 29.933 148.173t-29.92 148.204q-29.92 69.369-81.21 120.682-51.291 51.314-120.629 81.247-69.337 29.933-148.173 29.933ZM480-160q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z" />
+                    </svg>
+                </p>
+                <p className="centered">You have {props.from === "signin" ? "signed in" : "registered"} successfully</p>
                 <br />
+
+                <dl className="details">
+                    <dt>ID</dt>
+                    <dd>{jwt.id}</dd>
+                    <dt>Email</dt>
+                    <dd>{jwt.userName}</dd>
+                    <dt>Display name</dt>
+                    <dd>{jwt.displayName}</dd>
+                    <dt>Roles</dt>
+                    <dd>{jwt.roles.join(", ")}</dd>
+                    <dt>Verified</dt>
+                    <dd>{jwt.isVerified ? "true" : "false"}</dd>
+                    <dt>Issued at</dt>
+                    <dd>{issuedAt.toLocaleString()}</dd>
+                    <dt>Expires at</dt>
+                    <dd>{expiresAt.toLocaleString()}</dd>
+                </dl>
+
                 <p>
-                    <a className="button" href="/"><button>Back</button></a>
+                    <NavLink to="/">
+                        <button className="primary block">Continue</button>
+                    </NavLink>
+                </p>
+
+                <p className="m-t-2 m-b-2">
+                    <label className="divider"><span>OR</span></label>
+                </p>
+
+                <p className="centered">
+                    <button type="button" onClick={handleSignout} className="secondary small">Sign out</button>
                 </p>
             </main>
-        </div>
+        </>
     );
 };
 

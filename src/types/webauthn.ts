@@ -81,3 +81,20 @@ export type AuthData = {
      */
     extensions: string;
 };
+
+export type JwtPayload = {
+    /**
+     * Issued at time as a unix timestamp
+     */
+    iat: number;
+
+    /**
+     * Expires at time as a unix timestamp
+     */
+    exp: number;
+    id: string;
+    userName: string;
+    displayName: string;
+    roles: string[];
+    isVerified?: boolean;
+};

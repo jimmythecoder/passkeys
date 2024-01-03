@@ -4,7 +4,7 @@ const jsonAPI = (apiURL: string, method = "POST") => {
         const body = !isEmpty(data) && method !== "GET" ? JSON.stringify(data) : null;
         const params = !isEmpty(data) && method === "GET" ? new URLSearchParams(data as Record<string, string>) : null;
         const url = `${apiURL}${path}${params ? `?${params}` : ""}`;
-        const token = sessionStorage.getItem("token");
+        const token = sessionStorage.getItem("auth_token");
 
         console.debug(`API ${method} ${url}`);
 
