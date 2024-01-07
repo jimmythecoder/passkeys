@@ -48,7 +48,7 @@ export const Success: React.FC<React.PropsWithChildren<SuccessProps>> = (props) 
         <>
             <header>
                 <h1>
-                    Welcome <span>{user.displayName}</span>
+                    Hi, <span>{user.displayName}</span>
                 </h1>
             </header>
             <main className="success">

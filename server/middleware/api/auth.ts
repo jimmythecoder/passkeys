@@ -21,10 +21,14 @@ const USE_METADATA_SERVICE = process.env.USE_METADATA_SERVICE === "true";
 
 api.post("/signout", async (req, res) => {
     try {
+        const username = req.session.user?.userName;
+
         req.session.destroy((error: string) => {
             if (error) {
                 throw new Error(error);
             }
+
+            console.debug("User signed out", username);
 
             res.json({ status: "ok" });
         });
