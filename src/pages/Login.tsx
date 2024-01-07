@@ -72,6 +72,7 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
             const authenticators = JSON.parse(localStorage.getItem("authenticators") ?? "[]") as string[];
 
             if (authenticators && authenticators.length) {
+                console.debug("Conditional UI login", authenticators);
                 post<Auth.Signin.GetCredentials.Response, Auth.Signin.GetCredentials.ConditionalUIRequest>(ENDPOINTS.auth.signin.getAllCredentails, { authenticators }, abortController.signal).then((options) => {
                     return startAuthentication(options, true).then((attResp) => {
                         return post<Auth.Signin.Verify.Response, Auth.Signin.Verify.Request>(ENDPOINTS.auth.signin.verify, attResp, abortController.signal);
