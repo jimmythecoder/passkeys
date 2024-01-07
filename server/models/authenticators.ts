@@ -69,7 +69,6 @@ export class Authenticator implements RegisteredAuthenticator {
 export const UserAuthenticatorSchema = new dynamoose.Schema({
     id: {
         type: String,
-        hashKey: true,
     },
     userId: {
         type: String,
@@ -80,10 +79,7 @@ export const UserAuthenticatorSchema = new dynamoose.Schema({
     },
     credentialID: {
         type: Buffer,
-        index: {
-            type: "global",
-            name: "credentialIDIndex",
-        },
+        hashKey: true,
     },
     credentialPublicKey: {
         type: Buffer,

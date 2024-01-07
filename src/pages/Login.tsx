@@ -79,6 +79,7 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
                 }).then((response) => {
                     sessionStorage.setItem("user", JSON.stringify(response.user));
                     sessionStorage.setItem("session", JSON.stringify(response.session));
+                    console.debug("Conditional UI login success");
                     navigate(paths.signinSuccess);
                 }).catch((err) => {
                     if (err instanceof DOMException && err.name === "AbortError") {

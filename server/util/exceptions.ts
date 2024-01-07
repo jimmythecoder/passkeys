@@ -67,12 +67,18 @@ export class Unauthorized extends CustomError {
     }
 }
 
+/**
+ * This error is thrown when a user attempts to register an authenticator that is already registered.
+ */
 export class AuthenticatorAlreadyExists extends CustomError {
     constructor(message: string) {
         super(message, HttpStatusCode.Fobidden);
     }
 }
 
+/**
+ * No session was found for the user. Usually a cookie / domain issue.
+ */
 export class SessionNotFound extends CustomError {
     constructor(message: string) {
         super(message, HttpStatusCode.Unauthorized);

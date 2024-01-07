@@ -6,6 +6,7 @@ import { UserModel, User, AuthChallenge, UserSession } from "@/models/users";
 import { Authenticator, AuthenticatorModel } from "@/models/authenticators";
 import { UserNotFound, UserAlreadyExists, ValidationError, VerificationError, ChallengeError, AuthenticatorNotFound, CustomError, AuthenticatorMismatch } from "@/util/exceptions";
 import { HttpStatusCode } from "@/util/constants";
+import dynamoose from "dynamoose";
 
 dotenv.config();
 
@@ -77,7 +78,7 @@ api.post("/signin", async (req, res) => {
         req.session.user = user;
         req.session.challenge = challenge;
 
-        console.debug("User signing in", req.session.user);
+        console.debug("User signing in", req.session.user.userName);
 
         res.status(HttpStatusCode.OK).json(options);
     } catch (error) {
@@ -99,15 +100,16 @@ api.post("/signin", async (req, res) => {
 
 api.post("/signin/passkey", async (req, res) => {
     try {
-        const authenticators = Array.from(req.body.authenticators) as string[];
+        const credentials = ((req.body.authenticators ?? []) as string[]).map((cred) => {
+            return isoBase64URL.toBuffer(cred);
+        });
 
-        if (!authenticators || !authenticators.length) {
+        if (!credentials || !credentials.length) {
             throw new ValidationError("No authenticators provided");
         }
 
-        console.log("Authenticators", authenticators);
-
-        const userAuthenticators = await AuthenticatorModel.query("credentialID").eq(isoBase64URL.toBuffer(authenticators[0])).exec();
+        const filter = new dynamoose.Condition().filter("credentialID").in(credentials);
+        const userAuthenticators = await AuthenticatorModel.scan(filter).exec();
 
         if (!userAuthenticators.length) {
             throw new AuthenticatorNotFound(`No matching authenticators found`);
@@ -128,7 +130,7 @@ api.post("/signin/passkey", async (req, res) => {
         req.session.user = new User({ id: userAuthenticators[0].userId });
         req.session.challenge = challenge;
 
-        console.debug("User signing in", req.session.user);
+        console.debug("User signing in with Conditional UI", req.session.user.userName);
 
         res.status(HttpStatusCode.OK).json(options);
     } catch (error) {
@@ -157,8 +159,6 @@ api.post("/signin/verify", async (req, res) => {
         const userId = req.session.user.id;
         const challenge = new AuthChallenge(req.session.challenge);
 
-        console.debug("user signing in", userId, challenge);
-
         if (!challenge.currentChallenge) {
             throw new ChallengeError("Missing challenge, sign-in again");
         }
@@ -169,14 +169,11 @@ api.post("/signin/verify", async (req, res) => {
             throw new ValidationError("Missing credential ID");
         }
 
-        console.debug("Looking up authenticator", credentialID, userId);
         const [authenticator] = await AuthenticatorModel.query("credentialID").eq(credentialID).and().where("userId").eq(userId).exec();
 
         if (!authenticator) {
             throw new AuthenticatorMismatch(`Authenticator not found for userID`);
         }
-
-        console.debug("Authenticator found", authenticator);
 
         const verification = await verifyAuthenticationResponse({
             response: req.body,
@@ -196,7 +193,7 @@ api.post("/signin/verify", async (req, res) => {
         req.session.user = user;
         req.session.isSignedIn = true;
 
-        console.debug("User signed in", user, verification.authenticationInfo.credentialID);
+        console.debug("User verified", user.userName);
 
         const session = new UserSession({
             userId: user.id,
@@ -289,7 +286,7 @@ api.post("/register", async (req, res) => {
         req.session.user = user;
         req.session.challenge = challenge;
 
-        console.debug("New user registering", user, challenge);
+        console.debug("New user registration request", user.userName);
 
         res.status(HttpStatusCode.OK).json(options);
     } catch (error) {
@@ -347,8 +344,6 @@ api.post("/register/verify", async (req, res) => {
             transports: req.body.response.transports,
         });
 
-        console.debug("New authenticator registered", authenticator);
-
         const session = new UserSession({
             userId: user.id,
             issuedAt: Date.now(),
@@ -358,7 +353,7 @@ api.post("/register/verify", async (req, res) => {
         req.session.user = user;
         req.session.isSignedIn = true;
 
-        console.debug("New user registered", user);
+        console.debug("New user registered", user.userName);
 
         res.status(HttpStatusCode.Created).json({ user, session, credentialID: Buffer.from(authenticator.credentialID).toString("base64") });
     } catch (error) {

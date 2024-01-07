@@ -6,7 +6,6 @@ declare module "express-session-jwt" {
 
 declare global {
     declare module "express-session" {
-        import { UserModel, AuthChallenge } from "@/data/users";
         
         interface SessionOptions {
             keys: {
@@ -19,12 +18,12 @@ declare global {
             /**
              * User Model for the current user
              */
-            user?: UserModel;
+            user?: import("./models/users").User;
 
             /**
              * Sign in / register random challenge
              */
-            challenge?: AuthChallenge;
+            challenge?: import("./models/users").AuthChallenge;
 
             /**
              * Whether the user is signed in or not
