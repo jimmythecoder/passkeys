@@ -16,8 +16,20 @@ declare global {
         }
 
         interface SessionData {
+            /**
+             * User Model for the current user
+             */
             user?: UserModel;
+
+            /**
+             * Sign in / register random challenge
+             */
             challenge?: AuthChallenge;
+
+            /**
+             * Whether the user is signed in or not
+             */
+            isSignedIn?: boolean;
         }
     }
 }

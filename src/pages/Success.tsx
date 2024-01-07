@@ -1,33 +1,42 @@
 import "./Success.scss";
-import { useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { parseJwt } from "@/utils/jwt";
-import { post, endpoints } from "@/utils/api";
+import { post } from "@/utils/api";
+import { ENDPOINTS } from "@/config";
 import { paths } from "@/Routes";
-import type { JwtPayload } from "@/types/webauthn";
+import type { User, UserSession } from "@/types/user";
 
 export type SuccessProps = {
     from: "signin" | "register";
 };
 
 export const Success: React.FC<React.PropsWithChildren<SuccessProps>> = (props) => {
-    const authToken = sessionStorage.getItem("auth_token");
-
-    if (!authToken) {
-        throw new Error("No auth token found");
-    }
-
-    const jwt = useMemo(() => parseJwt<JwtPayload>(authToken!), [authToken]);
-    const issuedAt = useMemo(() => new Date(jwt.iat * 1000), [jwt.iat]);
-    const expiresAt = useMemo(() => new Date(jwt.exp * 1000), [jwt.exp]);
+    const [user, setUser] = useState<User>({roles: []} as unknown as User);
+    const [session, setSession] = useState<UserSession>({} as UserSession);
+    const userData = sessionStorage.getItem("user");
+    const sessionData = sessionStorage.getItem("session");
     const navigate = useNavigate();
+
+    useEffect(() => {
+        try {
+            if (!userData || !sessionData) {
+                throw new Error("No user found");
+            }
+            setUser(JSON.parse(userData));
+            setSession(JSON.parse(sessionData));
+        } catch (error) {
+            console.error(error);
+            navigate(paths.signin);
+        }
+    }, [userData, sessionData, navigate]);
 
     const handleSignout = async () => {
 
         try {
-            await post(endpoints.auth.signout);
+            await post(ENDPOINTS.auth.signout);
 
-            sessionStorage.removeItem("auth_token");
+            sessionStorage.removeItem("user");
+            sessionStorage.removeItem("session");
 
             navigate(paths.signin);
         } catch(error) {
@@ -39,7 +48,7 @@ export const Success: React.FC<React.PropsWithChildren<SuccessProps>> = (props) 
         <>
             <header>
                 <h1>
-                    Welcome <span>{jwt.displayName}</span>
+                    Welcome <span>{user.displayName}</span>
                 </h1>
             </header>
             <main className="success">
@@ -53,19 +62,17 @@ export const Success: React.FC<React.PropsWithChildren<SuccessProps>> = (props) 
 
                 <dl className="details">
                     <dt>ID</dt>
-                    <dd>{jwt.id}</dd>
+                    <dd>{user.id}</dd>
                     <dt>Email</dt>
-                    <dd>{jwt.userName}</dd>
+                    <dd>{user.userName}</dd>
                     <dt>Display name</dt>
-                    <dd>{jwt.displayName}</dd>
+                    <dd>{user.displayName}</dd>
                     <dt>Roles</dt>
-                    <dd>{jwt.roles.join(", ")}</dd>
+                    <dd>{user.roles.join(", ")}</dd>
                     <dt>Verified</dt>
-                    <dd>{jwt.isVerified ? "true" : "false"}</dd>
-                    <dt>Issued at</dt>
-                    <dd>{issuedAt.toLocaleString()}</dd>
+                    <dd>{user.isVerified ? "true" : "false"}</dd>
                     <dt>Expires at</dt>
-                    <dd>{expiresAt.toLocaleString()}</dd>
+                    <dd>{new Date(session.expiresAt).toLocaleString()}</dd>
                 </dl>
 
                 <p>

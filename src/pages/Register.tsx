@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { useNavigate, NavLink } from "react-router-dom";
-import { post, endpoints } from "@/utils/api";
+import { post } from "@/utils/api";
+import { ENDPOINTS } from "@/config";
 import { startRegistration, browserSupportsWebAuthn } from "@simplewebauthn/browser";
 import { paths } from "@/Routes";
 import "./Register.scss";
+import type { Auth } from "@/types/api";
 
 enum FormInputs {
-    name = "displayName",
+    displayName = "displayName",
     username = "email",
 }
 
@@ -17,19 +19,27 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
     const navigate = useNavigate();
 
     const api = {
+        /**
+         * Register a new user
+         * @param displayName Users display name / full name
+         * @param username Email address of the user
+         * @returns Promise<boolean> True if the user was registered successfully
+         */
         async register(displayName: string, username: string) {
             setLoading(true);
             setError("");
 
             try {
-                const registrationOptions = await post(endpoints.auth.register.getCredentials, { displayName, username });
+                const registrationOptions = await post<Auth.Register.GetCredentials.Response, Auth.Register.GetCredentials.Request>(ENDPOINTS.auth.register.getCredentials, { displayName, username });
 
                 // Pass the options to the authenticator and wait for a response
                 const attResp = await startRegistration(registrationOptions);
 
-                const response = await post(endpoints.auth.register.verify, attResp);
+                const response = await post<Auth.Register.Verify.Response, Auth.Register.Verify.Request>(ENDPOINTS.auth.register.verify, attResp);
 
-                sessionStorage.setItem("auth_token", response.token);
+                sessionStorage.setItem("user", JSON.stringify(response.user));
+                sessionStorage.setItem("session", JSON.stringify(response.session));
+                localStorage.setItem("authenticators", JSON.stringify([attResp.rawId]));
 
                 console.debug("User registered");
                 return true;
@@ -59,7 +69,7 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
 
         try {
             const formData = new FormData(e.currentTarget);
-            const displayName = formData.get(FormInputs.name) as string;
+            const displayName = formData.get(FormInputs.displayName) as string;
             const email = formData.get(FormInputs.username) as string;
 
             const success = await api.register(displayName, email);
@@ -98,7 +108,7 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
 
                     <div className="element">
                         <label htmlFor="displayName">Name</label>
-                        <input type="text" name={FormInputs.name} id={FormInputs.name} autoFocus autoComplete="name" placeholder="Full name" required />
+                        <input type="text" name={FormInputs.displayName} id={FormInputs.displayName} autoFocus autoComplete="name" placeholder="Full name" required />
                         <p className="error">Your name is required</p>
                     </div>
 

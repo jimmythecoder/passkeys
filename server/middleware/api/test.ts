@@ -1,22 +1,18 @@
 import * as express from "express";
 import dotenv from "dotenv";
-import { expressjwt, Request as JWTRequest } from "express-jwt";
-import jwt from "jsonwebtoken";
-import {  UserType } from "@/models/users";
-import {  Unauthorized, CustomError } from "@/util/exceptions";
+import { Unauthorized, CustomError } from "@/util/exceptions";
 import { HttpStatusCode } from "@/util/constants";
 
 dotenv.config();
 
 export const api = express.Router();
 
-const TOKEN_SECRET = process.env.AUTH_TOKEN_SECRET ?? "catfish";
-const TOKEN_ALGORITHIMS = [(process.env.TOKEN_ALGORITHIM as jwt.Algorithm) ?? "HS256"] satisfies jwt.Algorithm[];
-
-const jwtAuthorizer = expressjwt({ secret: TOKEN_SECRET, algorithms: TOKEN_ALGORITHIMS });
-
-api.get("/authorized", jwtAuthorizer, async (_, res) => {
+api.get("/authorized", async (req, res) => {
     try {
+        if (!req.session.isSignedIn) {
+            throw new Unauthorized("Not signed in");
+        }
+
         res.json({ status: "ok" });
     } catch (error) {
         if (error instanceof CustomError) {
@@ -30,9 +26,13 @@ api.get("/authorized", jwtAuthorizer, async (_, res) => {
     }
 });
 
-api.get("/authorized/admin", jwtAuthorizer, async (req: JWTRequest<UserType>, res) => {
+api.get("/authorized/admin", async (req, res) => {
     try {
-        if (!req.auth.roles.includes("admin")) {
+        if (!req.session.isSignedIn) {
+            throw new Unauthorized("Not signed in");
+        }
+
+        if (!req.session.user.roles.includes("admin")) {
             throw new Unauthorized("Missing admin role");
         }
 

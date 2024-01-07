@@ -1,31 +1,46 @@
 import { useEffect, useState } from "react";
 import { useNavigate, NavLink } from "react-router-dom";
-import { post, get, endpoints } from "@/utils/api";
+import { post } from "@/utils/api";
+import { ENDPOINTS } from "@/config";
 import { startAuthentication, browserSupportsWebAuthn } from "@simplewebauthn/browser";
 import { paths } from "@/Routes";
 import "./Login.scss";
+import type { Auth } from "@/types/api";
+
+enum FormInputs {
+    username = "email",
+}
 
 export const Login: React.FC<React.PropsWithChildren> = () => {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
-    const useConditionalUI = false;
+    const useConditionalUI = true;
 
     const api = {
+        /**
+         * Sign in a user
+         * @param username Users email address
+         * @returns Promise<boolean> True if the user was signed in successfully
+         */
         async signin(username: string) {
             setLoading(true);
             setError("");
 
             try {
-                const authenticationOptions = await post(endpoints.auth.signin.getCredentials, { username });
+                const authenticationOptions = await post<Auth.Signin.GetCredentials.Response, Auth.Signin.GetCredentials.Request>(ENDPOINTS.auth.signin.getCredentials, { username });
 
                 // Pass the options to the authenticator and wait for a response
                 const attResp = await startAuthentication(authenticationOptions);
-                const response = await post(endpoints.auth.signin.verify, attResp);
+                const response = await post<Auth.Signin.Verify.Response, Auth.Signin.Verify.Request>(ENDPOINTS.auth.signin.verify, attResp);
 
-                sessionStorage.setItem("auth_token", response.token);
+                sessionStorage.setItem("user", JSON.stringify(response.user));
+                sessionStorage.setItem("session", JSON.stringify(response.session));
 
-                console.debug("Login verified");
+                // Save Authenticator ID so we can use Conditional UI on next login
+                localStorage.setItem("authenticators", JSON.stringify([attResp.rawId]));
+
+                console.debug("Login success");
                 return true;
             } catch (error) {
                 if (error instanceof Error) {
@@ -54,15 +69,29 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
         const abortController = new AbortController();
 
         if (useConditionalUI) {
-            get(endpoints.auth.signin.getAllCredentails, undefined, abortController.signal).then((options) => {
-                return startAuthentication(options, true).then((attResp) => {
-                    return post("/api/signin/verify", attResp, abortController.signal);
-                });
-            }).then((isVerified) => {
-                if (isVerified) {
+            const authenticators = JSON.parse(localStorage.getItem("authenticators") ?? "[]") as string[];
+
+            if (authenticators && authenticators.length) {
+                post<Auth.Signin.GetCredentials.Response, Auth.Signin.GetCredentials.ConditionalUIRequest>(ENDPOINTS.auth.signin.getAllCredentails, { authenticators }, abortController.signal).then((options) => {
+                    return startAuthentication(options, true).then((attResp) => {
+                        return post<Auth.Signin.Verify.Response, Auth.Signin.Verify.Request>(ENDPOINTS.auth.signin.verify, attResp, abortController.signal);
+                    });
+                }).then((response) => {
+                    sessionStorage.setItem("user", JSON.stringify(response.user));
+                    sessionStorage.setItem("session", JSON.stringify(response.session));
                     navigate(paths.signinSuccess);
-                }
-            });
+                }).catch((err) => {
+                    if (err instanceof DOMException && err.name === "AbortError") {
+                        return;
+                    }
+
+                    if (err instanceof Error) {
+                        setError(err.message);
+                    }
+
+                    console.error(err);
+                });
+            }
         }
 
         return () => {
@@ -76,7 +105,7 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
         setError("");
 
         try {
-            const username = (e.currentTarget.elements.namedItem("username") as HTMLInputElement).value;
+            const username = (e.currentTarget.elements.namedItem(FormInputs.username) as HTMLInputElement).value;
             const success = await api.signin(username);
             console.debug("Login response", success);
 
@@ -113,7 +142,7 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
 
                     <div className="element">
                         <label htmlFor="username">Email address</label>
-                        <input type="email" name="username" id="username" autoComplete="username webauthn" placeholder="example@domain.com" required />
+                        <input type="email" name={FormInputs.username} id={FormInputs.username} autoComplete="username webauthn" placeholder="example@domain.com" required />
                         <p className="error">Your email is not valid</p>
                     </div>
 

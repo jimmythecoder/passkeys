@@ -1,10 +1,8 @@
 import * as express from "express";
 import dotenv from "dotenv";
-import { expressjwt, Request as JWTRequest } from "express-jwt";
-import jwt from "jsonwebtoken";
 import { generateRegistrationOptions, verifyRegistrationResponse, generateAuthenticationOptions, verifyAuthenticationResponse } from "@simplewebauthn/server";
 import { isoBase64URL } from "@simplewebauthn/server/helpers";
-import { UserModel, User, UserType, AuthChallenge } from "@/models/users";
+import { UserModel, User, AuthChallenge, UserSession } from "@/models/users";
 import { Authenticator, AuthenticatorModel } from "@/models/authenticators";
 import { UserNotFound, UserAlreadyExists, ValidationError, VerificationError, ChallengeError, AuthenticatorNotFound, CustomError, AuthenticatorMismatch } from "@/util/exceptions";
 import { HttpStatusCode } from "@/util/constants";
@@ -14,17 +12,13 @@ dotenv.config();
 export const api = express.Router();
 
 const IS_HTTPS = process.env.HTTPS === "true";
-const TOKEN_SECRET = process.env.AUTH_TOKEN_SECRET ?? "catfish";
-const TOKEN_EXPIRATION = process.env.AUTH_TOKEN_EXPIRATION ?? "1h";
-const TOKEN_ALGORITHIMS = [(process.env.TOKEN_ALGORITHIM as jwt.Algorithm) ?? "HS256"] satisfies jwt.Algorithm[];
+const SESSION_LIFETIME = parseInt(process.env.SESSION_LIFETIME ?? "0", 10) || 86400000;
 const RP_ORIGIN = `${IS_HTTPS ? "https" : "http"}://${process.env.RP_ID}:${process.env.RP_PROXY_PORT ?? "3000"}`;
 const RP_ID = process.env.RP_ID ?? "localhost";
 const RP_NAME = process.env.RP_NAME ?? "Passkeys Example";
 const USE_METADATA_SERVICE = process.env.USE_METADATA_SERVICE === "true";
 
-const jwtAuthorizer = expressjwt({ secret: TOKEN_SECRET, algorithms: TOKEN_ALGORITHIMS });
-
-api.post("/signout", jwtAuthorizer, async (req: JWTRequest<UserType>, res) => {
+api.post("/signout", async (req, res) => {
     try {
         req.session.destroy((error: string) => {
             if (error) {
@@ -48,6 +42,7 @@ api.post("/signout", jwtAuthorizer, async (req: JWTRequest<UserType>, res) => {
 api.post("/signin", async (req, res) => {
     try {
         const username = req.body.username as string;
+
         if (!username) {
             throw new ValidationError("Username is required");
         }
@@ -102,18 +97,35 @@ api.post("/signin", async (req, res) => {
     }
 });
 
-api.get("/signin/passkey", async (req, res) => {
+api.post("/signin/passkey", async (req, res) => {
     try {
-        const user = new User();
+        const authenticators = Array.from(req.body.authenticators) as string[];
+
+        if (!authenticators || !authenticators.length) {
+            throw new ValidationError("No authenticators provided");
+        }
+
+        console.log("Authenticators", authenticators);
+
+        const userAuthenticators = await AuthenticatorModel.query("credentialID").eq(isoBase64URL.toBuffer(authenticators[0])).exec();
+
+        if (!userAuthenticators.length) {
+            throw new AuthenticatorNotFound(`No matching authenticators found`);
+        }
 
         const options = await generateAuthenticationOptions({
             rpID: RP_ID,
+            allowCredentials: userAuthenticators.map((authenticator) => ({
+                id: authenticator.credentialID,
+                type: "public-key",
+                transports: authenticator.transports,
+            })),
             userVerification: "preferred",
         });
 
         const challenge = new AuthChallenge({ challenge: options.challenge });
 
-        req.session.user = user;
+        req.session.user = new User({ id: userAuthenticators[0].userId });
         req.session.challenge = challenge;
 
         console.debug("User signing in", req.session.user);
@@ -142,8 +154,10 @@ api.post("/signin/verify", async (req, res) => {
             throw new UserNotFound("User not found");
         }
 
-        const user = new User(req.session.user);
+        const userId = req.session.user.id;
         const challenge = new AuthChallenge(req.session.challenge);
+
+        console.debug("user signing in", userId, challenge);
 
         if (!challenge.currentChallenge) {
             throw new ChallengeError("Missing challenge, sign-in again");
@@ -155,7 +169,8 @@ api.post("/signin/verify", async (req, res) => {
             throw new ValidationError("Missing credential ID");
         }
 
-        const [authenticator] = await AuthenticatorModel.query("credentialID").eq(credentialID).and().where("userId").eq(user.id).exec();
+        console.debug("Looking up authenticator", credentialID, userId);
+        const [authenticator] = await AuthenticatorModel.query("credentialID").eq(credentialID).and().where("userId").eq(userId).exec();
 
         if (!authenticator) {
             throw new AuthenticatorMismatch(`Authenticator not found for userID`);
@@ -176,15 +191,20 @@ api.post("/signin/verify", async (req, res) => {
             throw new VerificationError("Verification failed");
         }
 
+        const user = await UserModel.get(authenticator.userId);
+
         req.session.user = user;
+        req.session.isSignedIn = true;
 
-        console.debug("User signed in", user);
+        console.debug("User signed in", user, verification.authenticationInfo.credentialID);
 
-        const token = jwt.sign({ ...user }, TOKEN_SECRET, {
-            expiresIn: TOKEN_EXPIRATION,
+        const session = new UserSession({
+            userId: user.id,
+            issuedAt: Date.now(),
+            expiresAt: Date.now() + SESSION_LIFETIME,
         });
 
-        res.status(HttpStatusCode.Created).json({ token });
+        res.status(HttpStatusCode.Created).json({ user, session });
     } catch (error) {
         if (error instanceof CustomError) {
             console.error(error);
@@ -310,34 +330,37 @@ api.post("/register/verify", async (req, res) => {
             throw new VerificationError("Verification failed");
         }
 
-        UserModel.create(user);
+        if (!verification.registrationInfo) {
+            throw new VerificationError("Missing registration info");
+        }
+
+        await UserModel.create(user);
+
+        const authenticator = await AuthenticatorModel.create({
+            id: crypto.randomUUID(),
+            userId: user.id,
+            credentialID: Buffer.from(verification.registrationInfo.credentialID),
+            credentialPublicKey: Buffer.from(verification.registrationInfo.credentialPublicKey),
+            counter: verification.registrationInfo.counter,
+            credentialDeviceType: verification.registrationInfo.credentialDeviceType,
+            credentialBackedUp: verification.registrationInfo.credentialBackedUp,
+            transports: req.body.response.transports,
+        });
+
+        console.debug("New authenticator registered", authenticator);
+
+        const session = new UserSession({
+            userId: user.id,
+            issuedAt: Date.now(),
+            expiresAt: Date.now() + SESSION_LIFETIME,
+        });
 
         req.session.user = user;
+        req.session.isSignedIn = true;
 
         console.debug("New user registered", user);
 
-        if (verification.registrationInfo) {
-            const newAuthenticator = new Authenticator({
-                id: crypto.randomUUID(),
-                userId: user.id,
-                credentialID: Buffer.from(verification.registrationInfo.credentialID),
-                credentialPublicKey: Buffer.from(verification.registrationInfo.credentialPublicKey),
-                counter: verification.registrationInfo.counter,
-                credentialDeviceType: verification.registrationInfo.credentialDeviceType,
-                credentialBackedUp: verification.registrationInfo.credentialBackedUp,
-                transports: req.body.response.transports,
-            });
-
-            AuthenticatorModel.create(newAuthenticator);
-
-            console.debug("New authenticator registered", newAuthenticator);
-        }
-
-        const token = jwt.sign({ ...user }, TOKEN_SECRET, {
-            expiresIn: TOKEN_EXPIRATION,
-        });
-
-        res.status(HttpStatusCode.Created).json({ token });
+        res.status(HttpStatusCode.Created).json({ user, session, credentialID: Buffer.from(authenticator.credentialID).toString("base64") });
     } catch (error) {
         if (error instanceof CustomError) {
             console.error(error);
