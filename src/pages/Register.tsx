@@ -5,6 +5,11 @@ import { startRegistration, browserSupportsWebAuthn } from "@simplewebauthn/brow
 import { paths } from "@/Routes";
 import "./Register.scss";
 
+enum FormInputs {
+    name = "displayName",
+    username = "email",
+}
+
 export const Register: React.FC<React.PropsWithChildren> = () => {
     const isWebAuthnSupported = browserSupportsWebAuthn();
     const [error, setError] = useState(isWebAuthnSupported ? "" : "WebAuthn is not supported in this browser");
@@ -54,10 +59,10 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
 
         try {
             const formData = new FormData(e.currentTarget);
-            const displayName = formData.get("displayName") as string;
-            const username = formData.get("username") as string;
+            const displayName = formData.get(FormInputs.name) as string;
+            const email = formData.get(FormInputs.username) as string;
 
-            const success = await api.register(displayName, username);
+            const success = await api.register(displayName, email);
 
             if (success) {
                 console.debug("User registered");
@@ -93,13 +98,13 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
 
                     <div className="element">
                         <label htmlFor="displayName">Name</label>
-                        <input type="text" name="displayName" id="displayName" autoFocus autoComplete="given-name" placeholder="John Doe" required />
+                        <input type="text" name={FormInputs.name} id={FormInputs.name} autoFocus autoComplete="name" placeholder="Full name" required />
                         <p className="error">Your name is required</p>
                     </div>
 
                     <div className="element">
                         <label htmlFor="username">Email address</label>
-                        <input type="email" name="username" id="username" autoComplete="email" placeholder="example@domain.com" required />
+                        <input type="email" name={FormInputs.username} id={FormInputs.username} autoComplete="email" placeholder="example@domain.com" required />
                         <p className="error">Your email is not valid</p>
                     </div>
 
