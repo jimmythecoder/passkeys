@@ -21,8 +21,6 @@ const jwtSessionConfig = {
         private: atob(JWTSessionKeys.private.pem),
         public: atob(JWTSessionKeys.public.pem),
     },
-    resave: false,
-    saveUninitialized: true,
     cookie: {
         secure: process.env.HTTPS === "true",
         httpOnly: true,
@@ -58,11 +56,10 @@ const startServer = async () => {
         if (USE_LOCAL_DB) {
             dynamoose.aws.ddb.local();
         } else {
-            const ddb = new dynamoose.aws.ddb.DynamoDB({
-                region: process.env.AWS_REGION,
-            });
-
-            console.debug("DynamoDB client created", ddb);
+            // const ddb = new dynamoose.aws.ddb.DynamoDB({
+            //     region: process.env.AWS_REGION,
+            // });
+            // console.debug("DynamoDB client created", ddb);
         }
     });
 
