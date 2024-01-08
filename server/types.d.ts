@@ -17,12 +17,12 @@ declare global {
             /**
              * User Model for the current user
              */
-            user?: import("./models/user").User;
+            user?: import("./src/models/user").User;
 
             /**
              * Sign in / register random challenge
              */
-            challenge?: import("./models/user").AuthChallenge;
+            challenge?: import("./src/models/user").AuthChallenge;
 
             /**
              * Whether the user is signed in or not

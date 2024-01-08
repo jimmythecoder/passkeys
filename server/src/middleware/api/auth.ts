@@ -11,7 +11,7 @@ import { isoBase64URL } from "@simplewebauthn/server/helpers";
 import { UserModel, User } from "@/models/user.js";
 import { UserSession } from "@/models/userSession.js";
 import { AuthChallenge } from "@/models/challenge.js";
-import { Authenticator, AuthenticatorModel } from "@/models/authenticators.js";
+import { Authenticator, AuthenticatorModel } from "@/models/authenticators";
 import {
     UserNotFound,
     UserAlreadyExists,
