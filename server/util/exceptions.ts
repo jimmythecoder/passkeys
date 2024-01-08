@@ -1,4 +1,4 @@
-import { HttpStatusCode } from "@/util/constants";
+import { HttpStatusCode } from "@/util/constants.js";
 
 export class CustomError extends Error {
     constructor(

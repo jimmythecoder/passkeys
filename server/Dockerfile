@@ -1,22 +1,21 @@
 FROM node:20-alpine as base
 
-# Install pnpm
-RUN npm install pnpm -g
-
 # Set the working directory
 WORKDIR /app
 
 # Copy package.json and package-lock.json
 COPY package.json .
-COPY ../.npmrc .
+COPY tsconfig.json .
 
 # Install dependencies
-RUN pnpm install
+RUN npm install
+
+RUN npm run build
 
 # Copy the rest of the application files
-COPY . .
+COPY ./dist .
 
 EXPOSE 8080
 
 # Set the entry point for the container
-CMD ["pnpm", "run", "start"]
+CMD ["node", "server.js"]

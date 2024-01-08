@@ -1,5 +1,5 @@
 import dynamoose from "dynamoose";
-import { Item } from "dynamoose/dist/Item";
+import { Item } from "dynamoose/dist/Item.js";
 
 /**
  * It is strongly advised that authenticators get their own DB

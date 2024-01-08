@@ -1,7 +1,7 @@
 import * as express from "express";
 import dotenv from "dotenv";
-import { Unauthorized, CustomError } from "@/util/exceptions";
-import { HttpStatusCode } from "@/util/constants";
+import { Unauthorized, CustomError } from "@/util/exceptions.js";
+import { HttpStatusCode } from "@/util/constants.js";
 
 dotenv.config();
 

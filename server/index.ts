@@ -6,26 +6,20 @@ import express from "express";
 import multer from "multer";
 import dotenv from "dotenv";
 import { readFileSync } from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
 import { MetadataService } from "@simplewebauthn/server";
 import dynamoose from "dynamoose";
-import { cors } from "./middleware/cors";
-import { api as authApi } from "./middleware/api/auth";
-import { api as healthApi } from "./middleware/api/health";
-import { api as testApi } from "./middleware/api/test";
+import { cors } from "./middleware/cors.js";
+import { api as authApi } from "./middleware/api/auth.js";
+import { api as healthApi } from "./middleware/api/health.js";
+import { api as testApi } from "./middleware/api/test.js";
 
 dotenv.config();
-
-const fileName = fileURLToPath(import.meta.url);
-const dirName = path.dirname(fileName);
-const serverRootDir = path.resolve(dirName);
 
 const jwtSessionConfig = {
     secret: process.env.SESSION_SECRET ?? "secret",
     keys: {
-        private: readFileSync(`${serverRootDir}${process.env.JWT_SESSION_PRIVATE_KEY_FILE_PATH}`, "utf8"),
-        public: readFileSync(`${serverRootDir}${process.env.JWT_SESSION_PUBLIC_KEY_FILE_PATH}`, "utf8"),
+        private: readFileSync(`./${process.env.JWT_SESSION_PRIVATE_KEY_FILE_PATH}`, "utf8"),
+        public: readFileSync(`./${process.env.JWT_SESSION_PUBLIC_KEY_FILE_PATH}`, "utf8"),
     },
     resave: false,
     saveUninitialized: true,
