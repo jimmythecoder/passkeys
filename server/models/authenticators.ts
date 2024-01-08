@@ -13,7 +13,7 @@ export type RegisteredAuthenticator = {
     id: string;
 
     userId: string;
-    
+
     // SQL: Encode to base64url then store as `TEXT`. Index this column
     credentialID: Uint8Array;
     // SQL: Store raw bytes as `BYTEA`/`BLOB`/etc...
@@ -38,18 +38,23 @@ export class Authenticator implements RegisteredAuthenticator {
     public readonly id: string;
 
     public readonly userId: string;
-    
+
     // SQL: Encode to base64url then store as `TEXT`. Index this column
     public readonly credentialID: Uint8Array;
+
     // SQL: Store raw bytes as `BYTEA`/`BLOB`/etc...
     public readonly credentialPublicKey: Uint8Array;
+
     // SQL: Consider `BIGINT` since some authenticators return atomic timestamps as counters
     public readonly counter: number;
+
     // SQL: `VARCHAR(32)` or similar, longest possible value is currently 12 characters
     // Ex: 'singleDevice' | 'multiDevice'
     public readonly credentialDeviceType: CredentialDeviceType;
+
     // SQL: `BOOL` or whatever similar type is supported
     public readonly credentialBackedUp: boolean;
+
     // SQL: `VARCHAR(255)` and store string array as a CSV string
     // Ex: ['usb' | 'ble' | 'nfc' | 'internal']
     transports?: AuthenticatorTransport[];

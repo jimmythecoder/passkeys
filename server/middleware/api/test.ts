@@ -5,7 +5,7 @@ import { HttpStatusCode } from "@/util/constants";
 
 dotenv.config();
 
-export const api = express.Router();
+const api = express.Router();
 
 api.get("/authorized", async (req, res) => {
     try {
@@ -13,7 +13,7 @@ api.get("/authorized", async (req, res) => {
             throw new Unauthorized("Not signed in");
         }
 
-        res.json({ status: "ok" });
+        return res.json({ status: "ok" });
     } catch (error) {
         if (error instanceof CustomError) {
             console.error("Authorization failed", error.message);
@@ -32,11 +32,11 @@ api.get("/authorized/admin", async (req, res) => {
             throw new Unauthorized("Not signed in");
         }
 
-        if (!req.session.user.roles.includes("admin")) {
+        if (!req.session.user?.roles.includes("admin")) {
             throw new Unauthorized("Missing admin role");
         }
 
-        res.json({ status: "ok" });
+        return res.json({ status: "ok" });
     } catch (error) {
         if (error instanceof CustomError) {
             console.error("Authorization failed", error.message);
@@ -48,3 +48,6 @@ api.get("/authorized/admin", async (req, res) => {
         return res.status(HttpStatusCode.Unauthorized).json(error);
     }
 });
+
+export { api };
+export default api;

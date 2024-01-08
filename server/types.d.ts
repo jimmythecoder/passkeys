@@ -6,7 +6,6 @@ declare module "express-session-jwt" {
 
 declare global {
     declare module "express-session" {
-        
         interface SessionOptions {
             keys: {
                 private: string;
@@ -18,12 +17,12 @@ declare global {
             /**
              * User Model for the current user
              */
-            user?: import("./models/users").User;
+            user?: import("./models/user").User;
 
             /**
              * Sign in / register random challenge
              */
-            challenge?: import("./models/users").AuthChallenge;
+            challenge?: import("./models/user").AuthChallenge;
 
             /**
              * Whether the user is signed in or not

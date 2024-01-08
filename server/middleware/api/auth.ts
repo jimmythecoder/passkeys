@@ -1,17 +1,32 @@
 import * as express from "express";
 import dotenv from "dotenv";
-import { generateRegistrationOptions, verifyRegistrationResponse, generateAuthenticationOptions, verifyAuthenticationResponse } from "@simplewebauthn/server";
-import { isoBase64URL } from "@simplewebauthn/server/helpers";
-import { UserModel, User, AuthChallenge, UserSession } from "@/models/users";
-import { Authenticator, AuthenticatorModel } from "@/models/authenticators";
-import { UserNotFound, UserAlreadyExists, ValidationError, VerificationError, ChallengeError, AuthenticatorNotFound, CustomError, AuthenticatorMismatch } from "@/util/exceptions";
-import { HttpStatusCode } from "@/util/constants";
+import {
+    generateRegistrationOptions,
+    verifyRegistrationResponse,
+    generateAuthenticationOptions,
+    verifyAuthenticationResponse,
+} from "@simplewebauthn/server";
 import dynamoose from "dynamoose";
+import { isoBase64URL } from "@simplewebauthn/server/helpers";
+import { UserModel, User } from "@/models/user";
+import { UserSession } from "@/models/userSession";
+import { AuthChallenge } from "@/models/challenge";
+import { Authenticator, AuthenticatorModel } from "@/models/authenticators";
+import {
+    UserNotFound,
+    UserAlreadyExists,
+    ValidationError,
+    VerificationError,
+    ChallengeError,
+    AuthenticatorNotFound,
+    CustomError,
+    AuthenticatorMismatch,
+} from "@/util/exceptions";
+import { HttpStatusCode } from "@/util/constants";
 
 dotenv.config();
 
-export const api = express.Router();
-
+const api = express.Router();
 const IS_HTTPS = process.env.HTTPS === "true";
 const SESSION_LIFETIME = parseInt(process.env.SESSION_LIFETIME ?? "0", 10) || 86400000;
 const RP_ORIGIN = `${IS_HTTPS ? "https" : "http"}://${process.env.RP_ID}:${process.env.RP_PROXY_PORT ?? "3000"}`;
@@ -23,7 +38,7 @@ api.post("/signout", async (req, res) => {
     try {
         const username = req.session.user?.userName;
 
-        req.session.destroy((error: string) => {
+        return req.session.destroy((error: string) => {
             if (error) {
                 throw new Error(error);
             }
@@ -84,7 +99,7 @@ api.post("/signin", async (req, res) => {
 
         console.debug("User signing in", req.session.user.userName);
 
-        res.status(HttpStatusCode.OK).json(options);
+        return res.status(HttpStatusCode.OK).json(options);
     } catch (error) {
         if (error instanceof CustomError) {
             console.error(error);
@@ -136,7 +151,7 @@ api.post("/signin/passkey", async (req, res) => {
 
         console.debug("User signing in with Conditional UI", req.session.user.userName);
 
-        res.status(HttpStatusCode.OK).json(options);
+        return res.status(HttpStatusCode.OK).json(options);
     } catch (error) {
         if (error instanceof CustomError) {
             console.error(error);
@@ -205,7 +220,7 @@ api.post("/signin/verify", async (req, res) => {
             expiresAt: Date.now() + SESSION_LIFETIME,
         });
 
-        res.status(HttpStatusCode.Created).json({ user, session });
+        return res.status(HttpStatusCode.Created).json({ user, session });
     } catch (error) {
         if (error instanceof CustomError) {
             console.error(error);
@@ -228,26 +243,26 @@ api.post("/signin/verify", async (req, res) => {
 
 api.post("/register", async (req, res) => {
     try {
-        const username = req.body.username as string;
+        const userName = req.body.username as string;
         const displayName = req.body.displayName as string;
 
         if (!displayName) {
             throw new ValidationError("Name is required");
         }
 
-        if (!username) {
+        if (!userName) {
             throw new ValidationError("Username is required");
         }
 
-        const users = await UserModel.query("userName").eq(username).limit(1).exec();
+        const users = await UserModel.query("userName").eq(userName).limit(1).exec();
 
         if (users.length) {
-            throw new UserAlreadyExists(`User ${username} already exists`);
+            throw new UserAlreadyExists(`User ${userName} already exists`);
         }
 
         const user = new User({
-            userName: username,
-            displayName: displayName,
+            userName,
+            displayName,
         });
 
         const userAuthenticators = [] as Authenticator[];
@@ -256,7 +271,7 @@ api.post("/register", async (req, res) => {
             rpName: RP_NAME,
             rpID: RP_ID,
             userID: user.id,
-            userName: user.userName,
+            userName,
             // Don't prompt users for additional information about the authenticator
             // (Recommended for smoother UX)
             attestationType: USE_METADATA_SERVICE ? "direct" : "none",
@@ -292,7 +307,7 @@ api.post("/register", async (req, res) => {
 
         console.debug("New user registration request", user.userName);
 
-        res.status(HttpStatusCode.OK).json(options);
+        return res.status(HttpStatusCode.OK).json(options);
     } catch (error) {
         if (error instanceof CustomError) {
             console.error(error.message);
@@ -359,7 +374,7 @@ api.post("/register/verify", async (req, res) => {
 
         console.debug("New user registered", user.userName);
 
-        res.status(HttpStatusCode.Created).json({ user, session, credentialID: Buffer.from(authenticator.credentialID).toString("base64") });
+        return res.status(HttpStatusCode.Created).json({ user, session, credentialID: Buffer.from(authenticator.credentialID).toString("base64") });
     } catch (error) {
         if (error instanceof CustomError) {
             console.error(error);
@@ -378,3 +393,6 @@ api.post("/register/verify", async (req, res) => {
         delete req.session.challenge;
     }
 });
+
+export { api };
+export default api;

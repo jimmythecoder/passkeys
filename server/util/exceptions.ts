@@ -1,7 +1,10 @@
 import { HttpStatusCode } from "@/util/constants";
 
 export class CustomError extends Error {
-    constructor(message: string, public code: number) {
+    constructor(
+        message: string,
+        public code: number,
+    ) {
         super(message);
         this.name = this.constructor.name;
     }
@@ -38,7 +41,6 @@ export class ValidationError extends CustomError {
         super(message, HttpStatusCode.BadRequest);
     }
 }
-
 
 export class UserAlreadyExists extends CustomError {
     constructor(message: string) {

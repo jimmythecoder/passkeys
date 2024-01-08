@@ -8,18 +8,18 @@ import dotenv from "dotenv";
 import { readFileSync } from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { MetadataService } from "@simplewebauthn/server";
+import dynamoose from "dynamoose";
 import { cors } from "./middleware/cors";
 import { api as authApi } from "./middleware/api/auth";
 import { api as healthApi } from "./middleware/api/health";
 import { api as testApi } from "./middleware/api/test";
-import { MetadataService } from "@simplewebauthn/server";
-import dynamoose from "dynamoose";
 
 dotenv.config();
 
 const fileName = fileURLToPath(import.meta.url);
 const dirName = path.dirname(fileName);
-const serverRootDir = path.resolve(dirName) ;
+const serverRootDir = path.resolve(dirName);
 
 const jwtSessionConfig = {
     secret: process.env.SESSION_SECRET ?? "secret",
@@ -34,12 +34,11 @@ const jwtSessionConfig = {
         httpOnly: true,
         sameSite: "strict",
         maxAge: parseInt(process.env.SESSION_LIFETIME ?? "86400000", 10),
-    }
+    },
 } satisfies jwtSession.SessionOptions;
 
 const USE_LOCAL_DB = process.env.USE_LOCAL_DB === "true";
 const USE_METADATA_SERVICE = process.env.USE_METADATA_SERVICE === "true";
-
 
 const fastify = Fastify({
     logger: true,
@@ -57,18 +56,19 @@ const startServer = async () => {
 
     fastify.addHook("onReady", async () => {
         if (USE_METADATA_SERVICE) {
-            return MetadataService.initialize().then(() => {
-                console.log("🔐 MetadataService initialized");
-                return;
+            await MetadataService.initialize().then(() => {
+                console.debug("🔐 MetadataService initialized");
             });
         }
 
         if (USE_LOCAL_DB) {
             dynamoose.aws.ddb.local();
         } else {
-            new dynamoose.aws.ddb.DynamoDB({
-                region: process.env.AWS_REGION
+            const ddb = new dynamoose.aws.ddb.DynamoDB({
+                region: process.env.AWS_REGION,
             });
+
+            console.debug("DynamoDB client created", ddb);
         }
     });
 
@@ -91,5 +91,5 @@ startServer().then((server) =>
             process.exit(1);
         }
         server.log.info(`server listening on ${address}`);
-    })
+    }),
 );

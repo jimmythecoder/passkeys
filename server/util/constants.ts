@@ -1,4 +1,3 @@
-
 export enum HttpStatusCode {
     OK = 200,
     Created = 201,
@@ -7,3 +6,5 @@ export enum HttpStatusCode {
     NotFound = 404,
     Fobidden = 403,
 }
+
+export default { HttpStatusCode };
