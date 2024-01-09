@@ -32,11 +32,12 @@ const jwtSessionConfig = {
 const USE_LOCAL_DB = process.env.USE_LOCAL_DB === "true";
 const USE_METADATA_SERVICE = process.env.USE_METADATA_SERVICE === "true";
 
-const fastify = Fastify({
-    logger: true,
-});
+const app = async () => {
 
-const startServer = async () => {
+    const fastify = Fastify({
+        logger: true,
+    });
+
     await fastify.register(fastifyExpress);
 
     fastify.use(express.urlencoded({ extended: true }));
@@ -66,24 +67,15 @@ const startServer = async () => {
         });
     });
 
-    fastify.get("/", async (_, reply) => {
-        reply.type("application/json").code(200);
-        return { hello: "world" };
-    });
-
     fastify.use("/api/auth", authApi);
     fastify.use("/api/health", healthApi);
     fastify.use("/api/test", testApi);
 
+    if (import.meta.env.PROD) {
+        fastify.listen({ host: "0.0.0.0", port: parseInt(process.env.PORT || "3001", 10) });
+    }
+
     return fastify;
 };
 
-startServer().then((server) =>
-    server.listen({ host: "0.0.0.0", port: parseInt(process.env.PORT || "3001", 10) }, (err, address) => {
-        if (err) {
-            server.log.error(err);
-            process.exit(1);
-        }
-        server.log.info(`server listening on ${address}`);
-    }),
-);
+export const viteNodeApp = app();
