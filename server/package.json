@@ -3,7 +3,7 @@
   "displayName": "Passkey API Server",
   "version": "1.0.0",
   "description": "Fastify / express server to handle webauthn registration and authentication",
-  "main": "dist/index.js",
+  "main": "dist/index.mjs",
   "type": "commonjs",
   "scripts": {
     "start:tsx": "tsx watch src/index.ts",
