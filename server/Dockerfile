@@ -1,29 +1,34 @@
 FROM node:20-alpine as base
 
-# Set the working directory
-WORKDIR /app
+FROM base as build
 
+WORKDIR /tmp
 
-
-# Copy package.json and package-lock.json
 COPY package.json .
 COPY tsconfig.json .
 COPY types.d.ts .
+COPY ./src .
 
 # Install dependencies
 RUN npm install
-
-COPY ./src ./src
-
 RUN npm run build
 
-FROM base as build
+FROM base as final
 
+RUN mkdir /app
+RUN addgroup -S app && adduser -S -G app app
+RUN chown -R app:app /app
+USER app
+
+WORKDIR /app
 
 # Copy the rest of the application files
 COPY ./dist .
+COPY ./node_modules ./node_modules
+COPY .env .
 
 EXPOSE 8080
+
 
 # Set the entry point for the container
 CMD ["node", "index.js"]

@@ -34,6 +34,21 @@ const RP_ID = process.env.RP_ID ?? "localhost";
 const RP_NAME = process.env.RP_NAME ?? "Passkeys Example";
 const USE_METADATA_SERVICE = process.env.USE_METADATA_SERVICE === "true";
 
+function handleError(error: unknown, res: express.Response) {
+    if (error instanceof CustomError) {
+        console.error(error.toString());
+        return res.status(error.code).json({ error });
+    }
+
+    if (error instanceof Error) {
+        console.error("[ERROR]", error.message);
+        return res.status(HttpStatusCode.BadRequest).json({ error });
+    }
+
+    console.error("[ERROR]", error);
+    return res.status(HttpStatusCode.BadRequest).json(error);
+}
+
 api.post("/signout", async (req, res) => {
     try {
         const username = req.session.user?.userName;
@@ -48,14 +63,7 @@ api.post("/signout", async (req, res) => {
             res.json({ status: "ok" });
         });
     } catch (error) {
-        if (error instanceof CustomError) {
-            console.error("Not signed in", error.message);
-            res.statusMessage = error.name;
-            return res.status(error.code).json(error);
-        }
-
-        console.error(error);
-        return res.status(HttpStatusCode.Unauthorized).json(error);
+        return handleError(error, res);
     }
 });
 
@@ -101,19 +109,7 @@ api.post("/signin", async (req, res) => {
 
         return res.status(HttpStatusCode.OK).json(options);
     } catch (error) {
-        if (error instanceof CustomError) {
-            console.error(error);
-            res.statusMessage = error.name;
-            return res.status(error.code).json(error);
-        }
-
-        if (error instanceof Error) {
-            console.error(error);
-            return res.status(HttpStatusCode.BadRequest).json(error);
-        }
-
-        console.error(error);
-        return res.status(HttpStatusCode.BadRequest).json(error);
+        return handleError(error, res);
     }
 });
 
@@ -153,19 +149,7 @@ api.post("/signin/passkey", async (req, res) => {
 
         return res.status(HttpStatusCode.OK).json(options);
     } catch (error) {
-        if (error instanceof CustomError) {
-            console.error(error);
-            res.statusMessage = error.name;
-            return res.status(error.code).json(error);
-        }
-
-        if (error instanceof Error) {
-            console.error(error);
-            return res.status(HttpStatusCode.BadRequest).json(error);
-        }
-
-        console.error(error);
-        return res.status(HttpStatusCode.BadRequest).json(error);
+        return handleError(error, res);
     }
 });
 
@@ -222,19 +206,7 @@ api.post("/signin/verify", async (req, res) => {
 
         return res.status(HttpStatusCode.Created).json({ user, session });
     } catch (error) {
-        if (error instanceof CustomError) {
-            console.error(error);
-            res.statusMessage = error.name;
-            return res.status(error.code).json(error);
-        }
-
-        if (error instanceof Error) {
-            console.error(error);
-            return res.status(HttpStatusCode.BadRequest).json({ message: "Invalid signature" });
-        }
-
-        console.error(error);
-        return res.status(HttpStatusCode.BadRequest).json({ message: "Unknown error" });
+        return handleError(error, res);
     } finally {
         // Prevent replay attacks with the same challenge
         delete req.session.challenge;
@@ -247,11 +219,11 @@ api.post("/register", async (req, res) => {
         const displayName = req.body.displayName as string;
 
         if (!displayName) {
-            throw new ValidationError("Name is required");
+            throw new ValidationError("Name is required", "displayName");
         }
 
         if (!userName) {
-            throw new ValidationError("Username is required");
+            throw new ValidationError("Username is required", "username");
         }
 
         const users = await UserModel.query("userName").eq(userName).limit(1).exec();
@@ -309,19 +281,7 @@ api.post("/register", async (req, res) => {
 
         return res.status(HttpStatusCode.OK).json(options);
     } catch (error) {
-        if (error instanceof CustomError) {
-            console.error(error.message);
-            res.statusMessage = error.name;
-            return res.status(error.code).json(error);
-        }
-
-        if (error instanceof Error) {
-            console.error(error);
-            return res.status(HttpStatusCode.BadRequest).json(error);
-        }
-
-        console.error(error);
-        return res.status(HttpStatusCode.BadRequest).json(error);
+        return handleError(error, res);
     }
 });
 
@@ -376,19 +336,7 @@ api.post("/register/verify", async (req, res) => {
 
         return res.status(HttpStatusCode.Created).json({ user, session, credentialID: Buffer.from(authenticator.credentialID).toString("base64") });
     } catch (error) {
-        if (error instanceof CustomError) {
-            console.error(error);
-            res.statusMessage = error.name;
-            return res.status(error.code).json(error);
-        }
-
-        if (error instanceof Error) {
-            console.error(error);
-            return res.status(HttpStatusCode.BadRequest).json(error);
-        }
-
-        console.error(error);
-        return res.status(HttpStatusCode.BadRequest).json(error);
+        return handleError(error, res);
     } finally {
         delete req.session.challenge;
     }

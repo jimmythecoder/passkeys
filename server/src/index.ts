@@ -54,13 +54,16 @@ const startServer = async () => {
         }
 
         if (USE_LOCAL_DB) {
-            dynamoose.aws.ddb.local();
-        } else {
-            // const ddb = new dynamoose.aws.ddb.DynamoDB({
-            //     region: process.env.AWS_REGION,
-            // });
-            // console.debug("DynamoDB client created", ddb);
+            return dynamoose.aws.ddb.local();
         }
+
+        return new dynamoose.aws.ddb.DynamoDB({
+            region: process.env.AWS_REGION!,
+            credentials: {
+                accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+                secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+            },
+        });
     });
 
     fastify.get("/", async (_, reply) => {

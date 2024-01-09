@@ -14,6 +14,10 @@ export class CustomError extends Error {
             message: this.message,
         };
     }
+
+    toString() {
+        return `[ERROR]: ${this.name}: ${this.message}`;
+    }
 }
 
 export default CustomError;
