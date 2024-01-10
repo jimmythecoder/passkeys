@@ -6,6 +6,7 @@ WORKDIR /tmp
 
 COPY package.json .
 COPY tsconfig.json .
+COPY vite.config.ts .
 COPY types.d.ts .
 COPY ./src .
 
@@ -32,4 +33,4 @@ EXPOSE 8080
 HEALTHCHECK --interval=1m --timeout=3s CMD wget --no-verbose --tries=1 --spider http://localhost:8080/api/health/status || exit 1
 
 # Set the entry point for the container
-CMD ["node", "index.js"]
+CMD ["node", "index.mjs"]
