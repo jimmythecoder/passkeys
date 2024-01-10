@@ -32,7 +32,7 @@ const jwtSessionConfig = {
 
 const USE_LOCAL_DB = process.env.USE_LOCAL_DB === "true";
 const USE_METADATA_SERVICE = process.env.USE_METADATA_SERVICE === "true";
-
+console.debug("USE_LOCAL_DB", process.env.USE_LOCAL_DB);
 const app = async () => {
     const fastify = Fastify({
         logger: true,
@@ -54,17 +54,32 @@ const app = async () => {
             });
         }
 
-        if (USE_LOCAL_DB) {
-            return dynamoose.aws.ddb.local();
-        }
+        // if (USE_LOCAL_DB) {
+        //     console.debug("🗄️ Using local DynamoDB");
+        //     return dynamoose.aws.ddb.local(process.env.AWS_DYNAMODB_ENDPOINT);
+        // }
 
-        return new dynamoose.aws.ddb.DynamoDB({
+        console.debug("🗄️ Using remote DynamoDB", {
+            endpoint: process.env.AWS_DYNAMODB_ENDPOINT,
             region: process.env.AWS_REGION!,
             credentials: {
                 accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
                 secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
             },
         });
+
+        try {
+            new dynamoose.aws.ddb.DynamoDB({
+                endpoint: process.env.AWS_DYNAMODB_ENDPOINT,
+                region: process.env.AWS_REGION!,
+                credentials: {
+                    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+                    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+                },
+            });
+        } catch (e) {
+            console.error("DynamoDB:", e);
+        }
     });
 
     fastify.use("/api/auth", authApi);
@@ -79,3 +94,5 @@ const app = async () => {
 };
 
 export const viteNodeApp = app();
+
+export default viteNodeApp;

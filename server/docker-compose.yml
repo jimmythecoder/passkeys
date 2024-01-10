@@ -1,8 +1,25 @@
 services:
   api:
     container_name: passkeys-api
-    build: ./
+    build: .
     environment:
       - NODE_ENV=production
     ports:
       - "8080:8080"
+    depends_on:
+     - "dynamodb-passkeys-local"
+    links:
+      - "dynamodb-passkeys-local"
+    env_file:
+      - .env
+  dynamodb-passkeys-local:
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
+    image: "amazon/dynamodb-local:latest"
+    container_name: dynamodb-passkeys-local
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - "./docker/dynamodb:/home/dynamodblocal/data"
+    working_dir: /home/dynamodblocal
