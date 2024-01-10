@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, NavLink } from "react-router-dom";
 import { post } from "@/utils/api";
 import { ENDPOINTS } from "@/config";
+import { Exception } from "@/exceptions";
 import { startAuthentication, browserSupportsWebAuthn } from "@simplewebauthn/browser";
 import { paths } from "@/Routes";
 import "./Login.scss";
@@ -12,7 +13,7 @@ enum FormInputs {
 }
 
 export const Login: React.FC<React.PropsWithChildren> = () => {
-    const [error, setError] = useState("");
+    const [error, setError] = useState<Exception>();
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const useConditionalUI = true;
@@ -25,7 +26,7 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
          */
         async signin(username: string) {
             setLoading(true);
-            setError("");
+            setError(undefined);
 
             try {
                 const authenticationOptions = await post<Auth.Signin.GetCredentials.Response, Auth.Signin.GetCredentials.Request>(ENDPOINTS.auth.signin.getCredentials, { username });
@@ -43,10 +44,10 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
                 console.debug("Login success");
                 return true;
             } catch (error) {
-                if (error instanceof Error) {
-                    setError(error.message);
+                if (error instanceof Exception) {
+                    setError(error);
                 } else {
-                    setError("Unknown server error");
+                    setError(new Exception({message: "An unknown error occurred"}));
                     console.error(error);
                 }
             }
@@ -57,7 +58,7 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
 
     useEffect(() => {
         if (!browserSupportsWebAuthn()) {
-            setError("WebAuthn is not supported in this browser");
+            setError(new Exception({ message: "WebAuthn is not supported in this browser" }));
         }
 
         const abortController = new AbortController();
@@ -81,8 +82,8 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
                         return;
                     }
 
-                    if (err instanceof Error) {
-                        setError(err.message);
+                    if (err instanceof Exception) {
+                        setError(err);
                     }
 
                     console.error(err);
@@ -98,7 +99,7 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setLoading(true);
-        setError("");
+        setError(undefined);
 
         try {
             const username = (e.currentTarget.elements.namedItem(FormInputs.username) as HTMLInputElement).value;
@@ -109,8 +110,8 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
                 navigate(paths.signinSuccess);
             }
         } catch (err) {
-            if (err instanceof Error) {
-                setError(err.message);
+            if (err instanceof Exception) {
+                setError(err);
                 console.error(err);
             }
         }
@@ -132,7 +133,7 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
                 <form onSubmit={handleSubmit} name="login">
                     {error && (
                         <div className="element form-error">
-                            <p>{error}</p>
+                            <p>{error.message}</p>
                         </div>
                     )}
 

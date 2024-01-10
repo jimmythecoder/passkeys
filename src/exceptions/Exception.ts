@@ -1,10 +1,17 @@
+export type CustomException = {
+    code?: number;
+    message: string;
+};
+
 export class Exception extends Error {
+    code?: number;
+
     constructor(
-        message: string,
-        public code: number,
+        error: CustomException,
     ) {
-        super(message);
+        super(error.message);
         this.name = this.constructor.name;
+        this.code = error.code;
     }
 
     toJSON() {
