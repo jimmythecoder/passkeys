@@ -6,9 +6,7 @@ export type CustomException = {
 export class Exception extends Error {
     code?: number;
 
-    constructor(
-        error: CustomException,
-    ) {
+    constructor(error: CustomException) {
         super(error.message);
         this.name = this.constructor.name;
         this.code = error.code;

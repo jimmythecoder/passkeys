@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate, NavLink } from "react-router-dom";
+import { startAuthentication, browserSupportsWebAuthn } from "@simplewebauthn/browser";
 import { post } from "@/utils/api";
 import { ENDPOINTS } from "@/config";
 import { Exception } from "@/exceptions";
-import { startAuthentication, browserSupportsWebAuthn } from "@simplewebauthn/browser";
 import { paths } from "@/Routes";
 import "./Login.scss";
 import type { Auth } from "@/types/api";
@@ -29,7 +29,10 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
             setError(undefined);
 
             try {
-                const authenticationOptions = await post<Auth.Signin.GetCredentials.Response, Auth.Signin.GetCredentials.Request>(ENDPOINTS.auth.signin.getCredentials, { username });
+                const authenticationOptions = await post<Auth.Signin.GetCredentials.Response, Auth.Signin.GetCredentials.Request>(
+                    ENDPOINTS.auth.signin.getCredentials,
+                    { username },
+                );
 
                 // Pass the options to the authenticator and wait for a response
                 const attResp = await startAuthentication(authenticationOptions);
@@ -43,12 +46,12 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
 
                 console.debug("Login success");
                 return true;
-            } catch (error) {
-                if (error instanceof Exception) {
-                    setError(error);
+            } catch (apiError) {
+                if (apiError instanceof Exception) {
+                    setError(apiError);
                 } else {
-                    setError(new Exception({message: "An unknown error occurred"}));
-                    console.error(error);
+                    setError(new Exception({ message: "An unknown error occurred" }));
+                    console.error(apiError);
                 }
             }
 
@@ -68,26 +71,37 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
 
             if (authenticators && authenticators.length) {
                 console.debug("Conditional UI login", authenticators);
-                post<Auth.Signin.GetCredentials.Response, Auth.Signin.GetCredentials.ConditionalUIRequest>(ENDPOINTS.auth.signin.getAllCredentails, { authenticators }, abortController.signal).then((options) => {
-                    return startAuthentication(options, true).then((attResp) => {
-                        return post<Auth.Signin.Verify.Response, Auth.Signin.Verify.Request>(ENDPOINTS.auth.signin.verify, attResp, abortController.signal);
+                post<Auth.Signin.GetCredentials.Response, Auth.Signin.GetCredentials.ConditionalUIRequest>(
+                    ENDPOINTS.auth.signin.getAllCredentails,
+                    { authenticators },
+                    abortController.signal,
+                )
+                    .then((options) => {
+                        return startAuthentication(options, true).then((attResp) => {
+                            return post<Auth.Signin.Verify.Response, Auth.Signin.Verify.Request>(
+                                ENDPOINTS.auth.signin.verify,
+                                attResp,
+                                abortController.signal,
+                            );
+                        });
+                    })
+                    .then((response) => {
+                        sessionStorage.setItem("user", JSON.stringify(response.user));
+                        sessionStorage.setItem("session", JSON.stringify(response.session));
+                        console.debug("Conditional UI login success");
+                        navigate(paths.signinSuccess);
+                    })
+                    .catch((err) => {
+                        if (err instanceof DOMException && err.name === "AbortError") {
+                            return;
+                        }
+
+                        if (err instanceof Exception) {
+                            setError(err);
+                        }
+
+                        console.error(err);
                     });
-                }).then((response) => {
-                    sessionStorage.setItem("user", JSON.stringify(response.user));
-                    sessionStorage.setItem("session", JSON.stringify(response.session));
-                    console.debug("Conditional UI login success");
-                    navigate(paths.signinSuccess);
-                }).catch((err) => {
-                    if (err instanceof DOMException && err.name === "AbortError") {
-                        return;
-                    }
-
-                    if (err instanceof Exception) {
-                        setError(err);
-                    }
-
-                    console.error(err);
-                });
             }
         }
 
@@ -139,7 +153,14 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
 
                     <div className="element">
                         <label htmlFor="username">Email address</label>
-                        <input type="email" name={FormInputs.username} id={FormInputs.username} autoComplete="username webauthn" placeholder="example@domain.com" required />
+                        <input
+                            type="email"
+                            name={FormInputs.username}
+                            id={FormInputs.username}
+                            autoComplete="username webauthn"
+                            placeholder="example@domain.com"
+                            required
+                        />
                         <p className="error">Your email is not valid</p>
                     </div>
 

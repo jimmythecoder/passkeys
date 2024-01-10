@@ -1,6 +1,10 @@
 import { API_URL } from "@/config";
 import * as Exceptions from "@/exceptions";
 
+function isEmpty(value: unknown) {
+    return value == null || value === "";
+}
+
 const jsonAPI = (apiURL: string, method = "POST") => {
     return async <T, U = void>(path: string, data?: U, signal?: AbortSignal) => {
         const body = !isEmpty(data) && method !== "GET" ? JSON.stringify(data) : null;
@@ -20,7 +24,7 @@ const jsonAPI = (apiURL: string, method = "POST") => {
             const isJSON = response.headers.get("content-type")?.includes("application/json");
 
             if (isJSON) {
-                const error = await response.json() as Exceptions.Exception;
+                const error = (await response.json()) as Exceptions.Exception;
 
                 switch (error.name) {
                     case "AuthenticatorAlreadyExists":
@@ -41,21 +45,17 @@ const jsonAPI = (apiURL: string, method = "POST") => {
                         throw new Exceptions.ValidationError(error);
                     case "VerificationError":
                         throw new Exceptions.VerificationError(error);
+                    default:
+                        throw new Exceptions.Exception(error);
                 }
-
-                throw new Exceptions.Exception(error);
             }
 
             throw new Error(await response.text());
         }
 
-        return await response.json() as T;
-    }
+        return (await response.json()) as T;
+    };
 };
-
-function isEmpty(value: unknown) {
-    return value == null || value === "";
-}
 
 export const post = jsonAPI(API_URL, "POST");
 export const get = jsonAPI(API_URL, "GET");
