@@ -16,6 +16,7 @@ import JWTSessionKeys from "./keys.json";
 dotenv.config();
 
 const jwtSessionConfig = {
+    name: process.env.SESSION_NAME,
     secret: process.env.SESSION_SECRET ?? "secret",
     keys: {
         private: atob(JWTSessionKeys.private.pem),
@@ -33,7 +34,6 @@ const USE_LOCAL_DB = process.env.USE_LOCAL_DB === "true";
 const USE_METADATA_SERVICE = process.env.USE_METADATA_SERVICE === "true";
 
 const app = async () => {
-
     const fastify = Fastify({
         logger: true,
     });
