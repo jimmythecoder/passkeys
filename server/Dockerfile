@@ -6,6 +6,7 @@ WORKDIR /tmp
 
 COPY package.json .
 COPY tsconfig.json .
+COPY vite.config.ts .
 COPY types.d.ts .
 COPY ./src .
 
@@ -31,4 +32,4 @@ EXPOSE 8080
 
 
 # Set the entry point for the container
-CMD ["node", "index.js"]
+CMD ["node", "index.mjs"]
