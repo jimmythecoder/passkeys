@@ -16,13 +16,20 @@ const jsonAPI = (apiURL: string, method = "POST") => {
             body,
         });
 
-        const json = await response.json() as T;
-
         if (!response.ok) {
-            throw new Error((json as Error).message);
+            const isJSON = response.headers.get("Content-Type") === "application/json";
+
+            if (isJSON) {
+                const error = await response.json() as Error;
+
+                
+                throw new Error(error.message);
+            }
+
+            throw new Error(await response.text());
         }
 
-        return json;
+        return await response.json() as T;
     }
 };
 
