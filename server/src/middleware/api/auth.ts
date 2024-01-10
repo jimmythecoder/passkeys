@@ -37,12 +37,12 @@ const USE_METADATA_SERVICE = process.env.USE_METADATA_SERVICE === "true";
 function handleError(error: unknown, res: express.Response) {
     if (error instanceof CustomError) {
         console.error(error.toString());
-        return res.status(error.code).json({ error });
+        return res.status(error.code).json(error);
     }
 
     if (error instanceof Error) {
         console.error("[ERROR]", error.message);
-        return res.status(HttpStatusCode.BadRequest).json({ error });
+        return res.status(HttpStatusCode.BadRequest).json(error);
     }
 
     console.error("[ERROR]", error);

@@ -44,12 +44,6 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
                 return true;
             } catch (error) {
                 if (error instanceof Error) {
-                    if (error.name === "InvalidStateError") {
-                        console.error("Error: Authenticator was probably already registered by user", error.message);
-                    } else {
-                        console.error(error);
-                    }
-
                     setError(error.message);
                 } else {
                     setError("Unknown server error");
