@@ -3,45 +3,54 @@
   "displayName": "Passkey API Server",
   "version": "1.0.0",
   "description": "Fastify / express server to handle webauthn registration and authentication",
-  "main": "dist/index.mjs",
-  "type": "commonjs",
+  "main": "dist/app.cjs",
+  "type": "module",
   "scripts": {
-    "start:tsx": "tsx watch src/index.ts",
+    "start": "tsx watch src/app.ts",
     "build:tsc": "tsc && tsc-alias",
-    "start": "vite",
-    "build": "vite build"
+    "build": "node --loader ts-node/esm node_modules/webpack-cli/bin/cli.js --config webpack.config.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@fastify/aws-lambda": "^3.5.0",
     "@fastify/express": "^2.3.0",
     "@simplewebauthn/server": "^8.3.6",
     "@simplewebauthn/typescript-types": "^8.3.4",
     "@types/body-parser": "^1.19.5",
     "@types/cors": "^2.8.17",
+    "@types/dotenv-webpack": "^7.0.7",
     "@types/express": "^4.17.21",
     "@types/express-session": "^1.17.10",
     "@types/multer": "^1.4.11",
     "@types/node": "^20.10.4",
+    "@types/webpack": "^5.28.5",
     "aws-sdk": "^2.1531.0",
     "body-parser": "^1.20.2",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
+    "dotenv-webpack": "^8.0.1",
     "dynamoose": "^4.0.0",
+    "esbuild": "^0.19.11",
     "express": "^4.18.2",
     "express-session-jwt": "^0.2.2",
     "fastify": "^4.24.3",
     "helmet": "^7.1.0",
     "multer": "1.4.5-lts.1",
+    "serverless-esbuild": "^1.50.1",
+    "ts-loader": "^9.5.1",
+    "ts-node": "^10.9.2",
     "tsx": "^4.6.2",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "webpack": "^5.89.0"
   },
   "devDependencies": {
     "@swc/core": "^1.3.102",
     "tsc-alias": "^1.8.8",
     "vite": "^5.0.11",
-    "vite-plugin-node": "^3.1.0"
+    "vite-plugin-node": "^3.1.0",
+    "webpack-cli": "^5.1.4"
   }
 }

@@ -1,4 +1,4 @@
-import { HttpStatusCode } from "../constants.js";
+import { HttpStatusCode } from "../constants";
 import { CustomError } from "./CustomError";
 
 export class UserAlreadyExists extends CustomError {

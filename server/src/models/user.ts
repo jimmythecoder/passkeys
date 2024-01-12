@@ -1,5 +1,5 @@
 import dynamoose from "dynamoose";
-import { Item } from "dynamoose/dist/Item.js";
+import { Item } from "dynamoose/dist/Item";
 
 export type UserType = {
     id: string;

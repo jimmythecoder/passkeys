@@ -8,9 +8,9 @@ import {
 } from "@simplewebauthn/server";
 import dynamoose from "dynamoose";
 import { isoBase64URL } from "@simplewebauthn/server/helpers";
-import { UserModel, User } from "@/models/user.js";
-import { UserSession } from "@/models/userSession.js";
-import { AuthChallenge } from "@/models/challenge.js";
+import { UserModel, User } from "@/models/user";
+import { UserSession } from "@/models/userSession";
+import { AuthChallenge } from "@/models/challenge";
 import { Authenticator, AuthenticatorModel } from "@/models/authenticators";
 import {
     UserNotFound,
@@ -21,8 +21,8 @@ import {
     AuthenticatorNotFound,
     CustomError,
     AuthenticatorMismatch,
-} from "@/util/exceptions.js";
-import { HttpStatusCode } from "@/util/constants.js";
+} from "@/util/exceptions";
+import { HttpStatusCode } from "@/util/constants";
 
 dotenv.config();
 

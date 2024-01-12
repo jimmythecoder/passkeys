@@ -1,5 +1,5 @@
-import { HttpStatusCode } from "../constants.js";
-import { CustomError } from "./CustomError.js";
+import { HttpStatusCode } from "../constants";
+import { CustomError } from "./CustomError";
 
 export class AuthenticatorNotFound extends CustomError {
     constructor(message: string) {

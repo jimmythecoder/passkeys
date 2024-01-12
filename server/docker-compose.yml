@@ -9,17 +9,6 @@ services:
     depends_on:
      - "dynamodb-passkeys-local"
     links:
-      - "dynamodb-passkeys-local"
+      - "dynamodb-passkeys-local:db"
     env_file:
       - .env
-  dynamodb-passkeys-local:
-    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
-    image: "amazon/dynamodb-local:latest"
-    container_name: dynamodb-passkeys-local
-    env_file:
-      - .env
-    ports:
-      - "8000:8000"
-    volumes:
-      - "./docker/dynamodb:/home/dynamodblocal/data"
-    working_dir: /home/dynamodblocal
