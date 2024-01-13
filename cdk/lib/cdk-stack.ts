@@ -58,6 +58,7 @@ export class CdkStack extends cdk.Stack {
                     allowedMethods: cdk.aws_cloudfront.AllowedMethods.ALLOW_ALL,
                     viewerProtocolPolicy: cdk.aws_cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
                     cachePolicy: cdk.aws_cloudfront.CachePolicy.CACHING_DISABLED,
+                    originRequestPolicy: cdk.aws_cloudfront.OriginRequestPolicy.ALL_VIEWER_EXCEPT_HOST_HEADER,
                 },
                 "/assets/*": {
                     origin: new cdk.aws_cloudfront_origins.S3Origin(webS3Bucket, {

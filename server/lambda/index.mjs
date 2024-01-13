@@ -85452,9 +85452,8 @@ var VerificationError = class extends CustomError {
 
 // src/middleware/api/auth.ts
 import_dotenv.default.config();
-var IS_HTTPS = process.env.HTTPS === "true";
-var SESSION_LIFETIME = parseInt(process.env.SESSION_LIFETIME ?? "0", 10) || 864e5;
-var RP_ORIGIN = `${IS_HTTPS ? "https" : "http"}://${process.env.RP_ID}:${process.env.RP_PROXY_PORT ?? "80"}`;
+var SESSION_LIFETIME = parseInt(process.env.SESSION_LIFETIME ?? "86400000", 10);
+var RP_ORIGIN = process.env.RP_ORIGIN ?? "http://localhost:3000";
 var RP_ID = process.env.RP_ID ?? "localhost";
 var RP_NAME = process.env.RP_NAME ?? "canhazpasskey";
 var USE_METADATA_SERVICE = process.env.USE_METADATA_SERVICE === "true";
@@ -85778,6 +85777,16 @@ var init = async () => {
         console.debug("\u{1F510} MetadataService initialized");
       });
     }
+    console.debug(
+      JSON.stringify({
+        endpoint: process.env.AWS_DYNAMODB_ENDPOINT,
+        region: process.env.AWS_REGION,
+        credentials: {
+          accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+          secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+        }
+      })
+    );
     new import_dynamoose4.default.aws.ddb.DynamoDB({
       endpoint: process.env.AWS_DYNAMODB_ENDPOINT,
       region: process.env.AWS_REGION,
@@ -85791,7 +85800,7 @@ var init = async () => {
 };
 if (!IS_PROD) {
   init().then(
-    (server) => server.listen({ host: "0.0.0.0", port: parseInt(process.env.PORT || "3001", 10) }, (err, address) => {
+    (server) => server.listen({ host: "0.0.0.0", port: parseInt(process.env.PORT ?? "3000", 10) }, (err, address) => {
       if (err) {
         server.log.error(err);
         process.exit(1);

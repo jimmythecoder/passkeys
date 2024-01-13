@@ -24,14 +24,14 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
          * @param username Users email address
          * @returns Promise<boolean> True if the user was signed in successfully
          */
-        async signin(username: string) {
+        async signin(userName: string) {
             setLoading(true);
             setError(undefined);
 
             try {
                 const authenticationOptions = await post<Auth.Signin.GetCredentials.Response, Auth.Signin.GetCredentials.Request>(
                     ENDPOINTS.auth.signin.getCredentials,
-                    { username },
+                    { userName },
                 );
 
                 // Pass the options to the authenticator and wait for a response

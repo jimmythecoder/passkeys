@@ -25,12 +25,12 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
          * @param username Email address of the user
          * @returns Promise<boolean> True if the user was registered successfully
          */
-        async register(displayName: string, username: string) {
+        async register(displayName: string, userName: string) {
             setLoading(true);
             setError("");
 
             try {
-                const registrationOptions = await post<Auth.Register.GetCredentials.Response, Auth.Register.GetCredentials.Request>(ENDPOINTS.auth.register.getCredentials, { displayName, username });
+                const registrationOptions = await post<Auth.Register.GetCredentials.Response, Auth.Register.GetCredentials.Request>(ENDPOINTS.auth.register.getCredentials, { displayName, userName });
 
                 // Pass the options to the authenticator and wait for a response
                 const attResp = await startRegistration(registrationOptions);

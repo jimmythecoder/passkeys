@@ -4,7 +4,6 @@ import session from "@fastify/secure-session";
 import dotenv from "dotenv";
 import { MetadataService } from "@simplewebauthn/server";
 import dynamoose from "dynamoose";
-import fs from "node:fs";
 import { api as authApi } from "./middleware/api/auth";
 import { api as healthApi } from "./middleware/api/health";
 import { api as testApi } from "./middleware/api/test";
@@ -46,6 +45,17 @@ const init = async () => {
             });
         }
 
+        console.debug(
+            JSON.stringify({
+                endpoint: process.env.AWS_DYNAMODB_ENDPOINT,
+                region: process.env.AWS_REGION!,
+                credentials: {
+                    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+                    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+                },
+            }),
+        );
+
         new dynamoose.aws.ddb.DynamoDB({
             endpoint: process.env.AWS_DYNAMODB_ENDPOINT,
             region: process.env.AWS_REGION!,
@@ -61,7 +71,7 @@ const init = async () => {
 
 if (!IS_PROD) {
     init().then((server) =>
-        server.listen({ host: "0.0.0.0", port: parseInt(process.env.PORT || "3001", 10) }, (err, address) => {
+        server.listen({ host: "0.0.0.0", port: parseInt(process.env.PORT ?? "3000", 10) }, (err, address) => {
             if (err) {
                 server.log.error(err);
                 process.exit(1);
