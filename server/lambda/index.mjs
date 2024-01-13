@@ -85454,9 +85454,9 @@ var VerificationError = class extends CustomError {
 import_dotenv.default.config();
 var IS_HTTPS = process.env.HTTPS === "true";
 var SESSION_LIFETIME = parseInt(process.env.SESSION_LIFETIME ?? "0", 10) || 864e5;
-var RP_ORIGIN = `${IS_HTTPS ? "https" : "http"}://${process.env.RP_ID}:${process.env.RP_PROXY_PORT ?? "3000"}`;
+var RP_ORIGIN = `${IS_HTTPS ? "https" : "http"}://${process.env.RP_ID}:${process.env.RP_PROXY_PORT ?? "80"}`;
 var RP_ID = process.env.RP_ID ?? "localhost";
-var RP_NAME = process.env.RP_NAME ?? "Passkeys Example";
+var RP_NAME = process.env.RP_NAME ?? "canhazpasskey";
 var USE_METADATA_SERVICE = process.env.USE_METADATA_SERVICE === "true";
 function handleError(error, reply) {
   if (error instanceof CustomError) {

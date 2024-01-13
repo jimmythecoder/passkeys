@@ -29,9 +29,9 @@ dotenv.config();
 
 const IS_HTTPS = process.env.HTTPS === "true";
 const SESSION_LIFETIME = parseInt(process.env.SESSION_LIFETIME ?? "0", 10) || 86400000;
-const RP_ORIGIN = `${IS_HTTPS ? "https" : "http"}://${process.env.RP_ID}:${process.env.RP_PROXY_PORT ?? "3000"}`;
+const RP_ORIGIN = `${IS_HTTPS ? "https" : "http"}://${process.env.RP_ID}:${process.env.RP_PROXY_PORT ?? "80"}`;
 const RP_ID = process.env.RP_ID ?? "localhost";
-const RP_NAME = process.env.RP_NAME ?? "Passkeys Example";
+const RP_NAME = process.env.RP_NAME ?? "canhazpasskey";
 const USE_METADATA_SERVICE = process.env.USE_METADATA_SERVICE === "true";
 
 function handleError(error: unknown, reply: FastifyReply) {
