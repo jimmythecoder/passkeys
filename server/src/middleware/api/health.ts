@@ -1,10 +1,13 @@
-import * as express from "express";
 
-const api = express.Router();
+import type { FastifyPluginCallback } from "fastify";
 
-api.get("/status", async (_, res) => {
-    res.json({ status: "ok" });
-});
+export const api: FastifyPluginCallback = (fastify, _, next) => {
+    fastify.get("/status", (request, reply) => {
+        console.debug("GET /api/health/status v2");
+        reply.send({ status: "ok" });
+    });
 
-export { api };
+    next();
+};
+
 export default api;

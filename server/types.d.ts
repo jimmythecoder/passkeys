@@ -1,18 +1,5 @@
-declare module "express-session-jwt" {
-    import session from "express-session";
-
-    export default session;
-}
-
 declare global {
-    declare module "express-session" {
-        interface SessionOptions {
-            keys: {
-                private: string;
-                public: string;
-            };
-        }
-
+    declare module "@fastify/secure-session" {
         interface SessionData {
             /**
              * User Model for the current user

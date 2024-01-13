@@ -1,55 +1,45 @@
 import Fastify from "fastify";
-import jwtSession from "express-session-jwt";
-import helmet from "helmet";
-import fastifyExpress from "@fastify/express";
-import express from "express";
-import multer from "multer";
+import helmet from "@fastify/helmet";
+import session from "@fastify/secure-session";
 import dotenv from "dotenv";
 import { MetadataService } from "@simplewebauthn/server";
 import dynamoose from "dynamoose";
-import { cors } from "./middleware/cors";
+import fs from "node:fs";
 import { api as authApi } from "./middleware/api/auth";
 import { api as healthApi } from "./middleware/api/health";
 import { api as testApi } from "./middleware/api/test";
-import JWTSessionKeys from "./keys.json";
 
 dotenv.config();
 
-const jwtSessionConfig = {
-    name: process.env.SESSION_NAME,
-    secret: process.env.SESSION_SECRET ?? "secret",
-    keys: {
-        private: atob(JWTSessionKeys.private.pem),
-        public: atob(JWTSessionKeys.public.pem),
-    },
-    cookie: {
-        secure: process.env.HTTPS === "true",
-        httpOnly: true,
-        sameSite: "strict",
-        maxAge: parseInt(process.env.SESSION_LIFETIME ?? "86400000", 10),
-    },
-} satisfies jwtSession.SessionOptions;
-
 const USE_METADATA_SERVICE = process.env.USE_METADATA_SERVICE === "true";
+const IS_PROD = process.env.NODE_ENV === "production";
+const SESSION_KEY = process.env.SESSION_HEX_KEY ?? "0xdeadbeef";
 
-export const init = () => {
+const init = async () => {
     const app = Fastify({
         logger: true,
     });
 
-    app.register(fastifyExpress).then(() => {
-        app.use(express.urlencoded({ extended: true }));
-        app.use(multer().none());
-        app.use(express.json());
-        app.use(helmet());
-        app.use(cors);
-        app.use(jwtSession(jwtSessionConfig));
-        app.use("/api/auth", authApi);
-        app.use("/api/health", healthApi);
-        app.use("/api/test", testApi);
+    await app.register(helmet);
+    await app.register(session, {
+        sessionName: process.env.SESSION_NAME,
+        cookieName: process.env.SESSION_COOKIE_NAME,
+        key: Buffer.from(SESSION_KEY, "hex"),
+        cookie: {
+            path: "/",
+            httpOnly: true,
+            secure: IS_PROD,
+            maxAge: parseInt(process.env.SESSION_LIFETIME ?? "86400000", 10),
+            sameSite: "strict",
+        },
     });
 
+    await app.register(healthApi, { prefix: "/api/health" });
+    await app.register(testApi, { prefix: "/api/test" });
+    await app.register(authApi, { prefix: "/api/auth" });
+
     app.addHook("onReady", async () => {
+        console.debug("Server ready... ", IS_PROD ? "PROD" : "DEV");
         if (USE_METADATA_SERVICE) {
             await MetadataService.initialize().then(() => {
                 console.debug("🔐 MetadataService initialized");
@@ -65,11 +55,11 @@ export const init = () => {
             },
         });
     });
-    
+
     return app;
 };
 
-if (require.main === module) {
+if (!IS_PROD) {
     init().then((server) =>
         server.listen({ host: "0.0.0.0", port: parseInt(process.env.PORT || "3001", 10) }, (err, address) => {
             if (err) {
@@ -81,4 +71,5 @@ if (require.main === module) {
     );
 }
 
+export { init };
 export default init;

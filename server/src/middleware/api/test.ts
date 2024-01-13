@@ -1,53 +1,52 @@
-import * as express from "express";
 import dotenv from "dotenv";
+import type { FastifyPluginCallback } from "fastify";
 import { Unauthorized, CustomError } from "@/util/exceptions";
 import { HttpStatusCode } from "@/util/constants";
 
 dotenv.config();
 
-const api = express.Router();
+export const api: FastifyPluginCallback = (fastify, _, next) => {
+    fastify.get("/authorized", (request, reply) => {
+        try {
+            if (!request.session.get("isSignedIn")) {
+                throw new Unauthorized("Not signed in");
+            }
 
-api.get("/authorized", async (req, res) => {
-    try {
-        if (!req.session.isSignedIn) {
-            throw new Unauthorized("Not signed in");
+            return reply.send({ status: "ok" });
+        } catch (error) {
+            if (error instanceof CustomError) {
+                console.error("Authorization failed", error.message);
+                return reply.status(error.code).send(error);
+            }
+
+            console.error(error);
+            return reply.status(HttpStatusCode.Unauthorized).send(error);
         }
+    });
 
-        return res.json({ status: "ok" });
-    } catch (error) {
-        if (error instanceof CustomError) {
-            console.error("Authorization failed", error.message);
-            res.statusMessage = error.name;
-            return res.status(error.code).json(error);
+    fastify.get("/authorized/admin", (request, reply) => {
+        try {
+            if (!request.session.get("isSignedIn")) {
+                throw new Unauthorized("Not signed in");
+            }
+
+            if (!request.session.get("user")?.roles.includes("admin")) {
+                throw new Unauthorized("Missing admin role");
+            }
+
+            return reply.send({ status: "ok" });
+        } catch (error) {
+            if (error instanceof CustomError) {
+                console.error("Authorization failed", error.message);
+                return reply.status(error.code).send(error);
+            }
+
+            console.error(error);
+            return reply.status(HttpStatusCode.Unauthorized).send(error);
         }
+    });
 
-        console.error(error);
-        return res.status(HttpStatusCode.Unauthorized).json(error);
-    }
-});
+    next();
+};
 
-api.get("/authorized/admin", async (req, res) => {
-    try {
-        if (!req.session.isSignedIn) {
-            throw new Unauthorized("Not signed in");
-        }
-
-        if (!req.session.user?.roles.includes("admin")) {
-            throw new Unauthorized("Missing admin role");
-        }
-
-        return res.json({ status: "ok" });
-    } catch (error) {
-        if (error instanceof CustomError) {
-            console.error("Authorization failed", error.message);
-            res.statusMessage = error.name;
-            return res.status(error.code).json(error);
-        }
-
-        console.error(error);
-        return res.status(HttpStatusCode.Unauthorized).json(error);
-    }
-});
-
-export { api };
 export default api;
