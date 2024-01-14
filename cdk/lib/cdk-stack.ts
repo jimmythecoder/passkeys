@@ -1,5 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
+import { OutputFormat } from "aws-cdk-lib/aws-lambda-nodejs";
 import { ENV } from "../types";
 
 export class CdkStack extends cdk.Stack {
@@ -40,6 +41,16 @@ export class CdkStack extends cdk.Stack {
                     originShieldEnabled: true,
                     originShieldRegion: config.AWS_REGION,
                 }),
+                functionAssociations: [
+                    {
+                        eventType: cdk.aws_cloudfront.FunctionEventType.VIEWER_REQUEST,
+                        function: new cdk.aws_cloudfront.Function(this, `spa-rewrite`, {
+                            code: cdk.aws_cloudfront.FunctionCode.fromFile({
+                                filePath: "./lib/viewer-request.js",
+                            }),
+                        }),
+                    },
+                ],
                 allowedMethods: cdk.aws_cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
                 viewerProtocolPolicy: cdk.aws_cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
                 cachePolicy: new cdk.aws_cloudfront.CachePolicy(this, `passkeys-cache`, {
@@ -105,6 +116,42 @@ export class CdkStack extends cdk.Stack {
             zone,
             target: cdk.aws_route53.RecordTarget.fromAlias(cloudFrontTarget),
             recordName: config.WEB_DOMAIN,
+        });
+
+        const lambdaRole = new cdk.aws_iam.Role(this, `passkeys-api-role`, {
+            assumedBy: new cdk.aws_iam.ServicePrincipal("lambda.amazonaws.com"),
+            managedPolicies: [
+                cdk.aws_iam.ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole"),
+                cdk.aws_iam.ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSLambdaVPCAccessExecutionRole"),
+                cdk.aws_iam.ManagedPolicy.fromManagedPolicyName(this, `lambda-dynamodb-policy`, "AWSLambdaDynamoDBRole"),
+            ],
+        });
+
+        const apiHandler = new cdk.aws_lambda_nodejs.NodejsFunction(this, `passkeys-api`, {
+            // depsLockFilePath: `../server/package-lock.json`,
+            entry: `../server/src/index.mts`,
+            functionName: `passkeys-api`,
+            description: `Passkeys API`,
+            memorySize: 512,
+            timeout: cdk.Duration.seconds(15),
+            role: lambdaRole,
+            runtime: cdk.aws_lambda.Runtime.NODEJS_20_X,
+            architecture: cdk.aws_lambda.Architecture.ARM_64,
+            handler: "handler",
+            bundling: {
+                platform: "node",
+                format: OutputFormat.ESM,
+                target: "esnext",
+                nodeModules: ["sodium-native"],
+                banner: `import { createRequire } from 'module';const require = createRequire(import.meta.url);`,
+                minify: true,
+                externalModules: ["aws-sdk", "sodium-native"],
+            },
+            environment: {
+                RP_ID: process.env.RP_ID ?? "example.com",
+                RP_ORIGIN: process.env.RP_ORIGIN ?? "https://example.com",
+                SESSION_HEX_KEY: process.env.SESSION_HEX_KEY ?? "0xdeadbeef",
+            },
         });
     }
 }

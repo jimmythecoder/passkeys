@@ -1,11 +1,9 @@
 #!/usr/bin/env node
-import "source-map-support/register";
 import * as dotenv from "dotenv";
-import path = require("path");
 import * as cdk from "aws-cdk-lib";
 import { CdkStack } from "../lib/cdk-stack";
 
-dotenv.config({ path: path.resolve(__dirname, "../.env") });
+dotenv.config();
 
 export const env = {
     AWS_REGION: process.env.AWS_REGION!,
