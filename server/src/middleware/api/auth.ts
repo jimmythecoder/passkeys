@@ -156,17 +156,21 @@ const schema = {
 } as const;
 
 export const api: FastifyPluginCallback = (fastify, _, next) => {
-    fastify.post("/signout", (request, reply) => {
+    fastify.post("/signout", async (request, reply) => {
         try {
-            return request.session.delete();
+            request.session.delete();
+
+            return await reply.status(HttpStatusCode.NoContent).send({ message: "Signed out" });
         } catch (error) {
             return handleError(error, reply);
         }
     });
 
-    fastify.delete("/session", (request, reply) => {
+    fastify.delete("/session", async (request, reply) => {
         try {
-            return request.session.delete();
+            request.session.delete();
+
+            return await reply.status(HttpStatusCode.NoContent).send({ message: "Signed out" });
         } catch (error) {
             return handleError(error, reply);
         }

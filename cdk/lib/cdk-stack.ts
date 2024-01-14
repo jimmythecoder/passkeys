@@ -128,7 +128,6 @@ export class CdkStack extends cdk.Stack {
         });
 
         const apiHandler = new cdk.aws_lambda_nodejs.NodejsFunction(this, `passkeys-api`, {
-            // depsLockFilePath: `../server/package-lock.json`,
             entry: `../server/src/index.mts`,
             functionName: `passkeys-api`,
             description: `Passkeys API`,
@@ -151,6 +150,7 @@ export class CdkStack extends cdk.Stack {
                 RP_ID: process.env.RP_ID ?? "example.com",
                 RP_ORIGIN: process.env.RP_ORIGIN ?? "https://example.com",
                 SESSION_HEX_KEY: process.env.SESSION_HEX_KEY ?? "0xdeadbeef",
+                NODE_ENV: process.env.NODE_ENV ?? "production",
             },
         });
     }
