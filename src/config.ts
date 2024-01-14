@@ -6,6 +6,7 @@ export const ENDPOINTS = {
             getAllCredentails: "/api/auth/signin/passkey",
         },
         signout: "/api/auth/signout",
+        session: "/api/auth/session",
         register: {
             getCredentials: "/api/auth/register",
             verify: "/api/auth/register/verify",
@@ -18,8 +19,8 @@ export const ENDPOINTS = {
         authorizer: {
             basic: "/api/test/authorized",
             admin: "/api/test/authorized/admin",
-        }
-    }
+        },
+    },
 };
 
 export const API_URL = import.meta.env.API_BASE_URL ?? "";

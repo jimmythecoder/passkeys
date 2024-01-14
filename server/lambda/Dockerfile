@@ -16,7 +16,7 @@ CMD [ "index.handler" ]
 # curl "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{}'
 # aws ecr get-login-password --region ap-southeast-2 | docker login --username AWS --password-stdin 427820939238.dkr.ecr.ap-southeast-2.amazonaws.com
 # aws ecr create-repository --repository-name passkeys-api --region ap-southeast-2 --image-scanning-configuration scanOnPush=true --image-tag-mutability MUTABLE
-# docker tag docker-image:passkeys-api 427820939238.dkr.ecr.ap-southeast-2.amazonaws.com/passkeys-api:latest
+# docker tag passkeys-api 427820939238.dkr.ecr.ap-southeast-2.amazonaws.com/passkeys-api:latest
 # docker push 427820939238.dkr.ecr.ap-southeast-2.amazonaws.com/passkeys-api:latest
 
-# aws lambda create-function --function-name passkeys-api --package-type Image --code ImageUri=427820939238.dkr.ecr.ap-southeast-2.amazonaws.com/passkeys-api:latest --architectures arm64 --role arn:aws:iam::427820939238:role/lambda-ex
+# aws lambda create-function --cli-input-json file://lambda/config.json

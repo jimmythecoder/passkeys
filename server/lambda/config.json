@@ -1,0 +1,25 @@
+{
+    "FunctionName": "passkeys-api",
+    "Role": "arn:aws:iam::427820939238:role/lambda-ex",
+    "Code": {
+        "ImageUri": "427820939238.dkr.ecr.ap-southeast-2.amazonaws.com/passkeys-api:latest"
+    },
+    "Description": "A passkeys API",
+    "Timeout": 15,
+    "MemorySize": 512,
+    "Publish": true,
+    "PackageType": "Image",
+    "Environment": {
+        "Variables": {
+            "RP_ID": "passkeys.jharris.nz",
+            "RP_ORIGIN": "https://passkeys.jharris.nz",
+            "SESSION_HEX_KEY": "822754afdf5e74d7d682bd915a2b95bc10aa42e6f8872fd71f02330fefa2d077"
+        }
+    },
+    "Tags": {
+        "KeyName": "Passkeys"
+    },
+    "Architectures": [
+        "arm64"
+    ]
+}

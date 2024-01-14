@@ -1,7 +1,7 @@
 import "./Success.scss";
 import React, { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { post } from "@/utils/api";
+import { del } from "@/utils/api";
 import { ENDPOINTS } from "@/config";
 import { paths } from "@/Routes";
 import type { User, UserSession } from "@/types/user";
@@ -11,7 +11,7 @@ export type SuccessProps = {
 };
 
 export const Success: React.FC<React.PropsWithChildren<SuccessProps>> = (props) => {
-    const [user, setUser] = useState<User>({roles: []} as unknown as User);
+    const [user, setUser] = useState<User>({ roles: [] } as unknown as User);
     const [session, setSession] = useState<UserSession>({} as UserSession);
     const userData = sessionStorage.getItem("user");
     const sessionData = sessionStorage.getItem("session");
@@ -31,18 +31,17 @@ export const Success: React.FC<React.PropsWithChildren<SuccessProps>> = (props) 
     }, [userData, sessionData, navigate]);
 
     const handleSignout = async () => {
-
         try {
-            await post(ENDPOINTS.auth.signout);
+            await del(ENDPOINTS.auth.session, {});
 
             sessionStorage.removeItem("user");
             sessionStorage.removeItem("session");
 
             navigate(paths.signin);
-        } catch(error) {
+        } catch (error) {
             console.error(error);
         }
-    }
+    };
 
     return (
         <>
@@ -82,11 +81,15 @@ export const Success: React.FC<React.PropsWithChildren<SuccessProps>> = (props) 
                 </p>
 
                 <p className="m-t-2 m-b-2">
-                    <label className="divider"><span>OR</span></label>
+                    <label className="divider">
+                        <span>OR</span>
+                    </label>
                 </p>
 
                 <p className="centered">
-                    <button type="button" onClick={handleSignout} className="secondary small">Sign out</button>
+                    <button type="button" onClick={handleSignout} className="secondary small">
+                        Sign out
+                    </button>
                 </p>
             </main>
         </>

@@ -37,6 +37,8 @@ export class CdkStack extends cdk.Stack {
             defaultBehavior: {
                 origin: new cdk.aws_cloudfront_origins.S3Origin(webS3Bucket, {
                     originAccessIdentity: passkeysOAI,
+                    originShieldEnabled: true,
+                    originShieldRegion: config.AWS_REGION,
                 }),
                 allowedMethods: cdk.aws_cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
                 viewerProtocolPolicy: cdk.aws_cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
@@ -45,9 +47,9 @@ export class CdkStack extends cdk.Stack {
                     cookieBehavior: cdk.aws_cloudfront.CacheCookieBehavior.none(),
                     headerBehavior: cdk.aws_cloudfront.CacheHeaderBehavior.none(),
                     queryStringBehavior: cdk.aws_cloudfront.CacheQueryStringBehavior.none(),
-                    defaultTtl: cdk.Duration.minutes(2),
+                    defaultTtl: cdk.Duration.minutes(1),
                     minTtl: cdk.Duration.minutes(0),
-                    maxTtl: cdk.Duration.minutes(2),
+                    maxTtl: cdk.Duration.minutes(1),
                     enableAcceptEncodingBrotli: true,
                     enableAcceptEncodingGzip: true,
                 }),
@@ -63,6 +65,8 @@ export class CdkStack extends cdk.Stack {
                 "/assets/*": {
                     origin: new cdk.aws_cloudfront_origins.S3Origin(webS3Bucket, {
                         originAccessIdentity: passkeysOAI,
+                        originShieldEnabled: true,
+                        originShieldRegion: config.AWS_REGION,
                     }),
                     allowedMethods: cdk.aws_cloudfront.AllowedMethods.ALLOW_ALL,
                     viewerProtocolPolicy: cdk.aws_cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
@@ -79,18 +83,6 @@ export class CdkStack extends cdk.Stack {
                     }),
                 },
             },
-            errorResponses: [
-                {
-                    httpStatus: 404,
-                    responsePagePath: "/index.html",
-                    responseHttpStatus: 200,
-                },
-                {
-                    httpStatus: 403,
-                    responsePagePath: "/index.html",
-                    responseHttpStatus: 200,
-                },
-            ],
             certificate,
             defaultRootObject: "index.html",
             minimumProtocolVersion: cdk.aws_cloudfront.SecurityPolicyProtocol.TLS_V1_2_2021,

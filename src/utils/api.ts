@@ -59,8 +59,12 @@ const jsonAPI = (apiURL: string, method = "POST") => {
 
 export const post = jsonAPI(API_URL, "POST");
 export const get = jsonAPI(API_URL, "GET");
+export const del = jsonAPI(API_URL, "DELETE");
+export const put = jsonAPI(API_URL, "PUT");
 
 export default {
     get,
     post,
+    del,
+    put,
 };

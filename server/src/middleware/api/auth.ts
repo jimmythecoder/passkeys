@@ -156,7 +156,15 @@ const schema = {
 } as const;
 
 export const api: FastifyPluginCallback = (fastify, _, next) => {
-    fastify.get("/signout", (request, reply) => {
+    fastify.post("/signout", (request, reply) => {
+        try {
+            return request.session.delete();
+        } catch (error) {
+            return handleError(error, reply);
+        }
+    });
+
+    fastify.delete("/session", (request, reply) => {
         try {
             return request.session.delete();
         } catch (error) {
@@ -252,13 +260,13 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
 
     fastify.post<{ Body: FromSchema<typeof schema.request.signin.verify> }>("/signin/verify", async (request, reply) => {
         try {
-            const user = request.session.get("user") as User;
+            const userSession = request.session.get("user") as User;
 
-            if (!user) {
+            if (!userSession) {
                 throw new UserNotFound("User not found");
             }
 
-            const userId = user.id;
+            const userId = userSession.id;
             const challenge = new AuthChallenge(request.session.get("challenge"));
 
             if (!challenge.currentChallenge) {
@@ -290,20 +298,20 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
                 throw new VerificationError("Verification failed");
             }
 
-            const userModel = await UserModel.get(authenticator.userId);
+            const user = await UserModel.get(authenticator.userId);
 
-            request.session.set("user", userModel);
+            request.session.set("user", user);
             request.session.set("isSignedIn", true);
 
-            console.debug("User verified", userModel.userName);
+            console.debug("User verified", user.userName);
 
             const session = new UserSession({
-                userId: userModel.id,
+                userId: user.id,
                 issuedAt: Date.now(),
                 expiresAt: Date.now() + SESSION_LIFETIME,
             });
 
-            return await reply.status(HttpStatusCode.Created).send({ userModel, session });
+            return await reply.status(HttpStatusCode.Created).send({ user, session });
         } catch (error) {
             return await handleError(error, reply);
         } finally {

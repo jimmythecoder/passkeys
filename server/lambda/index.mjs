@@ -85470,7 +85470,14 @@ function handleError(error, reply) {
   return reply.status(400 /* BadRequest */).send(error);
 }
 var api = (fastify, _, next) => {
-  fastify.get("/signout", (request, reply) => {
+  fastify.post("/signout", (request, reply) => {
+    try {
+      return request.session.delete();
+    } catch (error) {
+      return handleError(error, reply);
+    }
+  });
+  fastify.delete("/session", (request, reply) => {
     try {
       return request.session.delete();
     } catch (error) {
@@ -85544,11 +85551,11 @@ var api = (fastify, _, next) => {
   });
   fastify.post("/signin/verify", async (request, reply) => {
     try {
-      const user = request.session.get("user");
-      if (!user) {
+      const userSession = request.session.get("user");
+      if (!userSession) {
         throw new UserNotFound("User not found");
       }
-      const userId = user.id;
+      const userId = userSession.id;
       const challenge = new AuthChallenge(request.session.get("challenge"));
       if (!challenge.currentChallenge) {
         throw new ChallengeError("Missing challenge, sign-in again");
@@ -85572,16 +85579,16 @@ var api = (fastify, _, next) => {
       if (!verification.verified) {
         throw new VerificationError("Verification failed");
       }
-      const userModel = await UserModel.get(authenticator.userId);
-      request.session.set("user", userModel);
+      const user = await UserModel.get(authenticator.userId);
+      request.session.set("user", user);
       request.session.set("isSignedIn", true);
-      console.debug("User verified", userModel.userName);
+      console.debug("User verified", user.userName);
       const session2 = new UserSession({
-        userId: userModel.id,
+        userId: user.id,
         issuedAt: Date.now(),
         expiresAt: Date.now() + SESSION_LIFETIME
       });
-      return await reply.status(201 /* Created */).send({ userModel, session: session2 });
+      return await reply.status(201 /* Created */).send({ user, session: session2 });
     } catch (error) {
       return await handleError(error, reply);
     } finally {
@@ -85777,16 +85784,6 @@ var init = async () => {
         console.debug("\u{1F510} MetadataService initialized");
       });
     }
-    console.debug(
-      JSON.stringify({
-        endpoint: process.env.AWS_DYNAMODB_ENDPOINT,
-        region: process.env.AWS_REGION,
-        credentials: {
-          accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-          secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
-        }
-      })
-    );
     new import_dynamoose4.default.aws.ddb.DynamoDB({
       endpoint: process.env.AWS_DYNAMODB_ENDPOINT,
       region: process.env.AWS_REGION,
