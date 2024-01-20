@@ -12,7 +12,13 @@ export const env = {
     API_DOMAIN: process.env.API_DOMAIN!,
     AWS_DOMAIN_HOSTED_ZONE_ID: process.env.AWS_DOMAIN_HOSTED_ZONE_ID!,
     CERTIFICATE_ARN: process.env.CERTIFICATE_ARN!,
+    RP_ID: process.env.RP_ID ?? "example.com",
+    RP_ORIGIN: process.env.RP_ORIGIN ?? "https://example.com",
+    SESSION_HEX_KEY: process.env.SESSION_HEX_KEY ?? "0xdeadbeef",
+    NODE_ENV: process.env.NODE_ENV ?? "production",
 } as const;
+
+export type ENV = typeof env;
 
 const app = new cdk.App();
 

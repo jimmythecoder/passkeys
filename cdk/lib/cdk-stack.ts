@@ -7,6 +7,15 @@ export class CdkStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props: cdk.StackProps, config: ENV) {
         super(scope, id, props);
 
+        this.tags.setTag("app", "passkeys");
+        this.tags.setTag("AppManagerCFNStackKey", "passkeys-cdk-stack");
+
+        const logGroup = new cdk.aws_logs.LogGroup(this, `passkeys-log-group`, {
+            logGroupName: `/passkeys`,
+            removalPolicy: cdk.RemovalPolicy.DESTROY,
+            retention: cdk.aws_logs.RetentionDays.ONE_WEEK,
+        });
+
         const webS3Bucket = new cdk.aws_s3.Bucket(this, "passkey-s3-bucket", {
             bucketName: config.WEB_DOMAIN,
             blockPublicAccess: cdk.aws_s3.BlockPublicAccess.BLOCK_ALL,
@@ -25,16 +34,17 @@ export class CdkStack extends cdk.Stack {
             zoneName: config.ROOT_DOMAIN,
         });
 
-        // const apiCertificate = new cdk.aws_certificatemanager.Certificate(this, "certificate", {
-        //     domainName: config.ROOT_DOMAIN,
-        //     subjectAlternativeNames: [config.API_DOMAIN],
-        //     validation: cdk.aws_certificatemanager.CertificateValidation.fromDns(zone),
-        // });
+        const apiCertificate = new cdk.aws_certificatemanager.Certificate(this, "certificate", {
+            domainName: config.ROOT_DOMAIN,
+            subjectAlternativeNames: [config.API_DOMAIN],
+            validation: cdk.aws_certificatemanager.CertificateValidation.fromDns(zone),
+        });
 
         const certificate = cdk.aws_certificatemanager.Certificate.fromCertificateArn(this, `passkeys-certificate`, config.CERTIFICATE_ARN);
 
         const passkeysCDN = new cdk.aws_cloudfront.Distribution(this, `cdn`, {
             comment: `CDN for ${config.WEB_DOMAIN}`,
+            enableLogging: true,
             defaultBehavior: {
                 origin: new cdk.aws_cloudfront_origins.S3Origin(webS3Bucket, {
                     originAccessIdentity: passkeysOAI,
@@ -131,6 +141,8 @@ export class CdkStack extends cdk.Stack {
             entry: `../server/src/index.mts`,
             functionName: `passkeys-api`,
             description: `Passkeys API`,
+            logGroup,
+            tracing: cdk.aws_lambda.Tracing.ACTIVE,
             memorySize: 512,
             timeout: cdk.Duration.seconds(15),
             role: lambdaRole,
@@ -147,11 +159,64 @@ export class CdkStack extends cdk.Stack {
                 externalModules: ["aws-sdk", "sodium-native"],
             },
             environment: {
-                RP_ID: process.env.RP_ID ?? "example.com",
-                RP_ORIGIN: process.env.RP_ORIGIN ?? "https://example.com",
-                SESSION_HEX_KEY: process.env.SESSION_HEX_KEY ?? "0xdeadbeef",
-                NODE_ENV: process.env.NODE_ENV ?? "production",
+                RP_ID: config.RP_ID,
+                RP_ORIGIN: config.RP_ORIGIN,
+                SESSION_HEX_KEY: config.SESSION_HEX_KEY,
+                NODE_ENV: config.NODE_ENV,
             },
+        });
+
+        const apiGateway = new cdk.aws_apigatewayv2.HttpApi(this, `passkeys-api-gateway`, {
+            apiName: `passkeys-api`,
+            createDefaultStage: false,
+        });
+
+        const apiDomainName = new cdk.aws_apigatewayv2.DomainName(this, `api-domain-name`, {
+            domainName: config.API_DOMAIN,
+            certificate: apiCertificate,
+        });
+
+        const stage = apiGateway.addStage("default", {
+            autoDeploy: true,
+            domainMapping: {
+                domainName: apiDomainName,
+            },
+            throttle: {
+                rateLimit: 10,
+                burstLimit: 100,
+            },
+        });
+
+        const defaultStage = stage?.node.defaultChild as cdk.aws_apigatewayv2.CfnStage;
+
+        defaultStage.accessLogSettings = {
+            destinationArn: logGroup.logGroupArn,
+            format: JSON.stringify({
+                requestId: "$context.requestId",
+                ip: "$context.identity.sourceIp",
+                caller: "$context.identity.caller",
+                user: "$context.identity.user",
+                requestTime: "$context.requestTime",
+                httpMethod: "$context.httpMethod",
+                routeKey: "$context.routeKey",
+                status: "$context.status",
+                protocol: "$context.protocol",
+                responseLength: "$context.responseLength",
+            }),
+        };
+
+        apiGateway.addRoutes({
+            path: "/{proxy+}",
+            methods: [cdk.aws_apigatewayv2.HttpMethod.ANY],
+            integration: new cdk.aws_apigatewayv2_integrations.HttpLambdaIntegration("api-integration", apiHandler),
+        });
+
+        new cdk.aws_route53.ARecord(this, `api-domain-record`, {
+            zone,
+            target: cdk.aws_route53.RecordTarget.fromAlias(
+                new cdk.aws_route53_targets.ApiGatewayv2DomainProperties(apiDomainName.regionalDomainName, apiDomainName.regionalHostedZoneId),
+            ),
+            recordName: "passkeys-api",
         });
     }
 }

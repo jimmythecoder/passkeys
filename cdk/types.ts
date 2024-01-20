@@ -5,4 +5,8 @@ export type ENV = {
     WEB_DOMAIN: string;
     API_DOMAIN: string;
     CERTIFICATE_ARN: string;
+    RP_ID: string;
+    RP_ORIGIN: string;
+    SESSION_HEX_KEY: string;
+    NODE_ENV: string;
 };

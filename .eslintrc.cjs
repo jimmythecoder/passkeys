@@ -23,7 +23,6 @@ module.exports = {
     plugins: ["react-refresh", "prettier"],
     rules: {
         "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
-        "no-console": ["error", { allow: ["debug", "warn", "error"] }],
         "no-new": "off",
         "import/extensions": ["error", "ignorePackages", { "": "never", ts: "never", tsx: "never" }], // Allow imports without extensions
     },
