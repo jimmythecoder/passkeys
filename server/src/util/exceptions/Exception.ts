@@ -1,10 +1,10 @@
-export class CustomError extends Error {
+export class Exception extends Error {
     constructor(
-        message: string,
+        public message: string,
         public code: number,
+        public name: string,
     ) {
         super(message);
-        this.name = this.constructor.name;
     }
 
     toJSON() {
@@ -20,4 +20,4 @@ export class CustomError extends Error {
     }
 }
 
-export default CustomError;
+export default Exception;

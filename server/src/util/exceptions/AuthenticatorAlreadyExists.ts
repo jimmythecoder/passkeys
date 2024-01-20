@@ -1,12 +1,12 @@
 import { HttpStatusCode } from "../constants";
-import { CustomError } from "./CustomError";
+import { Exception } from "./Exception";
 
 /**
  * This error is thrown when a user attempts to register an authenticator that is already registered.
  */
-export class AuthenticatorAlreadyExists extends CustomError {
+export class AuthenticatorAlreadyExists extends Exception {
     constructor(message: string) {
-        super(message, HttpStatusCode.Fobidden);
+        super(message, HttpStatusCode.Fobidden, "AuthenticatorAlreadyExists");
     }
 }
 

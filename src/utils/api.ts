@@ -1,4 +1,5 @@
 import { API_URL } from "@/config";
+import * as xray from "@/utils/xray";
 import * as Exceptions from "@/exceptions";
 
 function isEmpty(value: unknown) {
@@ -9,24 +10,35 @@ const jsonAPI = (apiURL: string, method = "POST") => {
     return async <T, U = void>(path: string, data?: U, signal?: AbortSignal) => {
         const body = !isEmpty(data) && method !== "GET" ? JSON.stringify(data) : null;
         const url = `${apiURL}${path}`;
+        const segment = xray.startSegment(path);
+        const traceHeader = xray.getTraceHeader(segment);
 
         const response = await fetch(url, {
             signal,
             method,
             headers: {
                 "Content-Type": "application/json",
+                "X-Amzn-Trace-Id": traceHeader,
             },
             credentials: "include",
             body,
         });
 
-        if (!response.ok) {
-            const isJSON = response.headers.get("content-type")?.includes("application/json");
+        if (response.headers.has("X-Amzn-Trace-Id")) {
+            console.debug("X-Ray trace header", response.headers.get("X-Amzn-Trace-Id"));
+            const closeSegment = xray.endSegment(segment);
+            console.debug("X-Ray segment closed", closeSegment);
+        }
 
+        const isJSON = response.headers.get("content-type")?.includes("application/json");
+
+        if (!response.ok) {
             if (isJSON) {
                 const error = (await response.json()) as Exceptions.Exception;
 
                 switch (error.name) {
+                    case "InvalidStateError":
+                        throw new Exceptions.AuthenticatorAlreadyExists(error);
                     case "AuthenticatorAlreadyExists":
                         throw new Exceptions.AuthenticatorAlreadyExists(error);
                     case "AuthenticatorMismatch":
@@ -53,7 +65,9 @@ const jsonAPI = (apiURL: string, method = "POST") => {
             throw new Error(await response.text());
         }
 
-        return (await response.json()) as T;
+        if (response.status === 204) return {} as unknown as T;
+
+        return isJSON ? ((await response.json()) as T) : (response.text() as unknown as T);
     };
 };
 

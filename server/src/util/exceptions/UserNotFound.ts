@@ -1,9 +1,9 @@
 import { HttpStatusCode } from "../constants";
-import { CustomError } from "./CustomError";
+import { Exception } from "./Exception";
 
-export class UserNotFound extends CustomError {
+export class UserNotFound extends Exception {
     constructor(message: string) {
-        super(message, HttpStatusCode.NotFound);
+        super(message, HttpStatusCode.NotFound, "UserNotFound");
     }
 }
 

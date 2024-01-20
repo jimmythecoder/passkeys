@@ -24,6 +24,7 @@ module.exports = {
     rules: {
         "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
         "no-new": "off",
+        "no-console": "off",
         "import/extensions": ["error", "ignorePackages", { "": "never", ts: "never", tsx: "never" }], // Allow imports without extensions
     },
 };

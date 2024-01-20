@@ -1,9 +1,9 @@
 import { HttpStatusCode } from "../constants";
-import { CustomError } from "./CustomError";
+import { Exception } from "./Exception";
 
-export class Unauthorized extends CustomError {
+export class Unauthorized extends Exception {
     constructor(message: string) {
-        super(message, HttpStatusCode.Unauthorized);
+        super(message, HttpStatusCode.Unauthorized, "Unauthorized");
     }
 }
 

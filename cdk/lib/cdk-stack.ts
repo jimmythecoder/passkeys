@@ -115,9 +115,9 @@ export class CdkStack extends cdk.Stack {
         new cdk.aws_s3_deployment.BucketDeployment(this, `passkeys-bucket-deployment`, {
             sources: [cdk.aws_s3_deployment.Source.asset("../dist")],
             destinationBucket: webS3Bucket,
-            cacheControl: [cdk.aws_s3_deployment.CacheControl.setPublic(), cdk.aws_s3_deployment.CacheControl.maxAge(cdk.Duration.days(30))],
             distribution: passkeysCDN,
             distributionPaths: ["/*"],
+            prune: true,
         });
 
         const cloudFrontTarget = new cdk.aws_route53_targets.CloudFrontTarget(passkeysCDN);

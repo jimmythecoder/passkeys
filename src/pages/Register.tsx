@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, NavLink } from "react-router-dom";
+import { startRegistration, browserSupportsWebAuthn } from "@simplewebauthn/browser";
 import { post } from "@/utils/api";
 import { ENDPOINTS } from "@/config";
-import { startRegistration, browserSupportsWebAuthn } from "@simplewebauthn/browser";
 import { paths } from "@/Routes";
 import "./Register.scss";
 import type { Auth } from "@/types/api";
+import { Exception } from "@/exceptions";
 
 enum FormInputs {
     displayName = "displayName",
@@ -13,8 +14,7 @@ enum FormInputs {
 }
 
 export const Register: React.FC<React.PropsWithChildren> = () => {
-    const isWebAuthnSupported = browserSupportsWebAuthn();
-    const [error, setError] = useState(isWebAuthnSupported ? "" : "WebAuthn is not supported in this browser");
+    const [errorMsg, setErrorMsg] = useState<Exception>();
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
@@ -27,10 +27,13 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
          */
         async register(displayName: string, userName: string) {
             setLoading(true);
-            setError("");
+            setErrorMsg(undefined);
 
             try {
-                const registrationOptions = await post<Auth.Register.GetCredentials.Response, Auth.Register.GetCredentials.Request>(ENDPOINTS.auth.register.getCredentials, { displayName, userName });
+                const registrationOptions = await post<Auth.Register.GetCredentials.Response, Auth.Register.GetCredentials.Request>(
+                    ENDPOINTS.auth.register.getCredentials,
+                    { displayName, userName },
+                );
 
                 // Pass the options to the authenticator and wait for a response
                 const attResp = await startRegistration(registrationOptions);
@@ -43,18 +46,13 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
 
                 console.debug("User registered");
                 return true;
-            } catch (error) {
-                if (error instanceof Error) {
-                    if (error.name === "InvalidStateError") {
-                        console.error("Error: Authenticator was probably already registered by user", error.message);
-                    } else {
-                        console.error(error.message);
-                    }
-
-                    setError(error.message);
+            } catch (apiError) {
+                if (apiError instanceof Exception) {
+                    setErrorMsg(apiError);
+                    console.error(apiError);
                 } else {
-                    setError("Unknown server error");
-                    console.error(error);
+                    setErrorMsg(new Exception(apiError as Error));
+                    console.error(apiError);
                 }
             }
 
@@ -65,7 +63,7 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setLoading(true);
-        setError("");
+        setErrorMsg(undefined);
 
         try {
             const formData = new FormData(e.currentTarget);
@@ -80,13 +78,19 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
                 navigate(paths.registerSuccess);
             }
         } catch (err) {
-            if (err instanceof Error) {
-                setError(err.message);
+            if (err instanceof Exception) {
+                setErrorMsg(err);
                 console.error(err);
             }
         }
         setLoading(false);
     };
+
+    useEffect(() => {
+        if (!browserSupportsWebAuthn()) {
+            setErrorMsg(new Exception({ message: "WebAuthn is not supported in this browser" }));
+        }
+    }, []);
 
     return (
         <>
@@ -100,21 +104,36 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
             </header>
             <main>
                 <form onSubmit={handleSubmit} name="login">
-                    {error && (
+                    {errorMsg && (
                         <div className="element form-error">
-                            <p>{error}</p>
+                            <p>{errorMsg.message}</p>
                         </div>
                     )}
 
                     <div className="element">
                         <label htmlFor="displayName">Name</label>
-                        <input type="text" name={FormInputs.displayName} id={FormInputs.displayName} autoFocus autoComplete="name" placeholder="Full name" required />
+                        <input
+                            type="text"
+                            name={FormInputs.displayName}
+                            id={FormInputs.displayName}
+                            autoFocus
+                            autoComplete="name"
+                            placeholder="Full name"
+                            required
+                        />
                         <p className="error">Your name is required</p>
                     </div>
 
                     <div className="element">
                         <label htmlFor="username">Email address</label>
-                        <input type="email" name={FormInputs.username} id={FormInputs.username} autoComplete="email" placeholder="example@domain.com" required />
+                        <input
+                            type="email"
+                            name={FormInputs.username}
+                            id={FormInputs.username}
+                            autoComplete="email"
+                            placeholder="example@domain.com"
+                            required
+                        />
                         <p className="error">Your email is not valid</p>
                     </div>
 

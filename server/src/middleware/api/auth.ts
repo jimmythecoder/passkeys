@@ -20,7 +20,7 @@ import {
     VerificationError,
     ChallengeError,
     AuthenticatorNotFound,
-    CustomError,
+    Exception,
     AuthenticatorMismatch,
 } from "@/util/exceptions";
 import { HttpStatusCode } from "@/util/constants";
@@ -34,9 +34,9 @@ const RP_NAME = process.env.RP_NAME ?? "canhazpasskey";
 const USE_METADATA_SERVICE = process.env.USE_METADATA_SERVICE === "true";
 
 function handleError(error: unknown, reply: FastifyReply) {
-    if (error instanceof CustomError) {
+    if (error instanceof Exception) {
         console.error(error.toString());
-        return reply.status(error.code).send(error);
+        return reply.status(error.code).send(error.toJSON());
     }
 
     if (error instanceof Error) {

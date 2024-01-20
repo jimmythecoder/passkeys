@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 import type { FastifyPluginCallback } from "fastify";
-import { Unauthorized, CustomError } from "@/util/exceptions";
+import { Unauthorized, Exception } from "@/util/exceptions";
 import { HttpStatusCode } from "@/util/constants";
 
 dotenv.config();
@@ -14,7 +14,7 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
 
             return reply.send({ status: "ok" });
         } catch (error) {
-            if (error instanceof CustomError) {
+            if (error instanceof Exception) {
                 console.error("Authorization failed", error.message);
                 return reply.status(error.code).send(error);
             }
@@ -36,7 +36,7 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
 
             return reply.send({ status: "ok" });
         } catch (error) {
-            if (error instanceof CustomError) {
+            if (error instanceof Exception) {
                 console.error("Authorization failed", error.message);
                 return reply.status(error.code).send(error);
             }

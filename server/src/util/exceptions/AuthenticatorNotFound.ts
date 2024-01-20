@@ -1,9 +1,9 @@
 import { HttpStatusCode } from "../constants";
-import { CustomError } from "./CustomError";
+import { Exception } from "./Exception";
 
-export class AuthenticatorNotFound extends CustomError {
+export class AuthenticatorNotFound extends Exception {
     constructor(message: string) {
-        super(message, HttpStatusCode.Fobidden);
+        super(message, HttpStatusCode.Fobidden, "AuthenticatorNotFound");
     }
 }
 

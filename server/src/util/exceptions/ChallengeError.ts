@@ -1,9 +1,9 @@
 import { HttpStatusCode } from "../constants";
-import { CustomError } from "./CustomError";
+import { Exception } from "./Exception";
 
-export class ChallengeError extends CustomError {
+export class ChallengeError extends Exception {
     constructor(message: string) {
-        super(message, HttpStatusCode.Fobidden);
+        super(message, HttpStatusCode.Fobidden, "ChallengeError");
     }
 }
 

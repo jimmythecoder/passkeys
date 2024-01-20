@@ -1,12 +1,12 @@
 import { HttpStatusCode } from "../constants";
-import { CustomError } from "./CustomError";
+import { Exception } from "./Exception";
 
 /**
  * No session was found for the user. Usually a cookie / domain issue.
  */
-export class SessionNotFound extends CustomError {
+export class SessionNotFound extends Exception {
     constructor(message: string) {
-        super(message, HttpStatusCode.Unauthorized);
+        super(message, HttpStatusCode.Unauthorized, "SessionNotFound");
     }
 }
 
