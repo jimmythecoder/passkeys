@@ -8,7 +8,7 @@ export class CdkStack extends cdk.Stack {
         super(scope, id, props);
 
         this.tags.setTag("app", "passkeys");
-        this.tags.setTag("AppManagerCFNStackKey", "passkeys-cdk-stack");
+        this.tags.setTag("AppManagerCFNStackKey", this.stackName);
 
         const logGroup = new cdk.aws_logs.LogGroup(this, `passkeys-log-group`, {
             logGroupName: `/passkeys`,
