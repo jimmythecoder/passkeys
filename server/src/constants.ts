@@ -8,4 +8,9 @@ export enum HttpStatusCode {
     NoContent = 204,
 }
 
+/**
+ * The number of failed login attempts before the user is locked out.
+ */
+export const MAX_FAILED_LOGIN_ATTEMPTS = 5;
+
 export default { HttpStatusCode };

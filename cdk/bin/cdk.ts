@@ -16,6 +16,8 @@ export const env = {
     RP_ORIGIN: process.env.RP_ORIGIN ?? "https://example.com",
     SESSION_HEX_KEY: process.env.SESSION_HEX_KEY ?? "0xdeadbeef",
     NODE_ENV: process.env.NODE_ENV ?? "production",
+    JWK_PUBLIC_KEY: process.env.JWK_PUBLIC_KEY ?? "/passkeys/jwk/public",
+    JWK_PRIVATE_KEY: process.env.JWK_PRIVATE_KEY ?? "/passkeys/jwk/private",
 } as const;
 
 export type ENV = typeof env;

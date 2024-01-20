@@ -9,21 +9,14 @@ import {
 } from "@simplewebauthn/server";
 import dynamoose from "dynamoose";
 import { isoBase64URL } from "@simplewebauthn/server/helpers";
+import { sign, encrypt } from "@/util/jwt";
 import { UserModel, User } from "@/models/user";
 import { UserSession } from "@/models/userSession";
 import { AuthChallenge } from "@/models/challenge";
 import { Authenticator, AuthenticatorModel } from "@/models/authenticators";
-import {
-    UserNotFound,
-    UserAlreadyExists,
-    ValidationError,
-    VerificationError,
-    ChallengeError,
-    AuthenticatorNotFound,
-    Exception,
-    AuthenticatorMismatch,
-} from "@/util/exceptions";
-import { HttpStatusCode } from "@/util/constants";
+import * as Exceptions from "@/exceptions";
+import { HttpStatusCode } from "@/constants";
+import { schema } from "@/middleware/api/auth.schema";
 
 dotenv.config();
 
@@ -34,7 +27,7 @@ const RP_NAME = process.env.RP_NAME ?? "canhazpasskey";
 const USE_METADATA_SERVICE = process.env.USE_METADATA_SERVICE === "true";
 
 function handleError(error: unknown, reply: FastifyReply) {
-    if (error instanceof Exception) {
+    if (error instanceof Exceptions.Exception) {
         console.error(error.toString());
         return reply.status(error.code).send(error.toJSON());
     }
@@ -47,113 +40,6 @@ function handleError(error: unknown, reply: FastifyReply) {
     console.error("[ERROR]", error);
     return reply.status(HttpStatusCode.BadRequest).send(error);
 }
-
-const schema = {
-    request: {
-        signin: {
-            getCredentails: {
-                type: "object",
-                properties: {
-                    /**
-                     * Users can sign in with a username or email address
-                     */
-                    userName: { type: "string" },
-                },
-                required: ["userName"],
-            },
-            passkey: {
-                type: "object",
-                properties: {
-                    /**
-                     * Autenticator ids
-                     */
-                    authenticators: { type: "array", items: { type: "string" } },
-                },
-                required: ["authenticators"],
-            },
-            verify: {
-                type: "object",
-                properties: {
-                    id: { type: "string" },
-                    rawId: { type: "string" },
-                    response: {
-                        type: "object",
-                        properties: {
-                            clientDataJSON: { type: "string" },
-                            authenticatorData: { type: "string" },
-                            signature: { type: "string" },
-                            userHandle: { type: "string" },
-                        },
-                        required: ["clientDataJSON", "authenticatorData", "signature"],
-                    },
-                    authenticatorAttachment: { enum: ["cross-platform", "platform"] },
-                    clientExtensionResults: {
-                        type: "object",
-                        properties: {
-                            appid: { type: "boolean" },
-                            credProps: {
-                                type: "object",
-                                properties: {
-                                    rk: { type: "boolean" },
-                                },
-                            },
-                            hmacCreateSecret: { type: "boolean" },
-                        },
-                        required: [],
-                    },
-                    type: { enum: ["public-key"] },
-                },
-                required: ["rawId", "id", "response", "clientExtensionResults", "type"],
-            },
-        },
-        register: {
-            getCredentials: {
-                type: "object",
-                properties: {
-                    userName: { type: "string" },
-                    displayName: { type: "string" },
-                },
-                required: ["userName", "displayName"],
-            },
-            verify: {
-                type: "object",
-                properties: {
-                    id: { type: "string" },
-                    rawId: { type: "string" },
-                    response: {
-                        type: "object",
-                        properties: {
-                            clientDataJSON: { type: "string" },
-                            attestationObject: { type: "string" },
-                            authenticatorData: { type: "string" },
-                            transports: { type: "array", items: { enum: ["ble", "hybrid", "internal", "nfc", "usb"] } },
-                            publicKeyAlgorithm: { type: "number" },
-                            publicKey: { type: "string" },
-                        },
-                        required: ["clientDataJSON", "attestationObject"],
-                    },
-                    authenticatorAttachment: { enum: ["cross-platform", "platform"] },
-                    clientExtensionResults: {
-                        type: "object",
-                        properties: {
-                            appid: { type: "boolean" },
-                            credProps: {
-                                type: "object",
-                                properties: {
-                                    rk: { type: "boolean" },
-                                },
-                            },
-                            hmacCreateSecret: { type: "boolean" },
-                        },
-                        required: [],
-                    },
-                    type: { enum: ["public-key"] },
-                },
-                required: ["rawId", "id", "response", "clientExtensionResults", "type"],
-            },
-        },
-    },
-} as const;
 
 export const api: FastifyPluginCallback = (fastify, _, next) => {
     fastify.post("/signout", async (request, reply) => {
@@ -181,13 +67,13 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
             const { userName } = request.body;
 
             if (!userName) {
-                throw new ValidationError("UserName is required");
+                throw new Exceptions.ValidationError("UserName is required");
             }
 
             const [userEntity] = await UserModel.query("userName").eq(userName).exec();
 
             if (!userEntity) {
-                throw new UserNotFound(`User not found`);
+                throw new Exceptions.UserNotFound(`User not found`);
             }
 
             const user = new User(userEntity);
@@ -195,7 +81,11 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
             const userAuthenticators = await AuthenticatorModel.query("userId").eq(user.id).exec();
 
             if (!userAuthenticators.length) {
-                throw new AuthenticatorNotFound(`User has no registered authenticators`);
+                throw new Exceptions.AuthenticatorNotFound(`User has no registered authenticators`);
+            }
+
+            if (user.isLocked) {
+                throw new Exceptions.UserAccountLocked(`User is locked out`);
             }
 
             const options = await generateAuthenticationOptions({
@@ -216,6 +106,20 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
 
             console.debug("User signing in", user.userName);
 
+            const jwt = await sign({ sub: user.userName, challenge: challenge.challenge }, fastify.jwks.private, {
+                issuer: fastify.jwks.issuer,
+                audience: fastify.jwks.audience,
+                expiration: challenge.expires / 1000,
+            });
+
+            reply.setCookie("jwt", jwt, {
+                path: "/",
+                httpOnly: true,
+                secure: false,
+                sameSite: "strict",
+                expires: new Date(challenge.expires),
+            });
+
             return await reply.status(HttpStatusCode.OK).send(options);
         } catch (error) {
             return handleError(error, reply);
@@ -229,14 +133,14 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
             });
 
             if (!credentials || !credentials.length) {
-                throw new ValidationError("No authenticators provided");
+                throw new Exceptions.ValidationError("No authenticators provided");
             }
 
             const filter = new dynamoose.Condition().filter("credentialID").in(credentials);
             const userAuthenticators = await AuthenticatorModel.scan(filter).exec();
 
             if (!userAuthenticators.length) {
-                throw new AuthenticatorNotFound(`No matching authenticators found`);
+                throw new Exceptions.AuthenticatorNotFound(`No matching authenticators found`);
             }
 
             const options = await generateAuthenticationOptions({
@@ -267,26 +171,26 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
             const userSession = request.session.get("user") as User;
 
             if (!userSession) {
-                throw new UserNotFound("User not found");
+                throw new Exceptions.UserNotFound("User not found");
             }
 
             const userId = userSession.id;
             const challenge = new AuthChallenge(request.session.get("challenge"));
 
             if (!challenge.currentChallenge) {
-                throw new ChallengeError("Missing challenge, sign-in again");
+                throw new Exceptions.ChallengeError("Missing challenge, sign-in again");
             }
 
             const credentialID = isoBase64URL.toBuffer(request.body.rawId);
 
             if (!credentialID) {
-                throw new ValidationError("Missing credential ID");
+                throw new Exceptions.ValidationError("Missing credential ID");
             }
 
             const [authenticator] = await AuthenticatorModel.query("credentialID").eq(credentialID).and().where("userId").eq(userId).exec();
 
             if (!authenticator) {
-                throw new AuthenticatorMismatch(`Authenticator not found for userID`);
+                throw new Exceptions.AuthenticatorMismatch(`Authenticator not found for userID`);
             }
 
             const verification = await verifyAuthenticationResponse({
@@ -299,7 +203,7 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
             });
 
             if (!verification.verified) {
-                throw new VerificationError("Verification failed");
+                throw new Exceptions.VerificationError("Verification failed");
             }
 
             const user = await UserModel.get(authenticator.userId);
@@ -329,17 +233,17 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
             const { userName, displayName } = request.body;
 
             if (!displayName) {
-                throw new ValidationError("Name is required", "displayName");
+                throw new Exceptions.ValidationError("Name is required", "displayName");
             }
 
             if (!userName) {
-                throw new ValidationError("UserName is required", "userName");
+                throw new Exceptions.ValidationError("UserName is required", "userName");
             }
 
             const users = await UserModel.query("userName").eq(userName).limit(1).exec();
 
             if (users.length) {
-                throw new UserAlreadyExists(`User ${userName} already exists`);
+                throw new Exceptions.UserAlreadyExists(`User ${userName} already exists`);
             }
 
             const user = new User({
@@ -366,7 +270,7 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
                 })),
                 authenticatorSelection: {
                     // Require authenticators with a resident key (built into to laptop / phone)
-                    residentKey: "required",
+                    residentKey: "preferred",
 
                     /**
                      * Verify the user is present via a biometric sensor (TouchID, FaceID, Windows Hello, etc.)
@@ -378,7 +282,7 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
                      * @value platform: Use built-in authenticators, typically a laptop or phone with a TPM chip or Secure Enclave, it will use TouchID, FaceID, or Windows Hello
                      * @value cross-platform: Prefer authenticators without a resident key, but allow authenticators with one, typically a USB Key
                      */
-                    authenticatorAttachment: "platform", // Passkey
+                    // authenticatorAttachment: "cross-platform", // Passkey
                 },
             });
 
@@ -401,7 +305,7 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
             const challenge = new AuthChallenge(request.session.get("challenge"));
 
             if (!challenge.isValid()) {
-                throw new ChallengeError("Challenge not found or expired, re-register");
+                throw new Exceptions.ChallengeError("Challenge not found or expired, re-register");
             }
 
             const verification = await verifyRegistrationResponse({
@@ -413,11 +317,11 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
             });
 
             if (!verification.verified) {
-                throw new VerificationError("Verification failed");
+                throw new Exceptions.VerificationError("Verification failed");
             }
 
             if (!verification.registrationInfo) {
-                throw new VerificationError("Missing registration info");
+                throw new Exceptions.VerificationError("Missing registration info");
             }
 
             await UserModel.create(user);

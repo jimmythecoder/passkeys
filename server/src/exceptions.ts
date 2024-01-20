@@ -1,0 +1,12 @@
+export { AuthenticatorAlreadyExists } from "@/exceptions/AuthenticatorAlreadyExists";
+export { AuthenticatorMismatch } from "@/exceptions/AuthenticatorMismatch";
+export { AuthenticatorNotFound } from "@/exceptions/AuthenticatorNotFound";
+export { ChallengeError } from "@/exceptions/ChallengeError";
+export { Exception } from "@/exceptions/Exception";
+export { SessionNotFound } from "@/exceptions/SessionNotFound";
+export { Unauthorized } from "@/exceptions/Unauthorized";
+export { UserAlreadyExists } from "@/exceptions/UserAlreadyExists";
+export { UserNotFound } from "@/exceptions/UserNotFound";
+export { ValidationError } from "@/exceptions/ValidationError";
+export { VerificationError } from "@/exceptions/VerificationError";
+export { UserAccountLocked } from "@/exceptions/UserAccountLocked";

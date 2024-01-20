@@ -53,3 +53,5 @@ export const endSegment = (segment: Segment): Segment => {
         in_progress: false,
     };
 };
+
+export const HTTP_HEADER = "X-Amzn-Trace-Id";

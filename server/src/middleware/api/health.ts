@@ -1,4 +1,3 @@
-
 import type { FastifyPluginCallback } from "fastify";
 
 export const api: FastifyPluginCallback = (fastify, _, next) => {

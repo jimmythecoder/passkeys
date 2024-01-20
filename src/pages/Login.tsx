@@ -74,15 +74,13 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
                 post<Auth.Signin.GetCredentials.Response, Auth.Signin.GetCredentials.ConditionalUIRequest>(
                     ENDPOINTS.auth.signin.getAllCredentails,
                     { authenticators },
-                    abortController.signal,
+                    { signal: abortController.signal },
                 )
                     .then((options) => {
                         return startAuthentication(options, true).then((attResp) => {
-                            return post<Auth.Signin.Verify.Response, Auth.Signin.Verify.Request>(
-                                ENDPOINTS.auth.signin.verify,
-                                attResp,
-                                abortController.signal,
-                            );
+                            return post<Auth.Signin.Verify.Response, Auth.Signin.Verify.Request>(ENDPOINTS.auth.signin.verify, attResp, {
+                                signal: abortController.signal,
+                            });
                         });
                     })
                     .then((response) => {

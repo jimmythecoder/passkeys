@@ -1,6 +1,7 @@
 import Fastify from "fastify";
 import helmet from "@fastify/helmet";
 import session from "@fastify/secure-session";
+import { SSMClient, GetParametersCommand } from "@aws-sdk/client-ssm";
 import dotenv from "dotenv";
 import { MetadataService } from "@simplewebauthn/server";
 import dynamoose from "dynamoose";
@@ -53,6 +54,30 @@ const init = async () => {
                 secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
             },
         });
+
+        // Get SSM paramters from AWS
+        const ssm = new SSMClient({ region: process.env.AWS_REGION });
+        const cmd = new GetParametersCommand({
+            Names: [process.env.JWK_PRIVATE_KEY!, process.env.JWK_PUBLIC_KEY!],
+            WithDecryption: true,
+        });
+
+        const data = await ssm.send(cmd);
+
+        if (!data.Parameters) {
+            throw new Error("No private key found");
+        }
+
+        const [privateKey, publicKey] = data.Parameters;
+
+        const jwks = {
+            public: JSON.parse(Buffer.from(publicKey.Value!, "hex").toString("utf8")),
+            private: JSON.parse(Buffer.from(privateKey.Value!, "hex").toString("utf8")),
+            issuer: process.env.JWT_ISSUER,
+            audience: process.env.JWT_AUDIENCE,
+        };
+
+        app.decorate("jwks", jwks);
     });
 
     return app;

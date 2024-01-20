@@ -1,5 +1,6 @@
 import dynamoose from "dynamoose";
 import { Item } from "dynamoose/dist/Item";
+import { MAX_FAILED_LOGIN_ATTEMPTS } from "@/constants";
 
 export type UserType = {
     id: string;
@@ -7,6 +8,8 @@ export type UserType = {
     displayName: string;
     roles: string[];
     isVerified?: boolean;
+    failedLoginAttempts: number;
+    isLocked: boolean;
 };
 
 export enum UserRoles {
@@ -27,12 +30,22 @@ export class User implements User {
 
     public isVerified?: boolean;
 
+    public failedLoginAttempts: number;
+
     constructor(user: Partial<UserType> = {}) {
         this.id = user.id ?? crypto.randomUUID();
         this.userName = user.userName ?? this.id;
         this.displayName = user.displayName ?? "Anonymous";
         this.isVerified = user.isVerified ?? false;
         this.roles = user.roles ?? [UserRoles.Basic];
+        this.failedLoginAttempts = user.failedLoginAttempts ?? 0;
+    }
+
+    /**
+     * Whether the user is locked out.
+     */
+    get isLocked() {
+        return this.failedLoginAttempts >= MAX_FAILED_LOGIN_ATTEMPTS;
     }
 }
 
@@ -57,6 +70,10 @@ export const UserSchema = new dynamoose.Schema({
     roles: {
         type: Array,
         schema: [String],
+    },
+    failedLoginAttempts: {
+        type: Number,
+        default: 0,
     },
 });
 

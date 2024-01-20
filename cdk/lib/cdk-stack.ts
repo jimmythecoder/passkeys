@@ -29,6 +29,16 @@ export class CdkStack extends cdk.Stack {
 
         webS3Bucket.grantRead(passkeysOAI);
 
+        const jwkPublicKey = cdk.aws_ssm.StringParameter.fromSecureStringParameterAttributes(this, `jwk-ssm`, {
+            parameterName: config.JWK_PUBLIC_KEY,
+            version: 1,
+        });
+
+        const jwkPrivateKey = cdk.aws_ssm.StringParameter.fromSecureStringParameterAttributes(this, `jwk-ssm`, {
+            parameterName: config.JWK_PRIVATE_KEY,
+            version: 1,
+        });
+
         const zone = cdk.aws_route53.HostedZone.fromHostedZoneAttributes(this, `domain-zone`, {
             hostedZoneId: config.AWS_DOMAIN_HOSTED_ZONE_ID,
             zoneName: config.ROOT_DOMAIN,
@@ -149,6 +159,12 @@ export class CdkStack extends cdk.Stack {
             runtime: cdk.aws_lambda.Runtime.NODEJS_20_X,
             architecture: cdk.aws_lambda.Architecture.ARM_64,
             handler: "handler",
+            adotInstrumentation: {
+                execWrapper: cdk.aws_lambda.AdotLambdaExecWrapper.REGULAR_HANDLER,
+                layerVersion: cdk.aws_lambda.AdotLayerVersion.fromJavaScriptSdkLayerVersion(
+                    cdk.aws_lambda.AdotLambdaLayerJavaScriptSdkVersion.LATEST,
+                ),
+            },
             bundling: {
                 platform: "node",
                 format: OutputFormat.ESM,
@@ -156,15 +172,20 @@ export class CdkStack extends cdk.Stack {
                 nodeModules: ["sodium-native"],
                 banner: `import { createRequire } from 'module';const require = createRequire(import.meta.url);`,
                 minify: true,
-                externalModules: ["aws-sdk", "sodium-native"],
+                externalModules: ["aws-sdk", "@aws-sdk/client-ssm", "sodium-native"],
             },
             environment: {
                 RP_ID: config.RP_ID,
                 RP_ORIGIN: config.RP_ORIGIN,
                 SESSION_HEX_KEY: config.SESSION_HEX_KEY,
                 NODE_ENV: config.NODE_ENV,
+                JWK_PUBLIC_KEY: config.JWK_PUBLIC_KEY,
+                JWK_PRIVATE_KEY: config.JWK_PRIVATE_KEY,
             },
         });
+
+        jwkPublicKey.grantRead(apiHandler);
+        jwkPrivateKey.grantRead(apiHandler);
 
         const apiGateway = new cdk.aws_apigatewayv2.HttpApi(this, `passkeys-api-gateway`, {
             apiName: `passkeys-api`,
