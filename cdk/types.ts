@@ -9,6 +9,7 @@ export type ENV = {
     RP_ORIGIN: string;
     SESSION_HEX_KEY: string;
     NODE_ENV: string;
-    JWK_PUBLIC_KEY: string;
+    JWKS_PUBLIC_KEYS: string;
     JWK_PRIVATE_KEY: string;
+    SESSION_COOKIE_DOMAIN: string;
 };

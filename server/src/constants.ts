@@ -6,6 +6,7 @@ export enum HttpStatusCode {
     NotFound = 404,
     Fobidden = 403,
     NoContent = 204,
+    InternalServerError = 500,
 }
 
 /**

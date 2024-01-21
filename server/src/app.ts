@@ -1,36 +1,76 @@
 import Fastify from "fastify";
 import helmet from "@fastify/helmet";
-import session from "@fastify/secure-session";
+import cookie from "@fastify/cookie";
+import type { FastifyCookieOptions } from "@fastify/cookie";
 import { SSMClient, GetParametersCommand } from "@aws-sdk/client-ssm";
 import dotenv from "dotenv";
 import { MetadataService } from "@simplewebauthn/server";
 import dynamoose from "dynamoose";
-import { api as authApi } from "./middleware/api/auth";
-import { api as healthApi } from "./middleware/api/health";
-import { api as testApi } from "./middleware/api/test";
+import { api as authApi } from "@/middleware/api/auth";
+import { api as healthApi } from "@/middleware/api/health";
+import { api as testApi } from "@/middleware/api/test";
+import { jwtStatelessSession } from "@/plugins/jwt-stateless-session";
 
 dotenv.config();
 
 const USE_METADATA_SERVICE = process.env.USE_METADATA_SERVICE === "true";
 const IS_PROD = process.env.NODE_ENV === "production";
-const SESSION_KEY = process.env.SESSION_HEX_KEY ?? "0xdeadbeef";
 
 const init = async () => {
     const app = Fastify({
         logger: true,
     });
 
+    // Get SSM paramters from AWS
+    const ssm = new SSMClient({ region: process.env.AWS_REGION });
+    const cmd = new GetParametersCommand({
+        Names: [process.env.JWK_PRIVATE_KEY!, process.env.JWKS_PUBLIC_KEYS!],
+        WithDecryption: true,
+    });
+
+    const data = await ssm.send(cmd);
+
+    if (!data.Parameters) {
+        throw new Error("No private key found");
+    }
+
+    const [privateKey, publicKeys] = data.Parameters;
+
+    const jwtConfig = {
+        keys: {
+            public: JSON.parse(publicKeys.Value!),
+            private: JSON.parse(privateKey.Value!),
+        },
+        issuer: process.env.JWT_ISSUER ?? "https://localhost:3000",
+        audience: process.env.JWT_AUDIENCE ?? "localhost:3000",
+    };
+
     await app.register(helmet);
-    await app.register(session, {
-        sessionName: process.env.SESSION_NAME,
-        cookieName: process.env.SESSION_COOKIE_NAME,
-        key: Buffer.from(SESSION_KEY, "hex"),
+    await app.register(cookie, {
+        secret: "secret",
+    } as FastifyCookieOptions);
+    await app.register(jwtStatelessSession, {
+        jwt: {
+            issuer: jwtConfig.issuer,
+            audience: jwtConfig.audience,
+            sign: {
+                key: jwtConfig.keys.private,
+                algorithm: "EdDSA",
+                expiresIn: "2h",
+            },
+            verify: {
+                keys: jwtConfig.keys.public,
+                algorithms: ["EdDSA"],
+            },
+        },
         cookie: {
-            path: "/",
+            name: process.env.SESSION_COOKIE_NAME ?? "session",
+            path: "/api",
             httpOnly: true,
             secure: IS_PROD,
-            maxAge: parseInt(process.env.SESSION_LIFETIME ?? "86400000", 10),
+            maxAge: parseInt(process.env.SESSION_LIFETIME ?? "7200", 10),
             sameSite: "strict",
+            domain: process.env.SESSION_COOKIE_DOMAIN ?? "localhost",
         },
     });
 
@@ -54,30 +94,6 @@ const init = async () => {
                 secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
             },
         });
-
-        // Get SSM paramters from AWS
-        const ssm = new SSMClient({ region: process.env.AWS_REGION });
-        const cmd = new GetParametersCommand({
-            Names: [process.env.JWK_PRIVATE_KEY!, process.env.JWK_PUBLIC_KEY!],
-            WithDecryption: true,
-        });
-
-        const data = await ssm.send(cmd);
-
-        if (!data.Parameters) {
-            throw new Error("No private key found");
-        }
-
-        const [privateKey, publicKey] = data.Parameters;
-
-        const jwks = {
-            public: JSON.parse(Buffer.from(publicKey.Value!, "hex").toString("utf8")),
-            private: JSON.parse(Buffer.from(privateKey.Value!, "hex").toString("utf8")),
-            issuer: process.env.JWT_ISSUER,
-            audience: process.env.JWT_AUDIENCE,
-        };
-
-        app.decorate("jwks", jwks);
     });
 
     return app;

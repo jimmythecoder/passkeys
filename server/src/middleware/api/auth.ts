@@ -9,13 +9,14 @@ import {
 } from "@simplewebauthn/server";
 import dynamoose from "dynamoose";
 import { isoBase64URL } from "@simplewebauthn/server/helpers";
-import { sign, encrypt } from "@/util/jwt";
+import { sign } from "@/util/jwt";
 import { UserModel, User } from "@/models/user";
 import { UserSession } from "@/models/userSession";
 import { AuthChallenge } from "@/models/challenge";
 import { Authenticator, AuthenticatorModel } from "@/models/authenticators";
 import * as Exceptions from "@/exceptions";
 import { HttpStatusCode } from "@/constants";
+import { MAX_AUTHENTICATORS } from "@/config";
 import { schema } from "@/middleware/api/auth.schema";
 
 dotenv.config();
@@ -34,11 +35,11 @@ function handleError(error: unknown, reply: FastifyReply) {
 
     if (error instanceof Error) {
         console.error("[ERROR]", error.message);
-        return reply.status(HttpStatusCode.BadRequest).send(error);
+        return reply.status(HttpStatusCode.InternalServerError).send(error);
     }
 
     console.error("[ERROR]", error);
-    return reply.status(HttpStatusCode.BadRequest).send(error);
+    return reply.status(HttpStatusCode.InternalServerError).send(error);
 }
 
 export const api: FastifyPluginCallback = (fastify, _, next) => {
@@ -99,26 +100,28 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
                 userVerification: "preferred",
             });
 
-            const challenge = new AuthChallenge({ challenge: options.challenge });
-
-            request.session.set("user", user);
-            request.session.set("challenge", challenge);
+            const challenge = new AuthChallenge({
+                challenge: options.challenge,
+                authenticators: userAuthenticators.map((authenticator) => authenticator.id),
+            });
 
             console.debug("User signing in", user.userName);
+            request.session.set("sub", user.userName);
+            request.session.set("challenge", challenge.toJSON());
 
-            const jwt = await sign({ sub: user.userName, challenge: challenge.challenge }, fastify.jwks.private, {
-                issuer: fastify.jwks.issuer,
-                audience: fastify.jwks.audience,
-                expiration: challenge.expires / 1000,
-            });
+            // const jwt = await sign({ sub: user.userName, ...challenge.toJSON() }, fastify.jwks.private, {
+            //     issuer: fastify.jwks.issuer,
+            //     audience: fastify.jwks.audience,
+            //     expiration: challenge.expires / 1000,
+            // });
 
-            reply.setCookie("jwt", jwt, {
-                path: "/",
-                httpOnly: true,
-                secure: false,
-                sameSite: "strict",
-                expires: new Date(challenge.expires),
-            });
+            // reply.setCookie("jwt", jwt, {
+            //     path: "/api",
+            //     httpOnly: true,
+            //     secure: false,
+            //     sameSite: "strict",
+            //     expires: new Date(challenge.expires),
+            // });
 
             return await reply.status(HttpStatusCode.OK).send(options);
         } catch (error) {
@@ -136,11 +139,26 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
                 throw new Exceptions.ValidationError("No authenticators provided");
             }
 
+            if (credentials.length > MAX_AUTHENTICATORS) {
+                throw new Exceptions.ValidationError("Too many authenticators provided, max 10");
+            }
+
             const filter = new dynamoose.Condition().filter("credentialID").in(credentials);
             const userAuthenticators = await AuthenticatorModel.scan(filter).exec();
 
             if (!userAuthenticators.length) {
                 throw new Exceptions.AuthenticatorNotFound(`No matching authenticators found`);
+            }
+
+            const userModel = await UserModel.get(userAuthenticators[0].userId);
+            const user = new User(userModel);
+
+            if (!user) {
+                throw new Exceptions.UserNotFound(`User not found`);
+            }
+
+            if (user.isLocked) {
+                throw new Exceptions.UserAccountLocked(`User is locked out`);
             }
 
             const options = await generateAuthenticationOptions({
@@ -153,12 +171,28 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
                 userVerification: "preferred",
             });
 
-            const challenge = new AuthChallenge({ challenge: options.challenge });
+            const challenge = new AuthChallenge({
+                challenge: options.challenge,
+                authenticators: userAuthenticators.map((authenticator) => authenticator.id),
+            });
 
-            request.session.set("user", new User({ id: userAuthenticators[0].userId }));
-            request.session.set("challenge", challenge);
+            console.debug("User signing in with Conditional UI", userAuthenticators.map((authenticator) => authenticator.id).join(", "));
 
-            console.debug("User signing in with Conditional UI", userAuthenticators[0].userId);
+            request.session.set("challenge", challenge.toJSON());
+
+            // const jwt = await sign(challenge.toJSON(), fastify.jwks.private, {
+            //     issuer: fastify.jwks.issuer,
+            //     audience: fastify.jwks.audience,
+            //     expiration: challenge.expires / 1000,
+            // });
+
+            // reply.setCookie("jwt", jwt, {
+            //     path: "/api",
+            //     httpOnly: true,
+            //     secure: false,
+            //     sameSite: "strict",
+            //     expires: new Date(challenge.expires),
+            // });
 
             return await reply.status(HttpStatusCode.OK).send(options);
         } catch (error) {
@@ -168,17 +202,10 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
 
     fastify.post<{ Body: FromSchema<typeof schema.request.signin.verify> }>("/signin/verify", async (request, reply) => {
         try {
-            const userSession = request.session.get("user") as User;
+            const jwtToken = request.session.get("challenge");
 
-            if (!userSession) {
-                throw new Exceptions.UserNotFound("User not found");
-            }
-
-            const userId = userSession.id;
-            const challenge = new AuthChallenge(request.session.get("challenge"));
-
-            if (!challenge.currentChallenge) {
-                throw new Exceptions.ChallengeError("Missing challenge, sign-in again");
+            if (!jwtToken) {
+                throw new Exceptions.ValidationError("Missing auth token");
             }
 
             const credentialID = isoBase64URL.toBuffer(request.body.rawId);
@@ -187,29 +214,52 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
                 throw new Exceptions.ValidationError("Missing credential ID");
             }
 
-            const [authenticator] = await AuthenticatorModel.query("credentialID").eq(credentialID).and().where("userId").eq(userId).exec();
+            const [authenticator] = await AuthenticatorModel.query("credentialID").eq(credentialID).exec();
 
             if (!authenticator) {
-                throw new Exceptions.AuthenticatorMismatch(`Authenticator not found for userID`);
+                throw new Exceptions.AuthenticatorMismatch(`Authenticator not found`);
             }
 
-            const verification = await verifyAuthenticationResponse({
-                response: request.body,
-                expectedChallenge: challenge.currentChallenge,
-                expectedOrigin: RP_ORIGIN,
-                expectedRPID: RP_ID,
-                authenticator,
-                requireUserVerification: true,
-            });
+            // Is this authenticator the same as the one paired with the challenge?
+            if (!(jwtToken.authenticators as string[]).includes(authenticator.id)) {
+                throw new Exceptions.AuthenticatorMismatch(`Unknown authenticator used`);
+            }
 
-            if (!verification.verified) {
+            const challenge = new AuthChallenge({ challenge: jwtToken.challenge as string });
+
+            if (!challenge.currentChallenge) {
+                throw new Exceptions.ChallengeError("Missing challenge, sign-in again");
+            }
+
+            const userModel = await UserModel.get(authenticator.userId);
+
+            if (!userModel) {
+                throw new Exceptions.UserNotFound(`User not found`);
+            }
+
+            const user = new User(userModel);
+
+            if (user.isLocked) {
+                throw new Exceptions.UserAccountLocked(`User is locked out`);
+            }
+
+            try {
+                const verification = await verifyAuthenticationResponse({
+                    response: request.body,
+                    expectedChallenge: challenge.currentChallenge,
+                    expectedOrigin: RP_ORIGIN,
+                    expectedRPID: RP_ID,
+                    authenticator,
+                    requireUserVerification: true,
+                });
+
+                if (!verification.verified) {
+                    throw new Exceptions.VerificationError("Verification failed");
+                }
+            } catch (error) {
+                await UserModel.update({ id: user.id }, { failedLoginAttempts: user.failedLoginAttempts + 1 });
                 throw new Exceptions.VerificationError("Verification failed");
             }
-
-            const user = await UserModel.get(authenticator.userId);
-
-            request.session.set("user", user);
-            request.session.set("isSignedIn", true);
 
             console.debug("User verified", user.userName);
 
@@ -218,6 +268,10 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
                 issuedAt: Date.now(),
                 expiresAt: Date.now() + SESSION_LIFETIME,
             });
+
+            request.session.reset();
+            request.session.set("sub", user.id);
+            request.session.set("roles", user.roles);
 
             return await reply.status(HttpStatusCode.Created).send({ user, session });
         } catch (error) {
@@ -269,7 +323,6 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
                     transports: authenticator.transports,
                 })),
                 authenticatorSelection: {
-                    // Require authenticators with a resident key (built into to laptop / phone)
                     residentKey: "preferred",
 
                     /**
@@ -278,11 +331,10 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
                     userVerification: "preferred", // Prefer authenticators with biometric sensors
 
                     /**
-                     * Passkeys require a resident key to be stored on the authenticator that is multi-device compatible e.g. not a Yuibkey
-                     * @value platform: Use built-in authenticators, typically a laptop or phone with a TPM chip or Secure Enclave, it will use TouchID, FaceID, or Windows Hello
-                     * @value cross-platform: Prefer authenticators without a resident key, but allow authenticators with one, typically a USB Key
+                     * Require authenticators with a built-in platform authenticator (TouchID, FaceID, Windows Hello, etc.) or external authenticator (YubiKey, etc.)
+                     * @default none (no platform authenticator required, both can be used)
                      */
-                    // authenticatorAttachment: "cross-platform", // Passkey
+                    // authenticatorAttachment: "cross-platform",
                 },
             });
 
@@ -343,8 +395,9 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
                 expiresAt: Date.now() + SESSION_LIFETIME,
             });
 
-            request.session.set("user", user);
-            request.session.set("isSignedIn", true);
+            request.session.reset();
+            request.session.set("sub", user.id);
+            request.session.set("roles", user.roles);
 
             console.debug("New user registered", user.userName);
 

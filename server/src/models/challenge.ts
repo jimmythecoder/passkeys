@@ -5,10 +5,16 @@ export class AuthChallenge {
 
     public readonly expires: number;
 
+    /**
+     * List of authenticator IDs that can use this challenge.
+     */
+    public readonly authenticators: string[];
+
     constructor(authChallenge: Partial<AuthChallenge> = {}) {
         this.challenge = authChallenge.challenge ?? crypto.randomUUID();
         this.maxAge = authChallenge.maxAge ?? this.maxAge;
         this.expires = authChallenge.expires ?? Date.now() + this.maxAge * 1000;
+        this.authenticators = authChallenge.authenticators ?? [];
     }
 
     get currentChallenge() {
@@ -25,6 +31,13 @@ export class AuthChallenge {
 
     isChallengeExpired() {
         return Date.now() > this.expires;
+    }
+
+    toJSON() {
+        return {
+            challenge: this.challenge,
+            authenticators: this.authenticators,
+        };
     }
 }
 

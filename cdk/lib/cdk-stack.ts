@@ -29,8 +29,8 @@ export class CdkStack extends cdk.Stack {
 
         webS3Bucket.grantRead(passkeysOAI);
 
-        const jwkPublicKey = cdk.aws_ssm.StringParameter.fromSecureStringParameterAttributes(this, `jwk-ssm`, {
-            parameterName: config.JWK_PUBLIC_KEY,
+        const jwksPublicKeys = cdk.aws_ssm.StringParameter.fromSecureStringParameterAttributes(this, `jwk-ssm`, {
+            parameterName: config.JWKS_PUBLIC_KEYS,
             version: 1,
         });
 
@@ -179,12 +179,13 @@ export class CdkStack extends cdk.Stack {
                 RP_ORIGIN: config.RP_ORIGIN,
                 SESSION_HEX_KEY: config.SESSION_HEX_KEY,
                 NODE_ENV: config.NODE_ENV,
-                JWK_PUBLIC_KEY: config.JWK_PUBLIC_KEY,
+                JWKS_PUBLIC_KEYS: config.JWKS_PUBLIC_KEYS,
                 JWK_PRIVATE_KEY: config.JWK_PRIVATE_KEY,
+                SESSION_COOKIE_DOMAIN: config.SESSION_COOKIE_DOMAIN,
             },
         });
 
-        jwkPublicKey.grantRead(apiHandler);
+        jwksPublicKeys.grantRead(apiHandler);
         jwkPrivateKey.grantRead(apiHandler);
 
         const apiGateway = new cdk.aws_apigatewayv2.HttpApi(this, `passkeys-api-gateway`, {

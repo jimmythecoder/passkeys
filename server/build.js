@@ -17,5 +17,5 @@ esbuild.build({
             const require = createRequire(import.meta.url);`,
     },
     entryPoints: ["./src/index.mts"],
-    external: ["aws-sdk", "sodium-native"],
+    external: ["aws-sdk", "@aws-sdk/client-ssm"],
 });

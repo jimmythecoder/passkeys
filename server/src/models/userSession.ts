@@ -1,5 +1,3 @@
-import * as jose from "jose";
-
 export type UserSessionType = {
     /**
      * The user ID of the user that owns this session.
@@ -47,22 +45,6 @@ export class UserSession implements IUserSession {
         this.userId = userSession.userId;
         this.issuedAt = userSession.issuedAt;
         this.expiresAt = userSession.expiresAt;
-    }
-
-    async generateToken(jwk: JsonWebKey) {
-        const key = await crypto.subtle.importKey("jwk", jwk, { name: jwk.alg ?? this.algorithm, namedCurve: "Ed25519" }, true, ["sign"]);
-
-        const jwt = await new jose.SignJWT({
-            userId: this.userId,
-        })
-            .setProtectedHeader({ alg: jwk.alg ?? this.algorithm })
-            .setIssuedAt()
-            .setIssuer("https://passkeys.jharris.nz")
-            .setAudience("https://passkeys.jharris.nz")
-            .setExpirationTime("2h")
-            .sign(key);
-
-        return jwt;
     }
 
     get isExpired() {

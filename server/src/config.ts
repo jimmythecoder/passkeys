@@ -5,4 +5,5 @@ export const JWT_ALGORITHM = "EdDSA";
  */
 export const JWT_CHALLENGE_EXPIRATION = 360;
 export const MAX_FAILED_LOGIN_ATTEMPTS = 5;
+export const MAX_AUTHENTICATORS = 7;
 export const USER_SESSION_EXPIRATION = 360;
