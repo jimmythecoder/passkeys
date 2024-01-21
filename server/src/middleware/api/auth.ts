@@ -9,10 +9,9 @@ import {
 } from "@simplewebauthn/server";
 import dynamoose from "dynamoose";
 import { isoBase64URL } from "@simplewebauthn/server/helpers";
-import { sign } from "@/util/jwt";
 import { UserModel, User } from "@/models/user";
 import { UserSession } from "@/models/userSession";
-import { AuthChallenge } from "@/models/challenge";
+import { AuthChallenge, SessionChallenge } from "@/models/challenge";
 import { Authenticator, AuthenticatorModel } from "@/models/authenticators";
 import * as Exceptions from "@/exceptions";
 import { HttpStatusCode } from "@/constants";
@@ -109,20 +108,6 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
             request.session.set("sub", user.userName);
             request.session.set("challenge", challenge.toJSON());
 
-            // const jwt = await sign({ sub: user.userName, ...challenge.toJSON() }, fastify.jwks.private, {
-            //     issuer: fastify.jwks.issuer,
-            //     audience: fastify.jwks.audience,
-            //     expiration: challenge.expires / 1000,
-            // });
-
-            // reply.setCookie("jwt", jwt, {
-            //     path: "/api",
-            //     httpOnly: true,
-            //     secure: false,
-            //     sameSite: "strict",
-            //     expires: new Date(challenge.expires),
-            // });
-
             return await reply.status(HttpStatusCode.OK).send(options);
         } catch (error) {
             return handleError(error, reply);
@@ -180,20 +165,6 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
 
             request.session.set("challenge", challenge.toJSON());
 
-            // const jwt = await sign(challenge.toJSON(), fastify.jwks.private, {
-            //     issuer: fastify.jwks.issuer,
-            //     audience: fastify.jwks.audience,
-            //     expiration: challenge.expires / 1000,
-            // });
-
-            // reply.setCookie("jwt", jwt, {
-            //     path: "/api",
-            //     httpOnly: true,
-            //     secure: false,
-            //     sameSite: "strict",
-            //     expires: new Date(challenge.expires),
-            // });
-
             return await reply.status(HttpStatusCode.OK).send(options);
         } catch (error) {
             return handleError(error, reply);
@@ -202,7 +173,7 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
 
     fastify.post<{ Body: FromSchema<typeof schema.request.signin.verify> }>("/signin/verify", async (request, reply) => {
         try {
-            const jwtToken = request.session.get("challenge");
+            const jwtToken = request.session.get<SessionChallenge>("challenge");
 
             if (!jwtToken) {
                 throw new Exceptions.ValidationError("Missing auth token");
@@ -221,11 +192,11 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
             }
 
             // Is this authenticator the same as the one paired with the challenge?
-            if (!(jwtToken.authenticators as string[]).includes(authenticator.id)) {
+            if (!jwtToken.authenticators.includes(authenticator.id)) {
                 throw new Exceptions.AuthenticatorMismatch(`Unknown authenticator used`);
             }
 
-            const challenge = new AuthChallenge({ challenge: jwtToken.challenge as string });
+            const challenge = new AuthChallenge({ challenge: jwtToken.challenge });
 
             if (!challenge.currentChallenge) {
                 throw new Exceptions.ChallengeError("Missing challenge, sign-in again");

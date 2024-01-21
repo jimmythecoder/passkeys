@@ -41,4 +41,9 @@ export class AuthChallenge {
     }
 }
 
+export type SessionChallenge = {
+    challenge: string;
+    authenticators: string[];
+};
+
 export default AuthChallenge;
