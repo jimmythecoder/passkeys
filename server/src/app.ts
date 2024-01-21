@@ -2,10 +2,10 @@ import Fastify from "fastify";
 import helmet from "@fastify/helmet";
 import cookie from "@fastify/cookie";
 import type { FastifyCookieOptions } from "@fastify/cookie";
-import { SSMClient, GetParametersCommand } from "@aws-sdk/client-ssm";
 import dotenv from "dotenv";
 import { MetadataService } from "@simplewebauthn/server";
 import dynamoose from "dynamoose";
+import { getSSMParameters } from "@/util/ssm";
 import { api as authApi } from "@/middleware/api/auth";
 import { api as healthApi } from "@/middleware/api/health";
 import { api as testApi } from "@/middleware/api/test";
@@ -21,29 +21,7 @@ const init = async () => {
         logger: true,
     });
 
-    // Get SSM paramters from AWS
-    const ssm = new SSMClient({ region: process.env.AWS_REGION });
-    const cmd = new GetParametersCommand({
-        Names: [process.env.JWK_PRIVATE_KEY!, process.env.JWKS_PUBLIC_KEYS!],
-        WithDecryption: true,
-    });
-
-    const data = await ssm.send(cmd);
-
-    if (!data.Parameters) {
-        throw new Error("No private key found");
-    }
-
-    const [privateKey, publicKeys] = data.Parameters;
-
-    const jwtConfig = {
-        keys: {
-            public: JSON.parse(publicKeys.Value!),
-            private: JSON.parse(privateKey.Value!),
-        },
-        issuer: process.env.JWT_ISSUER ?? "https://localhost:3000",
-        audience: process.env.JWT_AUDIENCE ?? "localhost:3000",
-    };
+    const [privateKey, publicKeys] = await getSSMParameters([process.env.JWK_PRIVATE_KEY!, process.env.JWKS_PUBLIC_KEYS!]);
 
     await app.register(helmet);
     await app.register(cookie, {
@@ -51,15 +29,15 @@ const init = async () => {
     } as FastifyCookieOptions);
     await app.register(jwtStatelessSession, {
         jwt: {
-            issuer: jwtConfig.issuer,
-            audience: jwtConfig.audience,
+            issuer: process.env.JWT_ISSUER ?? "https://localhost:3000",
+            audience: process.env.JWT_AUDIENCE ?? "localhost:3000",
             sign: {
-                key: jwtConfig.keys.private,
+                key: JSON.parse(privateKey.Value!),
                 algorithm: "EdDSA",
                 expiresIn: "2h",
             },
             verify: {
-                keys: jwtConfig.keys.public,
+                keys: JSON.parse(publicKeys.Value!),
                 algorithms: ["EdDSA"],
             },
         },
