@@ -35,8 +35,19 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
                     { displayName, userName },
                 );
 
+                performance.mark("startRegister");
+
                 // Pass the options to the authenticator and wait for a response
                 const attResp = await startRegistration(registrationOptions);
+
+                performance.mark("endRegister");
+                performance.measure("register", "startRegister", "endRegister");
+
+                window.gtag("event", "register", {
+                    event_category: "webauthn",
+                    event_label: "register",
+                    value: performance.getEntriesByName("register")[0].duration,
+                });
 
                 const response = await post<Auth.Register.Verify.Response, Auth.Register.Verify.Request>(ENDPOINTS.auth.register.verify, attResp);
 

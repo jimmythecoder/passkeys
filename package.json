@@ -13,6 +13,7 @@
   "dependencies": {
     "@simplewebauthn/browser": "^8.3.4",
     "@simplewebauthn/typescript-types": "^8.3.4",
+    "@types/gtag.js": "^0.0.18",
     "@types/jsonwebtoken": "^9.0.5",
     "@types/node": "^20.10.6",
     "@vitejs/plugin-basic-ssl": "^1.0.2",

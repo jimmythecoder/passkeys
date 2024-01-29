@@ -22,7 +22,7 @@
         "paths": {
             "@/*": ["./src/*"]
         },
-        "types": ["@simplewebauthn/typescript-types"]
+        "types": ["@simplewebauthn/typescript-types", "@types/gtag.js"]
     },
     "include": ["src"],
     "references": [{ "path": "./tsconfig.node.json" }]

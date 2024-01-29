@@ -63,49 +63,6 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
         if (!browserSupportsWebAuthn()) {
             setError(new Exception({ message: "WebAuthn is not supported in this browser" }));
         }
-
-        const abortController = new AbortController();
-
-        if (useConditionalUI) {
-            const authenticators = JSON.parse(localStorage.getItem("authenticators") ?? "[]") as string[];
-
-            if (authenticators && authenticators.length) {
-                console.debug("Conditional UI login", authenticators);
-                post<Auth.Signin.GetCredentials.Response, Auth.Signin.GetCredentials.ConditionalUIRequest>(
-                    ENDPOINTS.auth.signin.getAllCredentails,
-                    { authenticators },
-                    { signal: abortController.signal },
-                )
-                    .then((options) => {
-                        return startAuthentication(options, true).then((attResp) => {
-                            return post<Auth.Signin.Verify.Response, Auth.Signin.Verify.Request>(ENDPOINTS.auth.signin.verify, attResp, {
-                                signal: abortController.signal,
-                            });
-                        });
-                    })
-                    .then((response) => {
-                        sessionStorage.setItem("user", JSON.stringify(response.user));
-                        sessionStorage.setItem("session", JSON.stringify(response.session));
-                        console.debug("Conditional UI login success");
-                        navigate(paths.signinSuccess);
-                    })
-                    .catch((err) => {
-                        if (err instanceof DOMException && err.name === "AbortError") {
-                            return;
-                        }
-
-                        if (err instanceof Exception) {
-                            setError(err);
-                        }
-
-                        console.error(err);
-                    });
-            }
-        }
-
-        return () => {
-            abortController.abort();
-        };
     }, [navigate, useConditionalUI]);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
