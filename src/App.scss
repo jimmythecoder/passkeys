@@ -1,16 +1,29 @@
 :root {
     --font-family--heading: "Open Sans", system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     --font-family--body: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    --font-size-small: 0.8rem;
+    --color-primary: hsl(193.73, 85.57%, 19.02%);
+    --color-secondary: hsl(194.26, 82.43%, 29.02%);
+    --color-tertiary: hsl(189.71, 43.04%, 69.02%);
+    --color-neutral: hsl(194.26, 10%, 90%);
+    --color-warning: hsl(44.93, 93.78%, 44.12%);
+    --color-danger: hsl(345.21, 93.78%, 44.12%);
+    --color-white: hsl(0, 0%, 100%);
+    --color-text: hsl(193.73, 85.57%, 10%);
+    --color-link: hsl(194.26, 82.43%, 29.02%);
+    --color-border: hsl(194.26, 10%, 50%);
+    --color-container-neutral: hsl(0, 100%, 100%);
 }
 
 html, body {
     font-size: 16px;
     margin: 0;
     padding: 0;
-    background-color: #EFEFEF;
+    background-color: var(--color-neutral);
     font-family: var(--font-family--body);
     font-weight: 300;
     width: 100%;
+    color: var(--color-text);
 }
 
 #root {
@@ -28,11 +41,11 @@ p {
 a {
     text-decoration: none;
     font-weight: 600;
-    color: #442983;
+    color: var(--color-link);
 
     &:hover {
         border-bottom: 2px solid #1a1136;
-        color: #5F3DC4;
+        color: var(--color-primary);
 
         &::after {
             content: "";
@@ -40,7 +53,7 @@ a {
     }
 
     &:active {
-        color: #442983;
+        color: var(--color-link);
     }
 
     &.button {
@@ -73,11 +86,10 @@ header {
     border-top-left-radius: 0.5rem;
     border-top-right-radius: 0.5rem;
     padding: 1rem;
-    background-color: #ded8ed;
+    background-color: var(--color-container-neutral);
     display: flex;
     justify-content: center;
-    color: #442983;
-    border-bottom: 2px solid #442983;
+    border-bottom: 2px solid var(--color-border);
 }
 
 main {
@@ -88,10 +100,6 @@ form {
     display: flex;
     flex-direction: column;
     gap: 2rem;
-
-    label {
-        color: #231444
-    }
 }
 
 .alert {
@@ -111,13 +119,13 @@ form {
 .element {
     display: flex;
     flex-direction: column;
-    gap: 0.3rem;
+    gap: 0.5rem;
 
     .error {
         display: none;
-        color: rgb(195, 39, 39);
+        color: var(--color-danger);
         font-size: 0.8rem;
-        margin: 0 0.5rem;
+        margin: 0;
     }
 
     &.signup {
@@ -126,49 +134,51 @@ form {
 
         p {
             margin: 0;
-            color: #231444;
         }
     }
 }
 
 button {
-    padding: 1rem 1rem;
+    display: inline-flex;
+    place-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
     border-radius: 2rem;
     border: none;
-    background-color: #442983;
-    color: #FFF;
+    background-color: var(--color-primary);
+    color: var(--color-white);
     font-weight: 500;
     font-size: 1.2rem;
 
     &:focus {
-        outline: 2px solid #442983;
+        outline: 2px solid var(--color-primary);
         outline-offset: 2px;
     }
 
     &:hover {
-        background-color: #5F3DC4;
+        background-color: var(--color-secondary);
     }
 
     &:active {
-        background-color: #442983;
+        background-color: var(--color-secondary);
     }
 
     &.secondary {
-        background-color: #FFF;
-        color: #442983;
-        border: 1px solid #442983;
+        background-color: var(--color-white);
+        color: var(--color-text);
+        border: 1px solid var(--color-secondary);
 
         &:hover {
-            background-color: #EFEFEF;
+            background-color: var(--color-neutral);
         }
 
         &:active {
-            background-color: #FFF;
+            background-color: var(--color-white);
         }
     }
 
     &.small {
-        padding: 0.5rem 1rem;
+        padding: 0.3rem 0.5rem;
         font-size: 1rem;
     }
 
@@ -180,22 +190,20 @@ button {
 input {
     padding: 1rem 1rem;
     border-radius: 0.5rem;
-    border: 1px solid #CCC;
-    font-size: 1.2rem;
+    border: 1px solid var(--color-border);
+    font-size: 1.0rem;
     outline: none;
 
     &:focus {
-        border-color: #442983;
-        outline: 1px solid #442983;
+        border: 2px solid var(--color-primary);
     }
 
     &:hover {
-        border-color: #442983;
+        border-color: var(--color-primary);
     }
 
     &::placeholder {
-        color: #AAA;
-        font-weight: 400;
+        font-weight: 300;
         font-size: 1rem;
         font-family: "Open Sans", system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     }
@@ -207,7 +215,17 @@ input {
     }
 
     &:user-invalid:not(:focus):not(:hover) {
-        border-color: rgb(195, 39, 39);
+        border-color: var(--color-danger);
+    }
+}
+
+form[data-submitted="true"] {
+    input:invalid, select:invalid, textarea:invalid {
+        border-color: var(--color-danger);
+
+        & + .error {
+            display: block;
+        }
     }
 }
 
@@ -220,7 +238,7 @@ input {
     &::before, &::after {
         content: "";
         flex: 1;
-        border-bottom: 1px solid #CCC;
+        border-bottom: 1px solid var(--color-border);
     }
 
     &::before {

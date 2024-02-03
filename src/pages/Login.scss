@@ -1,10 +1,9 @@
 .form-error {
-    color: rgb(145, 4, 4);;
-    font-size: 0.8rem;
-    margin: 1rem 0;
-    padding: 1rem;
+    color: var(--color-white);
+    font-size: var(--font-size-small);
+    padding: 0 1rem;
     font-family: monospace;
-    background-color: rgb(255, 0, 0, 0.1);
-    border: 1px solid rgb(215, 1, 1);
+    background-color: var(--color-danger);
+    border: 1px solid var(--color-danger);
     border-radius: 0.5rem;
 }

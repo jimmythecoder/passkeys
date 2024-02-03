@@ -4,6 +4,7 @@ import { startRegistration, browserSupportsWebAuthn } from "@simplewebauthn/brow
 import { post } from "@/utils/api";
 import { ENDPOINTS } from "@/config";
 import { paths } from "@/Routes";
+import PasskeyIcon from "@/assets/FIDO_Passkey_mark_A_reverse.png";
 import "./Register.scss";
 import type { Auth } from "@/types/api";
 import { Exception } from "@/exceptions";
@@ -15,6 +16,7 @@ enum FormInputs {
 
 export const Register: React.FC<React.PropsWithChildren> = () => {
     const [errorMsg, setErrorMsg] = useState<Exception>();
+    const [isSubmitted, setIsSubmitted] = useState(false);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
@@ -75,8 +77,15 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
         e.preventDefault();
         setLoading(true);
         setErrorMsg(undefined);
+        setIsSubmitted(true);
 
         try {
+            if (!e.currentTarget.checkValidity()) {
+                const firstInvalid = e.currentTarget.querySelector(":invalid") as HTMLElement;
+                firstInvalid.focus();
+                throw new Exception({ message: "Please check you have entered all fields correctly" });
+            }
+
             const formData = new FormData(e.currentTarget);
             const displayName = formData.get(FormInputs.displayName) as string;
             const email = formData.get(FormInputs.username) as string;
@@ -107,14 +116,11 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
         <>
             <header>
                 <h1>
-                    <svg xmlns="http://www.w3.org/2000/svg" height="44" viewBox="0 -960 960 960" width="44" fill="#442983">
-                        <path d="M140.001-180.001v-88.922q0-29.384 15.962-54.422 15.961-25.039 42.653-38.5 59.308-29.077 119.654-43.615 60.346-14.539 121.73-14.539 21.058 0 42.116 1.885 21.057 1.885 42.115 5.654-1.692 51.461 20.808 96.807Q567.539-270.307 609-240v59.999H140.001Zm613.845 107.69-53.343-53.138v-164.73q-39.118-11.514-63.849-43.975-24.73-32.461-24.73-74.691 0-51.467 36.38-87.848 36.381-36.382 87.846-36.382t87.657 36.397q36.192 36.397 36.192 87.885 0 39.947-22.423 70.716-22.423 30.769-57.192 44.231l44.23 44.23-53.076 53.192 53.076 53.192-70.768 70.922ZM440-484.615q-57.749 0-98.874-41.124-41.125-41.125-41.125-98.874 0-57.75 41.125-98.874 41.125-41.125 98.874-41.125 57.749 0 98.874 41.125 41.125 41.124 41.125 98.874 0 57.749-41.125 98.874-41.125 41.124-98.874 41.124Zm296.154 93.463q14.692 0 25.038-10.539 10.346-10.538 10.346-25.23t-10.346-25.038q-10.346-10.346-25.038-10.346-14.693 0-25.231 10.346-10.538 10.346-10.538 25.038t10.538 25.23q10.538 10.539 25.231 10.539Z" />
-                    </svg>
-                    <span>Sign up</span>
+                    <span>Create account</span>
                 </h1>
             </header>
             <main>
-                <form onSubmit={handleSubmit} name="login">
+                <form onSubmit={handleSubmit} noValidate name="login" data-submitted={isSubmitted}>
                     {errorMsg && (
                         <div className="element form-error">
                             <p>{errorMsg.message}</p>
@@ -122,21 +128,21 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
                     )}
 
                     <div className="element">
-                        <label htmlFor="displayName">Name</label>
+                        <label htmlFor={FormInputs.displayName}>Your name</label>
                         <input
                             type="text"
                             name={FormInputs.displayName}
                             id={FormInputs.displayName}
                             autoFocus
                             autoComplete="name"
-                            placeholder="Full name"
+                            placeholder="Full name or username"
                             required
                         />
                         <p className="error">Your name is required</p>
                     </div>
 
                     <div className="element">
-                        <label htmlFor="username">Email address</label>
+                        <label htmlFor={FormInputs.username}>Email address</label>
                         <input
                             type="email"
                             name={FormInputs.username}
@@ -150,7 +156,7 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
 
                     <div className="element">
                         <button disabled={loading} type="submit">
-                            Sign up
+                            <img width="32" height="32" className="passkey-icon" src={PasskeyIcon} /> Sign up with a passkey
                         </button>
                     </div>
 
