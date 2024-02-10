@@ -29,12 +29,12 @@ export class CdkStack extends cdk.Stack {
 
         webS3Bucket.grantRead(passkeysOAI);
 
-        const jwksPublicKeys = cdk.aws_ssm.StringParameter.fromSecureStringParameterAttributes(this, `jwk-ssm`, {
+        const jwksPublicKeys = cdk.aws_ssm.StringParameter.fromSecureStringParameterAttributes(this, `jwk-public-keys-ssm`, {
             parameterName: config.JWKS_PUBLIC_KEYS,
             version: 1,
         });
 
-        const jwkPrivateKey = cdk.aws_ssm.StringParameter.fromSecureStringParameterAttributes(this, `jwk-ssm`, {
+        const jwkPrivateKey = cdk.aws_ssm.StringParameter.fromSecureStringParameterAttributes(this, `jwk-private-key-ssm`, {
             parameterName: config.JWK_PRIVATE_KEY,
             version: 1,
         });
@@ -169,10 +169,9 @@ export class CdkStack extends cdk.Stack {
                 platform: "node",
                 format: OutputFormat.ESM,
                 target: "esnext",
-                nodeModules: ["sodium-native"],
                 banner: `import { createRequire } from 'module';const require = createRequire(import.meta.url);`,
                 minify: true,
-                externalModules: ["aws-sdk", "@aws-sdk/client-ssm", "sodium-native"],
+                externalModules: ["aws-sdk", "@aws-sdk/client-ssm"],
             },
             environment: {
                 RP_ID: config.RP_ID,
