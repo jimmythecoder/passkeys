@@ -45,7 +45,7 @@ export type JWK = jose.JWK;
  * @param options {Options} for the JWT.
  * @returns The signed JWT.
  */
-export const sign = async (data: Record<string, unknown>, jwk: jose.JWK, options: Options) => {
+export const sign = async <T extends jose.JWTPayload>(data: T, jwk: jose.JWK, options: Options) => {
     const alg = jwk.alg ?? options.algorithm ?? DEFAULT_SIGN_OPTIONS.algorithm;
 
     const key = await jose.importJWK(jwk);
@@ -73,9 +73,9 @@ export const encrypt = async (data: Record<string, unknown>, jwk: jose.JWK, opti
         .encrypt(key);
 };
 
-export const verify = async (token: string, keys: jose.JWK[], options: Options) => {
+export const verify = async <T extends jose.JWTPayload>(token: string, keys: jose.JWK[], options: Options) => {
     const jwks = jose.createLocalJWKSet({ keys });
-    const jwt = await jose.jwtVerify(token, jwks, {
+    const jwt = await jose.jwtVerify<T>(token, jwks, {
         algorithms: [options.algorithm ?? DEFAULT_SIGN_OPTIONS.algorithm],
         issuer: options.issuer,
         audience: options.audience,

@@ -1,4 +1,3 @@
-import { HttpStatusCode } from "../constants";
 import { Exception } from "./Exception";
 
 export class ValidationError extends Exception {
@@ -6,7 +5,7 @@ export class ValidationError extends Exception {
         public detail: string,
         public readonly param?: string,
     ) {
-        super(detail, HttpStatusCode.UnprocessableEntity, "ValidationError");
+        super(detail, Exception.Status.UnprocessableEntity, "ValidationError");
     }
 
     toJSON() {

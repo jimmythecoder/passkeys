@@ -13,7 +13,7 @@ import { UserModel, User } from "@/models/user";
 import { UserSession } from "@/models/userSession";
 import { AuthChallenge, SessionChallenge } from "@/models/challenge";
 import { Authenticator, AuthenticatorModel } from "@/models/authenticators";
-import * as Exceptions from "@/exceptions";
+import * as Exceptions from "@passkeys/exceptions";
 import { HttpStatusCode } from "@/constants";
 import { MAX_AUTHENTICATORS } from "@/config";
 import { schema } from "@/middleware/api/auth.schema";
@@ -34,11 +34,11 @@ function handleError(error: unknown, reply: FastifyReply) {
 
     if (error instanceof Error) {
         reply.log.error("[ERROR]", error.message);
-        return reply.type("application/problem+json").status(HttpStatusCode.InternalServerError).send(error);
+        return reply.type("application/problem+json").status(Exceptions.Exception.Status.InternalServerError).send(error);
     }
 
     reply.log.error("[ERROR]", error);
-    return reply.type("application/problem+json").status(HttpStatusCode.InternalServerError).send(error);
+    return reply.type("application/problem+json").status(Exceptions.Exception.Status.InternalServerError).send(error);
 }
 
 export const api: FastifyPluginCallback = (fastify, _, next) => {

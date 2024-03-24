@@ -1,4 +1,3 @@
-import { HttpStatusCode } from "../constants";
 import { Exception } from "./Exception";
 
 /**
@@ -6,7 +5,7 @@ import { Exception } from "./Exception";
  */
 export class AuthenticatorAlreadyExists extends Exception {
     constructor(detail: string) {
-        super(detail, HttpStatusCode.Conflict, "AuthenticatorAlreadyExists");
+        super(detail, Exception.Status.Conflict, "AuthenticatorAlreadyExists");
     }
 }
 

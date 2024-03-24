@@ -1,14 +1,29 @@
 export class Exception extends Error {
     public readonly type: string;
 
+    public static Status = {
+        OK: 200,
+        Created: 201,
+        Accepted: 202,
+        NoContent: 204,
+        BadRequest: 400,
+        Unauthorized: 401,
+        Fobidden: 403,
+        NotFound: 404,
+        Conflict: 409,
+        UnprocessableEntity: 422,
+        InternalServerError: 500,
+        GatewayTimeout: 504,
+    };
+
     constructor(
         public detail: string,
         public status: number,
-        public name: string,
+        public title: string,
     ) {
         super(detail);
 
-        this.type = `https://passkeys.jharris.nz/docs/api/exceptions/${this.name}`;
+        this.type = `https://passkeys.jharris.nz/docs/api/exceptions/${this.title}`;
     }
 
     /**
@@ -20,13 +35,13 @@ export class Exception extends Error {
         return {
             type: this.type,
             status: this.status,
-            title: this.name,
+            title: this.title,
             detail: this.detail,
         };
     }
 
     toString() {
-        return `[ERROR]: ${this.name}: ${this.detail}`;
+        return `[ERROR]: ${this.title}: ${this.detail}`;
     }
 }
 

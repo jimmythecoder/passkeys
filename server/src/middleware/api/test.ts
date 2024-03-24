@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 import type { FastifyPluginCallback } from "fastify";
-import { Unauthorized, Exception } from "@/exceptions";
+import { Unauthorized, Exception } from "@passkeys/exceptions";
 import { HttpStatusCode } from "@/constants";
 
 dotenv.config();
@@ -16,11 +16,11 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
         } catch (error) {
             if (error instanceof Exception) {
                 console.error("Authorization failed", error.message);
-                return reply.status(error.code).send(error.toJSON());
+                return reply.type("application/problem+json").status(error.status).send(error.toJSON());
             }
 
             console.error(error);
-            return reply.status(HttpStatusCode.Unauthorized).send(error);
+            return reply.type("application/problem+json").status(HttpStatusCode.Unauthorized).send(error);
         }
     });
 
@@ -30,7 +30,7 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
                 throw new Unauthorized("Not signed in");
             }
 
-            if (!request.session.get("user")?.roles.includes("admin")) {
+            if (!request.session.roles.includes("admin")) {
                 throw new Unauthorized("Missing admin role");
             }
 
@@ -38,11 +38,11 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
         } catch (error) {
             if (error instanceof Exception) {
                 console.error("Authorization failed", error.message);
-                return reply.status(error.code).send(error);
+                return reply.type("application/problem+json").status(error.status).send(error);
             }
 
             console.error(error);
-            return reply.status(HttpStatusCode.Unauthorized).send(error);
+            return reply.type("application/problem+json").status(HttpStatusCode.Unauthorized).send(error);
         }
     });
 

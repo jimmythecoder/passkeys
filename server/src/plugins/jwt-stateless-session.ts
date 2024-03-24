@@ -34,6 +34,8 @@ export class Session {
 
     public isDeleted = false;
 
+    public roles: string[] = [];
+
     constructor(
         public data: Record<string, unknown>,
         public readonly options: SessionOptions,
@@ -48,8 +50,14 @@ export class Session {
         this.isModified = true;
     }
 
+    setRoles(roles: string[]) {
+        this.roles = roles;
+        this.isModified = true;
+    }
+
     reset() {
         this.data = {};
+        this.roles = [];
         this.isModified = true;
     }
 
@@ -58,6 +66,7 @@ export class Session {
      */
     delete() {
         this.data = {};
+        this.roles = [];
         this.isDeleted = true;
     }
 
@@ -72,7 +81,7 @@ export class Session {
     }
 
     async verify(token: string) {
-        return verify(token, this.options.jwt.verify.keys, {
+        return verify<{ roles: string[] }>(token, this.options.jwt.verify.keys, {
             issuer: this.options.jwt.issuer,
             audience: this.options.jwt.audience,
         });

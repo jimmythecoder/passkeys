@@ -1,4 +1,3 @@
-import { HttpStatusCode } from "../constants";
 import { Exception } from "./Exception";
 
 /**
@@ -6,7 +5,7 @@ import { Exception } from "./Exception";
  */
 export class AuthenticatorMismatch extends Exception {
     constructor(detail: string) {
-        super(detail, HttpStatusCode.UnprocessableEntity, "AuthenticatorMismatch");
+        super(detail, Exception.Status.UnprocessableEntity, "AuthenticatorMismatch");
     }
 }
 

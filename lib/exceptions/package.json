@@ -1,0 +1,8 @@
+{
+    "name": "@passkeys/exceptions",
+    "displayName": "Common exceptions",
+    "private": false,
+    "version": "1.0.0",
+    "type": "module",
+    "main": "index.ts"
+}

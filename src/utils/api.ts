@@ -1,4 +1,4 @@
-import Exceptions, { Exception } from "@/exceptions";
+import * as Exceptions from "@passkeys/exceptions";
 
 function isEmpty(value: unknown) {
     return value == null || value === "";
@@ -28,13 +28,13 @@ const jsonAPI = (apiURL: string, method = "POST") => {
 
         if (!response.ok) {
             if (isJSON) {
-                const error = (await response.json()) as Exception;
+                const error = (await response.json()) as Exceptions.Exception;
 
-                if (Exceptions.has(error.name)) {
-                    throw new (Exceptions.get(error.name)!)(error);
+                if (Object.keys(Exceptions).includes(error.title)) {
+                    throw new Exceptions[error.title as unknown](error);
                 }
 
-                throw new Exception(error);
+                throw new Error(error.toString());
             }
 
             throw new Error(await response.text());
