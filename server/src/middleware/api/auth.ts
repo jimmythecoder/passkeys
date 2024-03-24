@@ -29,7 +29,7 @@ const USE_METADATA_SERVICE = process.env.USE_METADATA_SERVICE === "true";
 function handleError(error: unknown, reply: FastifyReply) {
     if (error instanceof Exceptions.Exception) {
         reply.log.error(error.toString());
-        return reply.type("application/problem+json").status(error.code).send(error.toJSON());
+        return reply.type("application/problem+json").status(error.status).send(error.toJSON());
     }
 
     if (error instanceof Error) {
