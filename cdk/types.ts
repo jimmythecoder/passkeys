@@ -7,7 +7,6 @@ export type ENV = {
     CERTIFICATE_ARN: string;
     RP_ID: string;
     RP_ORIGIN: string;
-    SESSION_HEX_KEY: string;
     NODE_ENV: string;
     JWKS_PUBLIC_KEYS: string;
     JWK_PRIVATE_KEY: string;

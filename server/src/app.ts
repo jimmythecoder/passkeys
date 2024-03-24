@@ -17,6 +17,7 @@ const USE_METADATA_SERVICE = process.env.USE_METADATA_SERVICE === "true";
 const IS_PROD = process.env.NODE_ENV === "production";
 
 const init = async () => {
+    console.debug("Starting server ...");
     const app = Fastify({
         logger: true,
     });
@@ -57,7 +58,7 @@ const init = async () => {
     await app.register(authApi, { prefix: "/api/auth" });
 
     app.addHook("onReady", async () => {
-        console.debug("Server ready... ", IS_PROD ? "PROD" : "DEV");
+        console.debug("Server ready ... ", IS_PROD ? "PROD" : "DEV");
         if (USE_METADATA_SERVICE) {
             await MetadataService.initialize().then(() => {
                 console.debug("🔐 MetadataService initialized");

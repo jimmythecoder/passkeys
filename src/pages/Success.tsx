@@ -2,7 +2,7 @@ import "./Success.scss";
 import React, { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { del } from "@/utils/api";
-import { ENDPOINTS } from "@/config";
+import { API_ENDPOINTS } from "@/config";
 import { paths } from "@/Routes";
 import type { User, UserSession } from "@/types/user";
 
@@ -32,7 +32,7 @@ export const Success: React.FC<React.PropsWithChildren<SuccessProps>> = (props) 
 
     const handleSignout = async () => {
         try {
-            await del(ENDPOINTS.auth.session, {});
+            await del(API_ENDPOINTS.auth.session, {});
 
             sessionStorage.removeItem("user");
             sessionStorage.removeItem("session");

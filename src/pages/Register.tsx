@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, NavLink } from "react-router-dom";
 import { startRegistration, browserSupportsWebAuthn } from "@simplewebauthn/browser";
 import { post } from "@/utils/api";
-import { ENDPOINTS } from "@/config";
+import { API_ENDPOINTS } from "@/config";
 import { paths } from "@/Routes";
 import PasskeyIcon from "@/assets/FIDO_Passkey_mark_A_reverse.png";
 import "./Register.scss";
@@ -33,7 +33,7 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
 
             try {
                 const registrationOptions = await post<Auth.Register.GetCredentials.Response, Auth.Register.GetCredentials.Request>(
-                    ENDPOINTS.auth.register.getCredentials,
+                    API_ENDPOINTS.auth.register.getCredentials,
                     { displayName, userName },
                 );
 
@@ -51,7 +51,7 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
                     value: performance.getEntriesByName("register")[0].duration,
                 });
 
-                const response = await post<Auth.Register.Verify.Response, Auth.Register.Verify.Request>(ENDPOINTS.auth.register.verify, attResp);
+                const response = await post<Auth.Register.Verify.Response, Auth.Register.Verify.Request>(API_ENDPOINTS.auth.register.verify, attResp);
 
                 sessionStorage.setItem("user", JSON.stringify(response.user));
                 sessionStorage.setItem("session", JSON.stringify(response.session));

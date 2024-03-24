@@ -14,7 +14,6 @@ export const env = {
     CERTIFICATE_ARN: process.env.CERTIFICATE_ARN!,
     RP_ID: process.env.RP_ID ?? "example.com",
     RP_ORIGIN: process.env.RP_ORIGIN ?? "https://example.com",
-    SESSION_HEX_KEY: process.env.SESSION_HEX_KEY ?? "0xdeadbeef",
     NODE_ENV: process.env.NODE_ENV ?? "production",
     JWKS_PUBLIC_KEYS: process.env.JWKS_PUBLIC_KEYS ?? "/passkeys/jwks/public",
     JWK_PRIVATE_KEY: process.env.JWK_PRIVATE_KEY ?? "/passkeys/jwk/private",

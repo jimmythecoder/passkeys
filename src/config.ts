@@ -1,4 +1,4 @@
-export const ENDPOINTS = {
+export const API_ENDPOINTS = {
     auth: {
         signin: {
             getCredentials: "/api/auth/signin",
@@ -23,4 +23,3 @@ export const ENDPOINTS = {
     },
 };
 
-export const API_URL = import.meta.env.API_BASE_URL ?? "";

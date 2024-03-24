@@ -176,7 +176,6 @@ export class CdkStack extends cdk.Stack {
             environment: {
                 RP_ID: config.RP_ID,
                 RP_ORIGIN: config.RP_ORIGIN,
-                SESSION_HEX_KEY: config.SESSION_HEX_KEY,
                 NODE_ENV: config.NODE_ENV,
                 JWKS_PUBLIC_KEYS: config.JWKS_PUBLIC_KEYS,
                 JWK_PRIVATE_KEY: config.JWK_PRIVATE_KEY,

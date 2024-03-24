@@ -13,7 +13,6 @@
         "Variables": {
             "RP_ID": "passkeys.jharris.nz",
             "RP_ORIGIN": "https://passkeys.jharris.nz",
-            "SESSION_HEX_KEY": "822754afdf5e74d7d682bd915a2b95bc10aa42e6f8872fd71f02330fefa2d077"
         }
     },
     "Tags": {

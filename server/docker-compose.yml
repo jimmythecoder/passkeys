@@ -7,13 +7,11 @@ services:
       - NODE_ENV=production
       - AWS_REGION=ap-southeast-2
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - RP_ID=passkeys.jharris.nz
       - RP_ORIGIN=https://passkeys.jharris.nz
       - SESSION_COOKIE_NAME=${SESSION_COOKIE_NAME}
       - SESSION_LIFETIME=${SESSION_LIFETIME}
-      - SESSION_HEX_KEY=${SESSION_HEX_KEY}
       - USE_METADATA_SERVICE=${USE_METADATA_SERVICE}
     ports:
-      - "9000:8080"
+      - "${PORT}:${PORT}"
     platform: linux/arm64

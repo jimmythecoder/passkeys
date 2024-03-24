@@ -1,5 +1,3 @@
-import { API_URL } from "@/config";
-import * as xray from "@/utils/xray";
 import Exceptions, { Exception } from "@/exceptions";
 
 function isEmpty(value: unknown) {
@@ -15,15 +13,12 @@ const jsonAPI = (apiURL: string, method = "POST") => {
     return async <T, U = void>(path: string, data?: U, options: Options = {}) => {
         const body = !isEmpty(data) && method !== "GET" ? JSON.stringify(data) : null;
         const url = `${apiURL}${path}`;
-        const segment = xray.startSegment(path);
-        const traceId = xray.getTraceHeader(segment);
 
         const response = await fetch(url, {
             signal: options.signal,
             method,
             headers: {
                 "Content-Type": "application/json",
-                [xray.HTTP_HEADER]: traceId,
             },
             credentials: "include",
             body,
@@ -56,10 +51,10 @@ const jsonAPI = (apiURL: string, method = "POST") => {
     };
 };
 
-export const post = jsonAPI(API_URL, "POST");
-export const get = jsonAPI(API_URL, "GET");
-export const del = jsonAPI(API_URL, "DELETE");
-export const put = jsonAPI(API_URL, "PUT");
+export const post = jsonAPI(import.meta.env.VITE_API_URL, "POST");
+export const get = jsonAPI(import.meta.env.VITE_API_URL, "GET");
+export const del = jsonAPI(import.meta.env.VITE_API_URL, "DELETE");
+export const put = jsonAPI(import.meta.env.VITE_API_URL, "PUT");
 
 export default {
     get,
