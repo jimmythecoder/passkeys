@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { RouterProvider } from "react-router-dom";
+import { Monitoring } from "@/contexts";
 import { routes } from "./Routes.tsx";
 
 window.addEventListener("error", (event) => {
@@ -13,6 +14,8 @@ window.addEventListener("error", (event) => {
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
     <React.StrictMode>
-        <RouterProvider router={routes} />
+        <Monitoring.MonitoringProvider>
+            <RouterProvider router={routes} />
+        </Monitoring.MonitoringProvider>
     </React.StrictMode>,
 );

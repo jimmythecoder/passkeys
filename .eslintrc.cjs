@@ -26,5 +26,7 @@ module.exports = {
         "no-new": "off",
         "no-console": "off",
         "import/extensions": ["error", "ignorePackages", { "": "never", ts: "never", tsx: "never" }], // Allow imports without extensions
+        "no-return-await": "off",
+        "@typescript-eslint/return-await": "always",
     },
 };
