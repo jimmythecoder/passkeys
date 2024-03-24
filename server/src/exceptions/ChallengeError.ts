@@ -2,8 +2,8 @@ import { HttpStatusCode } from "../constants";
 import { Exception } from "./Exception";
 
 export class ChallengeError extends Exception {
-    constructor(message: string) {
-        super(message, HttpStatusCode.Fobidden, "ChallengeError");
+    constructor(detail: string) {
+        super(detail, HttpStatusCode.Fobidden, "ChallengeError");
     }
 }
 

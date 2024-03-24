@@ -2,8 +2,8 @@ import { HttpStatusCode } from "../constants";
 import { Exception } from "./Exception";
 
 export class UserAccountLocked extends Exception {
-    constructor(message: string) {
-        super(message, HttpStatusCode.Unauthorized, "UserAccountLocked");
+    constructor(detail: string) {
+        super(detail, HttpStatusCode.Unauthorized, "UserAccountLocked");
     }
 }
 

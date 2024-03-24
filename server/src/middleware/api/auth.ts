@@ -29,16 +29,16 @@ const USE_METADATA_SERVICE = process.env.USE_METADATA_SERVICE === "true";
 function handleError(error: unknown, reply: FastifyReply) {
     if (error instanceof Exceptions.Exception) {
         reply.log.error(error.toString());
-        return reply.status(error.code).send(error.toJSON());
+        return reply.type("application/problem+json").status(error.code).send(error.toJSON());
     }
 
     if (error instanceof Error) {
         reply.log.error("[ERROR]", error.message);
-        return reply.status(HttpStatusCode.InternalServerError).send(error);
+        return reply.type("application/problem+json").status(HttpStatusCode.InternalServerError).send(error);
     }
 
     reply.log.error("[ERROR]", error);
-    return reply.status(HttpStatusCode.InternalServerError).send(error);
+    return reply.type("application/problem+json").status(HttpStatusCode.InternalServerError).send(error);
 }
 
 export const api: FastifyPluginCallback = (fastify, _, next) => {

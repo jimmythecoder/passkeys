@@ -3,18 +3,16 @@ import { Exception } from "./Exception";
 
 export class ValidationError extends Exception {
     constructor(
-        public message: string,
+        public detail: string,
         public readonly param?: string,
     ) {
-        super(message, HttpStatusCode.BadRequest, "ValidationError");
+        super(detail, HttpStatusCode.UnprocessableEntity, "ValidationError");
     }
 
     toJSON() {
         return {
-            name: this.name,
-            code: this.code,
-            message: this.message,
-            param: this.param,
+            ...super.toJSON(),
+            context: this.param,
         };
     }
 }
