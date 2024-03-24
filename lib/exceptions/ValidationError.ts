@@ -1,6 +1,6 @@
-import { Exception } from "./Exception";
+import { Exception, ProblemException } from "./Exception";
 
-export class ValidationError extends Exception {
+export class ValidationError extends Exception implements ProblemException {
     constructor(
         public detail: string,
         public readonly param?: string,
@@ -13,6 +13,10 @@ export class ValidationError extends Exception {
             ...super.toJSON(),
             context: this.param,
         };
+    }
+
+    fromJSON(error: Exception): Exception {
+        return new ValidationError(error.detail, error.context);
     }
 }
 

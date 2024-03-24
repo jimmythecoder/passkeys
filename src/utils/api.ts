@@ -31,7 +31,7 @@ const jsonAPI = (apiURL: string, method = "POST") => {
                 const error = (await response.json()) as Exceptions.Exception;
 
                 if (Object.keys(Exceptions).includes(error.title)) {
-                    throw new Exceptions[error.title as unknown](error);
+                    throw Exceptions[error.title as keyof typeof Exceptions].fromJSON(error);
                 }
 
                 throw new Error(error.toString());

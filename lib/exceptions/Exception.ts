@@ -1,4 +1,17 @@
-export class Exception extends Error {
+export type Problem = {
+    type: string;
+    status: number;
+    title: string;
+    detail: string;
+    context?: string;
+};
+
+export type ProblemException = Problem & {
+    toJSON(): Problem;
+    fromJSON(error: Problem): ProblemException;
+};
+
+export class Exception extends Error implements ProblemException {
     public readonly type: string;
 
     public static Status = {
@@ -20,6 +33,7 @@ export class Exception extends Error {
         public detail: string,
         public status: number,
         public title: string,
+        public context?: string,
     ) {
         super(detail);
 
@@ -37,11 +51,16 @@ export class Exception extends Error {
             status: this.status,
             title: this.title,
             detail: this.detail,
+            context: this.context,
         };
     }
 
+    fromJSON(error: Exception) {
+        return new Exception(error.detail, error.status, error.title, error.context);
+    }
+
     toString() {
-        return `[ERROR]: ${this.title}: ${this.detail}`;
+        return `[ERROR ${this.status}]: ${this.title}: ${this.detail}`;
     }
 }
 
