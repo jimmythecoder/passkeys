@@ -11,4 +11,4 @@ export { UserNotFound } from "./UserNotFound";
 export { ValidationError } from "./ValidationError";
 export { VerificationError } from "./VerificationError";
 
-export type { ProblemException } from "./Exception";
+export type { ProblemException, Problem } from "./Exception";
