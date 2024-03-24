@@ -12,4 +12,7 @@ export type ENV = {
     JWKS_PUBLIC_KEYS: string;
     JWK_PRIVATE_KEY: string;
     SESSION_COOKIE_DOMAIN: string;
+    JWT_AUDIENCE: string;
+    JWT_ISSUER: string;
+    COOKIE_SECRET: string;
 };

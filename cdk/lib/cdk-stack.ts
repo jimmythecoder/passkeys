@@ -180,7 +180,10 @@ export class CdkStack extends cdk.Stack {
                 NODE_ENV: config.NODE_ENV,
                 JWKS_PUBLIC_KEYS: config.JWKS_PUBLIC_KEYS,
                 JWK_PRIVATE_KEY: config.JWK_PRIVATE_KEY,
+                JWT_AUDIENCE: config.JWT_AUDIENCE,
+                JWT_ISSUER: config.JWT_ISSUER,
                 SESSION_COOKIE_DOMAIN: config.SESSION_COOKIE_DOMAIN,
+                COOKIE_SECRET: config.COOKIE_SECRET,
             },
         });
 

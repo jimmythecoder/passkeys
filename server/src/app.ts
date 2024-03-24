@@ -25,7 +25,7 @@ const init = async () => {
 
     await app.register(helmet);
     await app.register(cookie, {
-        secret: "secret",
+        secret: process.env.COOKIE_SECRET,
     } as FastifyCookieOptions);
     await app.register(jwtStatelessSession, {
         jwt: {
