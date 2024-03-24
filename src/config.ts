@@ -1,24 +1,24 @@
 export const API_ENDPOINTS = {
     auth: {
         signin: {
-            getCredentials: "/api/auth/signin",
-            verify: "/api/auth/signin/verify",
-            getAllCredentails: "/api/auth/signin/passkey",
+            getCredentials: "/auth/signin",
+            verify: "/auth/signin/verify",
+            getAllCredentails: "/auth/signin/passkey",
         },
-        signout: "/api/auth/signout",
-        session: "/api/auth/session",
+        signout: "/auth/signout",
+        session: "/auth/session",
         register: {
-            getCredentials: "/api/auth/register",
-            verify: "/api/auth/register/verify",
+            getCredentials: "/auth/register",
+            verify: "/auth/register/verify",
         },
     },
     health: {
-        status: "/api/health/status",
+        status: "/health/status",
     },
     test: {
         authorizer: {
-            basic: "/api/test/authorized",
-            admin: "/api/test/authorized/admin",
+            basic: "/test/authorized",
+            admin: "/test/authorized/admin",
         },
     },
 };

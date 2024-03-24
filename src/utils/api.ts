@@ -51,10 +51,10 @@ const jsonAPI = (apiURL: string, method = "POST") => {
     };
 };
 
-export const post = jsonAPI(import.meta.env.VITE_API_URL, "POST");
-export const get = jsonAPI(import.meta.env.VITE_API_URL, "GET");
-export const del = jsonAPI(import.meta.env.VITE_API_URL, "DELETE");
-export const put = jsonAPI(import.meta.env.VITE_API_URL, "PUT");
+export const post = jsonAPI("/api", "POST");
+export const get = jsonAPI("/api", "GET");
+export const del = jsonAPI("/api", "DELETE");
+export const put = jsonAPI("/api", "PUT");
 
 export default {
     get,
