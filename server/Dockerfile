@@ -2,6 +2,10 @@ FROM node:20-alpine as base
 
 FROM base as build
 
+RUN corepack enable 
+RUN corepack prepare pnpm@latest --activate
+RUN corepack use pnpm@8.x
+
 WORKDIR /tmp
 
 COPY package.json .
@@ -11,8 +15,8 @@ COPY types.d.ts .
 COPY ./src .
 
 # Install dependencies
-RUN npm install
-RUN npm run build
+RUN pnpm install
+RUN pnpm run build:cjs
 
 FROM base as final
 
@@ -28,9 +32,9 @@ COPY ./dist .
 COPY ./node_modules ./node_modules
 COPY .env .
 
-EXPOSE 8080
+EXPOSE ${CONTAINER_PORT}
 
 HEALTHCHECK --interval=1m --timeout=3s CMD wget --no-verbose --tries=1 --spider http://localhost:8080/api/health/status || exit 1
 
 # Set the entry point for the container
-CMD ["node", "index.mjs"]
+CMD ["node", "app.cjs"]

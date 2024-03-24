@@ -19,7 +19,9 @@ const IS_PROD = process.env.NODE_ENV === "production";
 const init = async () => {
     console.debug("Starting server ...");
     const app = Fastify({
-        logger: true,
+        logger: {
+            level: IS_PROD ? "info" : "debug",
+        },
     });
 
     const [privateKey, publicKeys] = await getSSMParameters([process.env.JWK_PRIVATE_KEY!, process.env.JWKS_PUBLIC_KEYS!]);
@@ -58,7 +60,7 @@ const init = async () => {
     await app.register(authApi, { prefix: "/api/auth" });
 
     app.addHook("onReady", async () => {
-        console.debug("Server ready ... ", IS_PROD ? "PROD" : "DEV");
+        app.log.debug("Server ready ... ", IS_PROD ? "PROD" : "DEV");
         if (USE_METADATA_SERVICE) {
             await MetadataService.initialize().then(() => {
                 console.debug("🔐 MetadataService initialized");
@@ -80,7 +82,7 @@ const init = async () => {
 
 if (!IS_PROD) {
     init().then((server) =>
-        server.listen({ host: "0.0.0.0", port: parseInt(process.env.PORT ?? "3000", 10) }, (err, address) => {
+        server.listen({ host: "0.0.0.0", port: parseInt(process.env.CONTAINER_PORT ?? "9000", 10) }, (err, address) => {
             if (err) {
                 server.log.error(err);
                 process.exit(1);

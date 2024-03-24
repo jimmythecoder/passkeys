@@ -1,17 +1,22 @@
 import { useRouteError, NavLink } from "react-router-dom";
 import { useEffect } from "react";
 import { paths } from "@/Routes";
+import { MonitoringContext } from "@/contexts/Monitoring";
+import { useContext } from "react";
 
 export const ErrorBoundary: React.FC<React.PropsWithChildren> = () => {
     const error = useRouteError() as Error;
+    const monitoring = useContext(MonitoringContext);
 
     useEffect(() => {
         if (error) {
             console.error("App error", error);
+            monitoring.awsRum?.recordError(error);
         }
 
         const errorHandler = (event: ErrorEvent) => {
             console.error("System error", event.error.stack);
+            monitoring.awsRum?.recordError(error);
         };
         window.addEventListener("error", errorHandler);
 

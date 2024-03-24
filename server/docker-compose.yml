@@ -1,17 +1,11 @@
 services:
-  api:
-    container_name: passkeys-api
-    image: passkeys-api:latest
-    build: ./lambda
-    environment:
-      - NODE_ENV=production
-      - AWS_REGION=ap-southeast-2
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - RP_ID=passkeys.jharris.nz
-      - RP_ORIGIN=https://passkeys.jharris.nz
-      - SESSION_COOKIE_NAME=${SESSION_COOKIE_NAME}
-      - SESSION_LIFETIME=${SESSION_LIFETIME}
-      - USE_METADATA_SERVICE=${USE_METADATA_SERVICE}
-    ports:
-      - "${PORT}:${PORT}"
-    platform: linux/arm64
+    api:
+        container_name: passkeys-api
+        image: passkeys-api:latest
+        build: .
+        env_file:
+            - .env.local
+            - .env
+        ports:
+            - "${CONTAINER_PORT}:${CONTAINER_PORT}"
+        platform: linux/arm64

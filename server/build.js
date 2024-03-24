@@ -8,7 +8,7 @@ esbuild.build({
     minify: false,
     sourcemap: false,
     // packages: "external",
-    outdir: "./lambda",
+    outdir: "./dist",
     outbase: "./src",
     // Fix for https://github.com/evanw/esbuild/pull/2067
     banner: {

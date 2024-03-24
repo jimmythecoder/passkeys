@@ -28,16 +28,16 @@ const USE_METADATA_SERVICE = process.env.USE_METADATA_SERVICE === "true";
 
 function handleError(error: unknown, reply: FastifyReply) {
     if (error instanceof Exceptions.Exception) {
-        console.error(error.toString());
+        reply.log.error(error.toString());
         return reply.status(error.code).send(error.toJSON());
     }
 
     if (error instanceof Error) {
-        console.error("[ERROR]", error.message);
+        reply.log.error("[ERROR]", error.message);
         return reply.status(HttpStatusCode.InternalServerError).send(error);
     }
 
-    console.error("[ERROR]", error);
+    reply.log.error("[ERROR]", error);
     return reply.status(HttpStatusCode.InternalServerError).send(error);
 }
 
@@ -104,7 +104,7 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
                 authenticators: userAuthenticators.map((authenticator) => authenticator.id),
             });
 
-            console.debug("User signing in", user.userName);
+            request.log.info("User signing in", user.userName);
             request.session.set("sub", user.userName);
             request.session.set("challenge", challenge.toJSON());
 
@@ -161,7 +161,7 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
                 authenticators: userAuthenticators.map((authenticator) => authenticator.id),
             });
 
-            console.debug("User signing in with Conditional UI", userAuthenticators.map((authenticator) => authenticator.id).join(", "));
+            request.log.debug("User signing in with Conditional UI", userAuthenticators.map((authenticator) => authenticator.id).join(", "));
 
             request.session.set("challenge", challenge.toJSON());
 
@@ -232,7 +232,7 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
                 throw new Exceptions.VerificationError("Verification failed");
             }
 
-            console.debug("User verified", user.userName);
+            request.log.debug("User verified", user.userName);
 
             const session = new UserSession({
                 userId: user.id,
@@ -314,7 +314,7 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
             request.session.set("user", user);
             request.session.set("challenge", challenge);
 
-            console.debug("New user registration request", user.userName);
+            request.log.debug("New user registration request", user.userName);
 
             return await reply.status(HttpStatusCode.OK).send(options);
         } catch (error) {
@@ -370,7 +370,7 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
             request.session.set("sub", user.id);
             request.session.set("roles", user.roles);
 
-            console.debug("New user registered", user.userName);
+            request.log.debug("New user registered", user.userName);
 
             return await reply
                 .status(HttpStatusCode.Created)
