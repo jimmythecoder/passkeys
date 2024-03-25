@@ -1,11 +1,11 @@
-import { Exception, ProblemException } from "./Exception";
+import { ApiException } from "./ApiException";
 
 /**
  * This error is thrown when a user attempts to use an authenticator that is not the one they registered with.
  */
-export class AuthenticatorMismatch extends Exception implements ProblemException {
+export class AuthenticatorMismatch extends ApiException {
     constructor(detail: string) {
-        super(detail, Exception.Status.UnprocessableEntity, "AuthenticatorMismatch");
+        super(detail, ApiException.Status.UnprocessableEntity, "AuthenticatorMismatch");
     }
 }
 

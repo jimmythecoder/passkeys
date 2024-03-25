@@ -1,21 +1,21 @@
-import { Exception, ProblemException } from "./Exception";
+import { ApiException, Problem } from "./ApiException";
 
-export class ValidationError extends Exception implements ProblemException {
+export class ValidationError extends ApiException<string> {
     constructor(
         public detail: string,
-        public readonly param?: string,
+        public context?: string,
     ) {
-        super(detail, Exception.Status.UnprocessableEntity, "ValidationError");
+        super(detail, ApiException.Status.UnprocessableEntity, "ValidationError");
     }
 
     toJSON() {
         return {
             ...super.toJSON(),
-            context: this.param,
+            context: this.context,
         };
     }
 
-    fromJSON(error: Exception): Exception {
+    public static fromJSON(error: Problem<string>) {
         return new ValidationError(error.detail, error.context);
     }
 }

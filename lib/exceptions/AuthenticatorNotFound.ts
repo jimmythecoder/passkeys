@@ -1,8 +1,8 @@
-import { Exception, ProblemException } from "./Exception";
+import { ApiException } from "./ApiException";
 
-export class AuthenticatorNotFound extends Exception implements ProblemException {
+export class AuthenticatorNotFound extends ApiException {
     constructor(detail: string) {
-        super(detail, Exception.Status.NotFound, "AuthenticatorNotFound");
+        super(detail, ApiException.Status.NotFound, "AuthenticatorNotFound");
     }
 }
 

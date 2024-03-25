@@ -1,8 +1,8 @@
-import { Exception, ProblemException } from "./Exception";
+import { ApiException } from "./ApiException";
 
-export class VerificationError extends Exception implements ProblemException {
+export class VerificationError extends ApiException {
     constructor(detail: string) {
-        super(detail, Exception.Status.UnprocessableEntity, "VerificationError");
+        super(detail, ApiException.Status.UnprocessableEntity, "VerificationError");
     }
 }
 

@@ -1,8 +1,8 @@
-import { Exception, ProblemException } from "./Exception";
+import { ApiException } from "./ApiException";
 
-export class UserAlreadyExists extends Exception implements ProblemException {
+export class UserAlreadyExists extends ApiException {
     constructor(detail: string) {
-        super(detail, Exception.Status.Conflict, "UserAlreadyExists");
+        super(detail, ApiException.Status.Conflict, "UserAlreadyExists");
     }
 }
 

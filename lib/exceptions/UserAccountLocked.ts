@@ -1,8 +1,8 @@
-import { Exception, ProblemException } from "./Exception";
+import { ApiException } from "./ApiException";
 
-export class UserAccountLocked extends Exception implements ProblemException {
+export class UserAccountLocked extends ApiException {
     constructor(detail: string) {
-        super(detail, Exception.Status.Unauthorized, "UserAccountLocked");
+        super(detail, ApiException.Status.Unauthorized, "UserAccountLocked");
     }
 }
 

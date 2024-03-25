@@ -28,7 +28,7 @@ const jsonAPI = (apiURL: string, method = "POST") => {
 
         if (!response.ok) {
             if (isJSON) {
-                const error = (await response.json()) as Exceptions.ProblemException;
+                const error = (await response.json()) as Exceptions.Problem<any>;
 
                 if (Object.keys(Exceptions).includes(error.title)) {
                     throw Exceptions[error.title as keyof typeof Exceptions].fromJSON(error);

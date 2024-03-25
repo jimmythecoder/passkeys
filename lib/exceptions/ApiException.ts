@@ -1,17 +1,34 @@
-export type Problem = {
+export type Problem<T = unknown> = {
     type: string;
     status: number;
     title: string;
     detail: string;
-    context?: string;
+    context?: T;
 };
 
-export type ProblemException = Problem & {
-    toJSON(): Problem;
-    fromJSON(error: Problem): ProblemException;
+export type ProblemException<T> = Problem<T> & {
+    /**
+     * Serialize the exception to a Problem JSON object that can be sent to the client using the RFC 9457 format.
+     */
+    toJSON(): Problem<T>;
 };
 
-export class Exception extends Error implements ProblemException {
+export type ProblemExceptionStatic = {
+    new <T>(detail: string, status: number, title: string, context?: string): ProblemException<T>;
+
+    /**
+     * HTTP status codes that best represent the status of the exception.
+     */
+    Status: Record<string, number>;
+
+    /**
+     * Revive an exception from a Problem JSON object.
+     * @param error The Problem JSON object representing the exception.
+     */
+    fromJSON<T>(error: Problem<T>): ProblemException<T>;
+};
+
+export class ApiException<T = unknown> extends Error implements ProblemException<T> {
     public readonly type: string;
 
     public static Status = {
@@ -33,7 +50,7 @@ export class Exception extends Error implements ProblemException {
         public detail: string,
         public status: number,
         public title: string,
-        public context?: string,
+        public context?: T,
     ) {
         super(detail);
 
@@ -55,8 +72,8 @@ export class Exception extends Error implements ProblemException {
         };
     }
 
-    fromJSON(error: Exception) {
-        return new Exception(error.detail, error.status, error.title, error.context);
+    public static fromJSON(error: Problem<unknown>) {
+        return new this(error.detail, error.status, error.title, error.context);
     }
 
     toString() {
@@ -64,4 +81,4 @@ export class Exception extends Error implements ProblemException {
     }
 }
 
-export default Exception;
+export default ApiException;

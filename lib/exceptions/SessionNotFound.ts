@@ -1,11 +1,11 @@
-import { Exception, ProblemException } from "./Exception";
+import { ApiException } from "./ApiException";
 
 /**
  * No session was found for the user. Usually a cookie / domain issue.
  */
-export class SessionNotFound extends Exception implements ProblemException {
+export class SessionNotFound extends ApiException {
     constructor(detail: string) {
-        super(detail, Exception.Status.Unauthorized, "SessionNotFound");
+        super(detail, ApiException.Status.Unauthorized, "SessionNotFound");
     }
 }
 

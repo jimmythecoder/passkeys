@@ -1,8 +1,8 @@
-import { Exception, ProblemException } from "./Exception";
+import { ApiException } from "./ApiException";
 
-export class ChallengeError extends Exception implements ProblemException {
+export class ChallengeError extends ApiException {
     constructor(detail: string) {
-        super(detail, Exception.Status.Fobidden, "ChallengeError");
+        super(detail, ApiException.Status.Fobidden, "ChallengeError");
     }
 }
 

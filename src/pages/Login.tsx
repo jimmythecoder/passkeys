@@ -3,7 +3,7 @@ import { useNavigate, NavLink } from "react-router-dom";
 import { startAuthentication, browserSupportsWebAuthn } from "@simplewebauthn/browser";
 import { post } from "@/utils/api";
 import { API_ENDPOINTS } from "@/config";
-import { Exception } from "@/exceptions";
+import { ApiException } from "@passkeys/exceptions";
 import { paths } from "@/Routes";
 import "./Login.scss";
 import PasskeyIcon from "@/assets/FIDO_Passkey_mark_A_reverse.png";
@@ -14,7 +14,7 @@ enum FormInputs {
 }
 
 export const Login: React.FC<React.PropsWithChildren> = () => {
-    const [error, setError] = useState<Exception>();
+    const [error, setError] = useState<Error>();
     const [loading, setLoading] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
     const navigate = useNavigate();
@@ -49,10 +49,10 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
                 console.debug("Login success");
                 return true;
             } catch (apiError) {
-                if (apiError instanceof Exception) {
+                if (apiError instanceof ApiException) {
                     setError(apiError);
                 } else {
-                    setError(new Exception({ message: "An unknown error occurred" }));
+                    setError(new Error("An unknown error occurred"));
                     console.error(apiError);
                 }
             }
@@ -63,7 +63,7 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
 
     useEffect(() => {
         if (!browserSupportsWebAuthn()) {
-            setError(new Exception({ message: "WebAuthn is not supported in this browser" }));
+            setError(new Error("WebAuthn is not supported in this browser"));
         }
     }, [navigate, useConditionalUI]);
 
@@ -77,7 +77,7 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
             if (!e.currentTarget.checkValidity()) {
                 const firstInvalid = e.currentTarget.querySelector(":invalid") as HTMLElement;
                 firstInvalid.focus();
-                throw new Exception({ message: "Please check you have entered all fields correctly" });
+                throw new Error("Please check you have entered all fields correctly");
             }
 
             const username = (e.currentTarget.elements.namedItem(FormInputs.username) as HTMLInputElement).value;
@@ -88,7 +88,7 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
                 navigate(paths.signinSuccess);
             }
         } catch (err) {
-            if (err instanceof Exception) {
+            if (err instanceof ApiException) {
                 setError(err);
                 console.error(err);
             }

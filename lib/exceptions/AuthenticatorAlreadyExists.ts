@@ -1,11 +1,11 @@
-import { Exception, ProblemException } from "./Exception";
+import { ApiException } from "./ApiException";
 
 /**
  * This error is thrown when a user attempts to register an authenticator that is already registered.
  */
-export class AuthenticatorAlreadyExists extends Exception implements ProblemException {
+export class AuthenticatorAlreadyExists extends ApiException {
     constructor(detail: string) {
-        super(detail, Exception.Status.Conflict, "AuthenticatorAlreadyExists");
+        super(detail, ApiException.Status.Conflict, "AuthenticatorAlreadyExists");
     }
 }
 

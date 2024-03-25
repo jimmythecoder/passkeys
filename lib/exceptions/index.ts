@@ -1,4 +1,4 @@
-export { Exception } from "./Exception";
+export { ApiException } from "./ApiException";
 export { AuthenticatorAlreadyExists } from "./AuthenticatorAlreadyExists";
 export { AuthenticatorMismatch } from "./AuthenticatorMismatch";
 export { AuthenticatorNotFound } from "./AuthenticatorNotFound";
@@ -11,4 +11,4 @@ export { UserNotFound } from "./UserNotFound";
 export { ValidationError } from "./ValidationError";
 export { VerificationError } from "./VerificationError";
 
-export type { ProblemException, Problem } from "./Exception";
+export type { ProblemException, Problem, ProblemExceptionStatic } from "./ApiException";

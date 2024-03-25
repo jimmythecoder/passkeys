@@ -7,7 +7,7 @@ import { paths } from "@/Routes";
 import PasskeyIcon from "@/assets/FIDO_Passkey_mark_A_reverse.png";
 import "./Register.scss";
 import type { Auth } from "@/types/api";
-import { Exception } from "@/exceptions";
+import { ApiException } from "@passkeys/exceptions";
 
 enum FormInputs {
     displayName = "displayName",
@@ -15,7 +15,7 @@ enum FormInputs {
 }
 
 export const Register: React.FC<React.PropsWithChildren> = () => {
-    const [errorMsg, setErrorMsg] = useState<Exception>();
+    const [errorMsg, setErrorMsg] = useState<Error>();
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
@@ -60,11 +60,14 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
                 console.debug("User registered");
                 return true;
             } catch (apiError) {
-                if (apiError instanceof Exception) {
+                if (apiError instanceof ApiException) {
+                    setErrorMsg(apiError);
+                    console.error(apiError);
+                } else if (apiError instanceof Error) {
                     setErrorMsg(apiError);
                     console.error(apiError);
                 } else {
-                    setErrorMsg(new Exception(apiError as Error));
+                    setErrorMsg(new ApiException("An unknown error occurred", ApiException.Status.InternalServerError, "UnknownError"));
                     console.error(apiError);
                 }
             }
@@ -83,7 +86,7 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
             if (!e.currentTarget.checkValidity()) {
                 const firstInvalid = e.currentTarget.querySelector(":invalid") as HTMLElement;
                 firstInvalid.focus();
-                throw new Exception({ message: "Please check you have entered all fields correctly" });
+                throw new Error("Please check you have entered all fields correctly");
             }
 
             const formData = new FormData(e.currentTarget);
@@ -98,7 +101,7 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
                 navigate(paths.registerSuccess);
             }
         } catch (err) {
-            if (err instanceof Exception) {
+            if (err instanceof ApiException) {
                 setErrorMsg(err);
                 console.error(err);
             }
@@ -108,7 +111,7 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
 
     useEffect(() => {
         if (!browserSupportsWebAuthn()) {
-            setErrorMsg(new Exception({ message: "WebAuthn is not supported in this browser" }));
+            setErrorMsg(new Error("WebAuthn is not supported in this browser"));
         }
     }, []);
 
