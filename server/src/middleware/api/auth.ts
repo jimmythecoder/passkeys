@@ -27,18 +27,18 @@ const RP_NAME = process.env.RP_NAME ?? "canhazpasskey";
 const USE_METADATA_SERVICE = process.env.USE_METADATA_SERVICE === "true";
 
 function handleError(error: unknown, reply: FastifyReply) {
-    if (error instanceof Exceptions.Exception) {
+    if (error instanceof Exceptions.ApiException) {
         reply.log.error(error.toString());
         return reply.type("application/problem+json").status(error.status).send(error.toJSON());
     }
 
     if (error instanceof Error) {
         reply.log.error("[ERROR]", error.message);
-        return reply.type("application/problem+json").status(Exceptions.Exception.Status.InternalServerError).send(error);
+        return reply.type("application/problem+json").status(Exceptions.ApiException.Status.InternalServerError).send(error);
     }
 
     reply.log.error("[ERROR]", error);
-    return reply.type("application/problem+json").status(Exceptions.Exception.Status.InternalServerError).send(error);
+    return reply.type("application/problem+json").status(Exceptions.ApiException.Status.InternalServerError).send(error);
 }
 
 export const api: FastifyPluginCallback = (fastify, _, next) => {
