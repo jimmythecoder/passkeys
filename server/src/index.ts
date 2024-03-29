@@ -11,13 +11,12 @@ import { api as healthApi } from "@/middleware/api/health";
 import { api as testApi } from "@/middleware/api/test";
 import { jwtStatelessSession } from "@/plugins/jwt-stateless-session";
 
-dotenv.config();
+dotenv.config({ path: [".env.local", ".env"] });
 
 const USE_METADATA_SERVICE = process.env.USE_METADATA_SERVICE === "true";
 const IS_PROD = process.env.NODE_ENV === "production";
 
 const init = async () => {
-    console.debug("Starting server ...");
     const app = Fastify({
         logger: {
             level: IS_PROD ? "info" : "debug",
@@ -60,7 +59,6 @@ const init = async () => {
     await app.register(authApi, { prefix: "/api/auth" });
 
     app.addHook("onReady", async () => {
-        app.log.debug("Server ready ... ", IS_PROD ? "PROD" : "DEV");
         if (USE_METADATA_SERVICE) {
             await MetadataService.initialize().then(() => {
                 console.debug("🔐 MetadataService initialized");
@@ -81,15 +79,15 @@ const init = async () => {
 };
 
 if (!IS_PROD) {
-    init().then((server) =>
-        server.listen({ host: "0.0.0.0", port: parseInt(process.env.CONTAINER_PORT ?? "9000", 10) }, (err, address) => {
+    init().then((server) => {
+        server.log.info("🚀 Starting server");
+        return server.listen({ host: "0.0.0.0", port: parseInt(process.env.CONTAINER_PORT ?? "9000", 10) }, (err) => {
             if (err) {
                 server.log.error(err);
                 process.exit(1);
             }
-            server.log.info(`server listening on ${address}`);
-        }),
-    );
+        });
+    });
 }
 
 export { init };
