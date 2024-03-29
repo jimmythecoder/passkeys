@@ -34,7 +34,7 @@ COPY .env .
 
 EXPOSE ${CONTAINER_PORT}
 
-HEALTHCHECK --interval=1m --timeout=3s CMD wget --no-verbose --tries=1 --spider http://localhost:8080/api/health/status || exit 1
+HEALTHCHECK --interval=1m --timeout=3s CMD wget --no-verbose --tries=1 --spider http://localhost:${CONTAINER_PORT}/api/health/status || exit 1
 
 # Set the entry point for the container
-CMD ["node", "app.cjs"]
+CMD ["node", "index.mjs"]

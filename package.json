@@ -13,7 +13,6 @@
     "dependencies": {
         "@passkeys/exceptions": "workspace:^",
         "@simplewebauthn/browser": "^9.0.1",
-        "@simplewebauthn/typescript-types": "^8.3.4",
         "@types/gtag.js": "^0.0.19",
         "@types/jsonwebtoken": "^9.0.6",
         "@types/node": "^20.11.30",
@@ -36,16 +35,16 @@
         "sass": "^1.72.0"
     },
     "devDependencies": {
-        "@types/react": "^18.2.69",
-        "@types/react-dom": "^18.2.22",
-        "@typescript-eslint/eslint-plugin": "^7.3.1",
-        "@typescript-eslint/parser": "^7.3.1",
+        "@types/react": "^18.2.73",
+        "@types/react-dom": "^18.2.23",
+        "@typescript-eslint/eslint-plugin": "^7.4.0",
+        "@typescript-eslint/parser": "^7.4.0",
         "@vitejs/plugin-react-swc": "^3.6.0",
         "eslint": "^8.57.0",
         "eslint-plugin-react-hooks": "^4.6.0",
         "eslint-plugin-react-refresh": "^0.4.6",
         "tsx": "^4.7.1",
         "typescript": "^5.4.3",
-        "vite": "^5.2.4"
+        "vite": "^5.2.7"
     }
 }

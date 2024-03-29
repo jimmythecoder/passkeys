@@ -1,14 +1,15 @@
 {
     "name": "@passkeys/api",
     "displayName": "Passkey API Server",
+    "private": true,
     "version": "1.0.0",
     "description": "Fastify / express server to handle webauthn registration and authentication",
-    "main": "dist/app.cjs",
+    "main": "src/index.ts",
     "type": "module",
     "scripts": {
-        "start": "tsx watch src/app.ts",
+        "start": "tsx watch src/index.ts",
         "build:tsc": "tsc && tsc-alias",
-        "build:cjs": "esbuild src/app.ts --bundle --platform=node --outfile=dist/app.cjs",
+        "build:cjs": "esbuild src/index.ts --bundle --platform=node --outfile=dist/index.cjs",
         "build": "node build.js",
         "genkey": "tsx utils/genkey.ts"
     },
@@ -23,7 +24,7 @@
         "@fastify/multipart": "^8.2.0",
         "@passkeys/exceptions": "workspace:^",
         "@simplewebauthn/server": "^9.0.3",
-        "@simplewebauthn/typescript-types": "^8.3.4",
+        "@simplewebauthn/types": "^9.0.1",
         "@types/aws-lambda": "^8.10.136",
         "@types/body-parser": "^1.19.5",
         "@types/cors": "^2.8.17",
@@ -33,7 +34,7 @@
         "@types/node": "^20.11.30",
         "@types/webpack": "^5.28.5",
         "aws-lambda": "^1.0.7",
-        "aws-sdk": "^2.1584.0",
+        "aws-sdk": "^2.1589.0",
         "body-parser": "^1.20.2",
         "cookie-parser": "^1.4.6",
         "cors": "^2.8.5",
@@ -42,7 +43,7 @@
         "dynamoose": "^4.0.0",
         "esbuild": "^0.20.2",
         "esbuild-plugin-fileloc": "^0.0.6",
-        "express": "^4.19.1",
+        "express": "^4.19.2",
         "fastify": "^4.26.2",
         "fastify-plugin": "^4.5.1",
         "helmet": "^7.1.0",
@@ -55,7 +56,7 @@
         "typescript": "^5.4.3"
     },
     "devDependencies": {
-        "@swc/core": "^1.4.8",
+        "@swc/core": "^1.4.11",
         "tsc-alias": "^1.8.8"
     }
 }

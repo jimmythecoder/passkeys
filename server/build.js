@@ -16,6 +16,6 @@ esbuild.build({
             const __dirname = import.meta.url;
             const require = createRequire(import.meta.url);`,
     },
-    entryPoints: ["./src/index.mts"],
+    entryPoints: ["./src/index.ts", "./src/lambda.mts"],
     external: ["aws-sdk", "@aws-sdk/client-ssm"],
 });
