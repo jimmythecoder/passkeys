@@ -3,7 +3,7 @@
   "passkeysloggroupAEBC363A": {
    "Type": "AWS::Logs::LogGroup",
    "Properties": {
-    "LogGroupName": "/passkeys/api",
+    "LogGroupName": "/passkeys",
     "RetentionInDays": 7
    },
    "UpdateReplacePolicy": "Delete",
@@ -362,7 +362,7 @@
   "CDKMetadata": {
    "Type": "AWS::CDK::Metadata",
    "Properties": {
-    "Analytics": "v2:deflate64:H4sIAAAAAAAA/11Qy27CMBD8Fu5mS4OqngNVH1KLqvABaHGWaCGxI68DQpb/vbJDStXTzHhm12MX8Fg8w2KGF5nr+jRveQ9h61GfFF5kF1rbCIRP27w5O/RqfTATj0qT83xgjZ46NNiQg7C+n6XwHxkVYwehsm12Mn7blvU1yZFF1WK3r3FnbE1HgU2G18Foz9YoWe5QhLxAmUDJElaDPpFfodBtFML6YH4n0mZyHYuwNVFhzw16uuD1XEB4974ve06hBEluPTa53kjKnr+w79k0t9CkUrayg6fMPoynxuF04z855l5sh2w22OX1dxWVS/7TEkJZkbauzjOZbcnHqCoSOzhNKj86Fbv1mYyo0nfBUR7OxQIeC1jMjsI8d4Px3BFUI/4AocD2POsBAAA="
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/11RXW8CIRD8LX3HrT3TtK9q04+kNc35A8zKcWT1gAtwGkP47wXOq02fZmZ3FmahgofqCeZ3eHYz3hxnHe0hbD3yI0ulXeiMdBA+jXyzZujZutUTj4wL66kljl4o1CiFhbC+1bL5j4yMUEGoTVc6Bb9NR/yS5cgi61DtG9xp04iDg02B10FzT0Yzt9ihc8I7WGZIGlYDPwq/QieuoylCq38n8snCKnIuqciwJ5minPFyqiC8e98ve8qmDFmmzWWJN5JU/sK+Jy2vpkllb22GtGRmH9oLaXG68Z8cfS9GIekNqnL8TUVmc/9xAWFZC25sU2YK2wofI6uFM4PlKU1eOge75pkakeXngoO7P1VzeE6/eXBEMztoT0pAPeIP1QNP3OoBAAA="
    },
    "Metadata": {
     "aws:cdk:path": "passkeys-api-stack/CDKMetadata/Default"

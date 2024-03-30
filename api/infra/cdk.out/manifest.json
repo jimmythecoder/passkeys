@@ -22,7 +22,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::427820939238:role/cdk-hnb659fds-deploy-role-427820939238-ap-southeast-2",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::427820939238:role/cdk-hnb659fds-cfn-exec-role-427820939238-ap-southeast-2",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-427820939238-ap-southeast-2/8ec716695f0fbb1bf0e4fe04b359ba1eef920b0443ac0fd3ca7c37b22b4767fd.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-427820939238-ap-southeast-2/f814c0e9494d1a80817ddf600fcb894026bc1f3728e0b110f31334e0e0489760.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
@@ -48,12 +48,12 @@
               "new Bundling (/Users/james/Sites/passkeys/node_modules/.pnpm/aws-cdk-lib@2.127.0_constructs@10.3.0/node_modules/aws-cdk-lib/aws-lambda-nodejs/lib/bundling.js:1:2955)",
               "Bundling.bundle (/Users/james/Sites/passkeys/node_modules/.pnpm/aws-cdk-lib@2.127.0_constructs@10.3.0/node_modules/aws-cdk-lib/aws-lambda-nodejs/lib/bundling.js:1:960)",
               "new NodejsFunction (/Users/james/Sites/passkeys/node_modules/.pnpm/aws-cdk-lib@2.127.0_constructs@10.3.0/node_modules/aws-cdk-lib/aws-lambda-nodejs/lib/function.js:1:1729)",
-              "new ApiStack (file:///Users/james/Sites/passkeys/server/infra/src/api-stack.ts:1:1811)",
-              "file:///Users/james/Sites/passkeys/server/infra/src/index.ts:2:179",
-              "ModuleJob.run (node:internal/modules/esm/module_job:222:25)",
-              "async ModuleLoader.import (node:internal/modules/esm/loader:323:24)",
-              "async loadESM (node:internal/process/esm_loader:28:7)",
-              "async handleMainPromise (node:internal/modules/run_main:113:12)"
+              "ApiStack (/Users/james/Sites/passkeys/api/infra/src/api-stack.ts:48:28)",
+              "<anonymous> (/Users/james/Sites/passkeys/api/infra/src/index.ts:10:16)",
+              "ModuleJob.run (node:internal/modules/esm/module_job:217:25)",
+              "async ModuleLoader.import (node:internal/modules/esm/loader:316:24)",
+              "async loadESM (node:internal/process/esm_loader:34:7)",
+              "async handleMainPromise (node:internal/modules/run_main:66:12)"
             ]
           },
           {

@@ -18,7 +18,7 @@
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::Logs::LogGroup",
                   "aws:cdk:cloudformation:props": {
-                    "logGroupName": "/passkeys/api",
+                    "logGroupName": "/passkeys",
                     "retentionInDays": 7
                   }
                 },
