@@ -1,11 +1,10 @@
 {
-    "name": "@passkeys/client",
+    "name": "@passkeys/ui",
     "private": true,
     "version": "1.0.0",
     "type": "module",
     "scripts": {
         "start": "vite",
-        "server": "cd server && pnpm run start",
         "build": "tsc && vite build",
         "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
         "preview": "vite preview"
@@ -13,6 +12,7 @@
     "dependencies": {
         "@passkeys/exceptions": "workspace:^",
         "@simplewebauthn/browser": "^9.0.1",
+        "@simplewebauthn/types": "^9.0.1",
         "@types/gtag.js": "^0.0.19",
         "@types/jsonwebtoken": "^9.0.6",
         "@types/node": "^20.11.30",

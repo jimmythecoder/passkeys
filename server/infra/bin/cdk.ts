@@ -8,10 +8,8 @@ dotenv.config();
 export const env = {
     AWS_REGION: process.env.AWS_REGION!,
     ROOT_DOMAIN: process.env.ROOT_DOMAIN!,
-    WEB_DOMAIN: process.env.WEB_DOMAIN!,
     API_DOMAIN: process.env.API_DOMAIN!,
     AWS_DOMAIN_HOSTED_ZONE_ID: process.env.AWS_DOMAIN_HOSTED_ZONE_ID!,
-    CERTIFICATE_ARN: process.env.CERTIFICATE_ARN!,
     RP_ID: process.env.RP_ID ?? "example.com",
     RP_ORIGIN: process.env.RP_ORIGIN ?? "https://example.com",
     NODE_ENV: process.env.NODE_ENV ?? "production",
@@ -29,7 +27,7 @@ const app = new cdk.App();
 
 export default new CdkStack(
     app,
-    "passkeys-cdk-stack",
+    "passkeys-api-stack",
     {
         /* If you don't specify 'env', this stack will be environment-agnostic.
          * Account/Region-dependent features and context lookups will not work,
