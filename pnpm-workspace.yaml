@@ -2,3 +2,4 @@ packages:
     - "lib/**"
     - "server/**"
     - "cdk/**"
+    - "ui/**"
