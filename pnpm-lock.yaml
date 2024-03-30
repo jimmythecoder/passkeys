@@ -6,6 +6,8 @@ settings:
 
 importers:
 
+  .: {}
+
   cdk:
     dependencies:
       aws-cdk-lib:
