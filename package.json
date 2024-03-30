@@ -1,0 +1,7 @@
+{
+    "name": "@passkeys/root",
+    "displayName": "Passkeys webauthn implementation",
+    "description": "Passkeys webauthn implementation",
+    "version": "1.0.0",
+    "private": true
+}

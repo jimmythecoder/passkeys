@@ -1,8 +1,8 @@
-export default {
+module.exports = {
     tabWidth: 4,
     printWidth: 150,
     singleQuote: false,
-    trailingComma: 'all',
+    trailingComma: "all",
     bracketSpacing: true,
     semi: true,
     useTabs: false,
