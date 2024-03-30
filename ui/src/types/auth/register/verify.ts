@@ -1,5 +1,5 @@
 import { User, UserSession } from "@/types/user";
-import { RegistrationResponseJSON } from "@simplewebauthn/typescript-types";
+import { RegistrationResponseJSON } from "@simplewebauthn/types";
 
 export type Request = RegistrationResponseJSON;
 
