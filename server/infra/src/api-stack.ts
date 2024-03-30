@@ -122,8 +122,7 @@ export class ApiStack extends cdk.Stack {
                 routeKey: "$context.routeKey",
                 status: "$context.status",
                 protocol: "$context.protocol",
-                responseLength: "$context.responseLength",
-                traceId: "$context.traceId"
+                responseLength: "$context.responseLength"
             }),
         };
 
