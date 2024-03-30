@@ -1,4 +1,5 @@
 packages:
+    - "cdk/**"
     - "ui/**"
     - "lib/**"
     - "server/**"

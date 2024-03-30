@@ -46,7 +46,7 @@ export class ApiStack extends cdk.Stack {
         });
 
         const apiHandler = new cdk.aws_lambda_nodejs.NodejsFunction(this, `passkeys-api`, {
-            entry: `../src/lambda.mts`,
+            entry: `../server/src/lambda.mts`,
             functionName: `passkeys-api`,
             description: `Passkeys API`,
             logGroup,
@@ -122,7 +122,7 @@ export class ApiStack extends cdk.Stack {
                 routeKey: "$context.routeKey",
                 status: "$context.status",
                 protocol: "$context.protocol",
-                responseLength: "$context.responseLength"
+                responseLength: "$context.responseLength",
             }),
         };
 
