@@ -17,7 +17,10 @@ export const env = {
     NODE_ENV: process.env.NODE_ENV ?? "production",
     JWKS_PUBLIC_KEYS: process.env.JWKS_PUBLIC_KEYS ?? "/passkeys/jwks/public",
     JWK_PRIVATE_KEY: process.env.JWK_PRIVATE_KEY ?? "/passkeys/jwk/private",
+    JWT_AUDIENCE: process.env.JWT_AUDIENCE ?? "example.com",
+    JWT_ISSUER: process.env.JWT_ISSUER ?? "https://example.com",
     SESSION_COOKIE_DOMAIN: process.env.SESSION_COOKIE_DOMAIN ?? "example.com",
+    COOKIE_SECRET: process.env.COOKIE_SECRET ?? "canhazpasskeys",
 } as const;
 
 export type ENV = typeof env;

@@ -4,7 +4,6 @@ services:
         image: passkeys-api:latest
         build: .
         env_file:
-            - .env.local
             - .env
         ports:
             - "${CONTAINER_PORT}:${CONTAINER_PORT}"
