@@ -7,7 +7,7 @@ dotenv.config({ path: [".env.local", ".env"] });
 
 const app = new cdk.App();
 
-export default new UIStack(app, "passkeys-ui-stack", {
+export default new UIStack(app, "passkeys-ui", {
     /* If you don't specify 'env', this stack will be environment-agnostic.
      * Account/Region-dependent features and context lookups will not work,
      * but a single synthesized template can be deployed anywhere. */

@@ -4,17 +4,17 @@
     "id": "App",
     "path": "",
     "children": {
-      "passkeys-ui-stack": {
-        "id": "passkeys-ui-stack",
-        "path": "passkeys-ui-stack",
+      "passkeys-ui": {
+        "id": "passkeys-ui",
+        "path": "passkeys-ui",
         "children": {
-          "passkey-s3-bucket": {
-            "id": "passkey-s3-bucket",
-            "path": "passkeys-ui-stack/passkey-s3-bucket",
+          "passkeys-ui-s3-bucket": {
+            "id": "passkeys-ui-s3-bucket",
+            "path": "passkeys-ui/passkeys-ui-s3-bucket",
             "children": {
               "Resource": {
                 "id": "Resource",
-                "path": "passkeys-ui-stack/passkey-s3-bucket/Resource",
+                "path": "passkeys-ui/passkeys-ui-s3-bucket/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::S3::Bucket",
                   "aws:cdk:cloudformation:props": {
@@ -31,7 +31,7 @@
                         "value": "true"
                       },
                       {
-                        "key": "aws-cdk:cr-owned:0ce7ad24",
+                        "key": "aws-cdk:cr-owned:df06a61a",
                         "value": "true"
                       }
                     ]
@@ -44,16 +44,16 @@
               },
               "Policy": {
                 "id": "Policy",
-                "path": "passkeys-ui-stack/passkey-s3-bucket/Policy",
+                "path": "passkeys-ui/passkeys-ui-s3-bucket/Policy",
                 "children": {
                   "Resource": {
                     "id": "Resource",
-                    "path": "passkeys-ui-stack/passkey-s3-bucket/Policy/Resource",
+                    "path": "passkeys-ui/passkeys-ui-s3-bucket/Policy/Resource",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::S3::BucketPolicy",
                       "aws:cdk:cloudformation:props": {
                         "bucket": {
-                          "Ref": "passkeys3bucket7C7E1BE7"
+                          "Ref": "passkeysuis3bucket4B4FEDA7"
                         },
                         "policyDocument": {
                           "Statement": [
@@ -76,7 +76,7 @@
                               "Resource": [
                                 {
                                   "Fn::GetAtt": [
-                                    "passkeys3bucket7C7E1BE7",
+                                    "passkeysuis3bucket4B4FEDA7",
                                     "Arn"
                                   ]
                                 },
@@ -86,7 +86,7 @@
                                     [
                                       {
                                         "Fn::GetAtt": [
-                                          "passkeys3bucket7C7E1BE7",
+                                          "passkeysuis3bucket4B4FEDA7",
                                           "Arn"
                                         ]
                                       },
@@ -106,7 +106,7 @@
                               "Principal": {
                                 "CanonicalUser": {
                                   "Fn::GetAtt": [
-                                    "oai7A77E975",
+                                    "passkeysuioai5BF2C536",
                                     "S3CanonicalUserId"
                                   ]
                                 }
@@ -114,7 +114,7 @@
                               "Resource": [
                                 {
                                   "Fn::GetAtt": [
-                                    "passkeys3bucket7C7E1BE7",
+                                    "passkeysuis3bucket4B4FEDA7",
                                     "Arn"
                                   ]
                                 },
@@ -124,7 +124,7 @@
                                     [
                                       {
                                         "Fn::GetAtt": [
-                                          "passkeys3bucket7C7E1BE7",
+                                          "passkeysuis3bucket4B4FEDA7",
                                           "Arn"
                                         ]
                                       },
@@ -140,7 +140,7 @@
                               "Principal": {
                                 "CanonicalUser": {
                                   "Fn::GetAtt": [
-                                    "oai7A77E975",
+                                    "passkeysuioai5BF2C536",
                                     "S3CanonicalUserId"
                                   ]
                                 }
@@ -151,7 +151,7 @@
                                   [
                                     {
                                       "Fn::GetAtt": [
-                                        "passkeys3bucket7C7E1BE7",
+                                        "passkeysuis3bucket4B4FEDA7",
                                         "Arn"
                                       ]
                                     },
@@ -178,11 +178,11 @@
               },
               "AutoDeleteObjectsCustomResource": {
                 "id": "AutoDeleteObjectsCustomResource",
-                "path": "passkeys-ui-stack/passkey-s3-bucket/AutoDeleteObjectsCustomResource",
+                "path": "passkeys-ui/passkeys-ui-s3-bucket/AutoDeleteObjectsCustomResource",
                 "children": {
                   "Default": {
                     "id": "Default",
-                    "path": "passkeys-ui-stack/passkey-s3-bucket/AutoDeleteObjectsCustomResource/Default",
+                    "path": "passkeys-ui/passkeys-ui-s3-bucket/AutoDeleteObjectsCustomResource/Default",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.CfnResource",
                       "version": "2.127.0"
@@ -202,11 +202,11 @@
           },
           "Custom::S3AutoDeleteObjectsCustomResourceProvider": {
             "id": "Custom::S3AutoDeleteObjectsCustomResourceProvider",
-            "path": "passkeys-ui-stack/Custom::S3AutoDeleteObjectsCustomResourceProvider",
+            "path": "passkeys-ui/Custom::S3AutoDeleteObjectsCustomResourceProvider",
             "children": {
               "Staging": {
                 "id": "Staging",
-                "path": "passkeys-ui-stack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Staging",
+                "path": "passkeys-ui/Custom::S3AutoDeleteObjectsCustomResourceProvider/Staging",
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.AssetStaging",
                   "version": "2.127.0"
@@ -214,7 +214,7 @@
               },
               "Role": {
                 "id": "Role",
-                "path": "passkeys-ui-stack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Role",
+                "path": "passkeys-ui/Custom::S3AutoDeleteObjectsCustomResourceProvider/Role",
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.CfnResource",
                   "version": "2.127.0"
@@ -222,7 +222,7 @@
               },
               "Handler": {
                 "id": "Handler",
-                "path": "passkeys-ui-stack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Handler",
+                "path": "passkeys-ui/Custom::S3AutoDeleteObjectsCustomResourceProvider/Handler",
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.CfnResource",
                   "version": "2.127.0"
@@ -234,13 +234,13 @@
               "version": "2.127.0"
             }
           },
-          "oai": {
-            "id": "oai",
-            "path": "passkeys-ui-stack/oai",
+          "passkeys-ui-oai": {
+            "id": "passkeys-ui-oai",
+            "path": "passkeys-ui/passkeys-ui-oai",
             "children": {
               "Resource": {
                 "id": "Resource",
-                "path": "passkeys-ui-stack/oai/Resource",
+                "path": "passkeys-ui/passkeys-ui-oai/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::CloudFront::CloudFrontOriginAccessIdentity",
                   "aws:cdk:cloudformation:props": {
@@ -260,83 +260,39 @@
               "version": "2.127.0"
             }
           },
-          "domain-zone": {
-            "id": "domain-zone",
-            "path": "passkeys-ui-stack/domain-zone",
+          "passkeys-ui-route53-hosted-zone": {
+            "id": "passkeys-ui-route53-hosted-zone",
+            "path": "passkeys-ui/passkeys-ui-route53-hosted-zone",
             "constructInfo": {
               "fqn": "aws-cdk-lib.Resource",
               "version": "2.127.0"
             }
           },
-          "certificate": {
-            "id": "certificate",
-            "path": "passkeys-ui-stack/certificate",
-            "children": {
-              "Resource": {
-                "id": "Resource",
-                "path": "passkeys-ui-stack/certificate/Resource",
-                "attributes": {
-                  "aws:cdk:cloudformation:type": "AWS::CertificateManager::Certificate",
-                  "aws:cdk:cloudformation:props": {
-                    "domainName": "jharris.nz",
-                    "domainValidationOptions": [
-                      {
-                        "domainName": "jharris.nz",
-                        "hostedZoneId": "Z0324600191ZXCBZ5ARGI"
-                      },
-                      {
-                        "domainName": "passkeys-api.jharris.nz",
-                        "hostedZoneId": "Z0324600191ZXCBZ5ARGI"
-                      }
-                    ],
-                    "subjectAlternativeNames": [
-                      "passkeys-api.jharris.nz"
-                    ],
-                    "tags": [
-                      {
-                        "key": "Name",
-                        "value": "passkeys-ui-stack/certificate"
-                      }
-                    ],
-                    "validationMethod": "DNS"
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_certificatemanager.CfnCertificate",
-                  "version": "2.127.0"
-                }
-              }
-            },
-            "constructInfo": {
-              "fqn": "aws-cdk-lib.aws_certificatemanager.Certificate",
-              "version": "2.127.0"
-            }
-          },
-          "passkeys-certificate": {
-            "id": "passkeys-certificate",
-            "path": "passkeys-ui-stack/passkeys-certificate",
+          "passkeys-ui-certificate": {
+            "id": "passkeys-ui-certificate",
+            "path": "passkeys-ui/passkeys-ui-certificate",
             "constructInfo": {
               "fqn": "aws-cdk-lib.Resource",
               "version": "2.127.0"
             }
           },
-          "spa-rewrite": {
-            "id": "spa-rewrite",
-            "path": "passkeys-ui-stack/spa-rewrite",
+          "passkeys-ui-cloudfront-viewer-request": {
+            "id": "passkeys-ui-cloudfront-viewer-request",
+            "path": "passkeys-ui/passkeys-ui-cloudfront-viewer-request",
             "children": {
               "Resource": {
                 "id": "Resource",
-                "path": "passkeys-ui-stack/spa-rewrite/Resource",
+                "path": "passkeys-ui/passkeys-ui-cloudfront-viewer-request/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::CloudFront::Function",
                   "aws:cdk:cloudformation:props": {
                     "autoPublish": true,
                     "functionCode": "function handler(event) {\n    var request = event.request;\n\n    // Redirect to index.html for requests to the root path or any path that for SPA routes (React Router, Vue Router, etc)\n    if (request.uri.endsWith(\"/\") || !request.uri.includes(\".\")) {\n        request.uri = \"/index.html\";\n    }\n\n    return request;\n}\n",
                     "functionConfig": {
-                      "comment": "ap-southeast-2passkeysuistacksparewriteDC7FFE30",
+                      "comment": "ap-southeast-2passkeysuipasskeysicloudfrontviewerrequest8CF0B8D2",
                       "runtime": "cloudfront-js-1.0"
                     },
-                    "name": "ap-southeast-2passkeysuistacksparewriteDC7FFE30"
+                    "name": "ap-southeast-2passkeysuipasskeysicloudfrontviewerrequest8CF0B8D2"
                   }
                 },
                 "constructInfo": {
@@ -350,18 +306,18 @@
               "version": "2.127.0"
             }
           },
-          "passkeys-cache": {
-            "id": "passkeys-cache",
-            "path": "passkeys-ui-stack/passkeys-cache",
+          "passkeys-ui-default-cache": {
+            "id": "passkeys-ui-default-cache",
+            "path": "passkeys-ui/passkeys-ui-default-cache",
             "children": {
               "Resource": {
                 "id": "Resource",
-                "path": "passkeys-ui-stack/passkeys-cache/Resource",
+                "path": "passkeys-ui/passkeys-ui-default-cache/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::CloudFront::CachePolicy",
                   "aws:cdk:cloudformation:props": {
                     "cachePolicyConfig": {
-                      "name": "passkeysuistackpasskeyscacheF3BF6887-ap-southeast-2",
+                      "name": "passkeysuipasskeysuidefaultcache76D4C0E4-ap-southeast-2",
                       "comment": "Web Cache policy passkeys.jharris.nz",
                       "minTtl": 0,
                       "maxTtl": 60,
@@ -393,18 +349,18 @@
               "version": "2.127.0"
             }
           },
-          "assets-cache": {
-            "id": "assets-cache",
-            "path": "passkeys-ui-stack/assets-cache",
+          "passkeys-ui-assets-cache": {
+            "id": "passkeys-ui-assets-cache",
+            "path": "passkeys-ui/passkeys-ui-assets-cache",
             "children": {
               "Resource": {
                 "id": "Resource",
-                "path": "passkeys-ui-stack/assets-cache/Resource",
+                "path": "passkeys-ui/passkeys-ui-assets-cache/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::CloudFront::CachePolicy",
                   "aws:cdk:cloudformation:props": {
                     "cachePolicyConfig": {
-                      "name": "passkeysuistackassetscacheA10D0CC3-ap-southeast-2",
+                      "name": "passkeysuipasskeysuiassetscache56A434F9-ap-southeast-2",
                       "comment": "Assets Cache policy passkeys.jharris.nz",
                       "minTtl": 86400,
                       "maxTtl": 2592000,
@@ -436,13 +392,13 @@
               "version": "2.127.0"
             }
           },
-          "cdn": {
-            "id": "cdn",
-            "path": "passkeys-ui-stack/cdn",
+          "passkeys-ui-cloudfront": {
+            "id": "passkeys-ui-cloudfront",
+            "path": "passkeys-ui/passkeys-ui-cloudfront",
             "children": {
               "Origin1": {
                 "id": "Origin1",
-                "path": "passkeys-ui-stack/cdn/Origin1",
+                "path": "passkeys-ui/passkeys-ui-cloudfront/Origin1",
                 "constructInfo": {
                   "fqn": "constructs.Construct",
                   "version": "10.3.0"
@@ -450,7 +406,7 @@
               },
               "Origin2": {
                 "id": "Origin2",
-                "path": "passkeys-ui-stack/cdn/Origin2",
+                "path": "passkeys-ui/passkeys-ui-cloudfront/Origin2",
                 "constructInfo": {
                   "fqn": "constructs.Construct",
                   "version": "10.3.0"
@@ -458,7 +414,7 @@
               },
               "Origin3": {
                 "id": "Origin3",
-                "path": "passkeys-ui-stack/cdn/Origin3",
+                "path": "passkeys-ui/passkeys-ui-cloudfront/Origin3",
                 "constructInfo": {
                   "fqn": "constructs.Construct",
                   "version": "10.3.0"
@@ -466,11 +422,11 @@
               },
               "LoggingBucket": {
                 "id": "LoggingBucket",
-                "path": "passkeys-ui-stack/cdn/LoggingBucket",
+                "path": "passkeys-ui/passkeys-ui-cloudfront/LoggingBucket",
                 "children": {
                   "Resource": {
                     "id": "Resource",
-                    "path": "passkeys-ui-stack/cdn/LoggingBucket/Resource",
+                    "path": "passkeys-ui/passkeys-ui-cloudfront/LoggingBucket/Resource",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::S3::Bucket",
                       "aws:cdk:cloudformation:props": {
@@ -505,7 +461,7 @@
               },
               "Resource": {
                 "id": "Resource",
-                "path": "passkeys-ui-stack/cdn/Resource",
+                "path": "passkeys-ui/passkeys-ui-cloudfront/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::CloudFront::Distribution",
                   "aws:cdk:cloudformation:props": {
@@ -515,11 +471,11 @@
                         {
                           "domainName": {
                             "Fn::GetAtt": [
-                              "passkeys3bucket7C7E1BE7",
+                              "passkeysuis3bucket4B4FEDA7",
                               "RegionalDomainName"
                             ]
                           },
-                          "id": "passkeysuistackcdnOrigin19E6839B7",
+                          "id": "passkeysuipasskeysuicloudfrontOrigin1D43754A7",
                           "s3OriginConfig": {
                             "originAccessIdentity": {
                               "Fn::Join": [
@@ -527,7 +483,7 @@
                                 [
                                   "origin-access-identity/cloudfront/",
                                   {
-                                    "Ref": "oai7A77E975"
+                                    "Ref": "passkeysuioai5BF2C536"
                                   }
                                 ]
                               ]
@@ -540,7 +496,7 @@
                         },
                         {
                           "domainName": "passkeys-api.jharris.nz",
-                          "id": "passkeysuistackcdnOrigin2E695C4D9",
+                          "id": "passkeysuipasskeysuicloudfrontOrigin299D57844",
                           "customOriginConfig": {
                             "originSslProtocols": [
                               "TLSv1.2"
@@ -551,11 +507,11 @@
                         {
                           "domainName": {
                             "Fn::GetAtt": [
-                              "passkeys3bucket7C7E1BE7",
+                              "passkeysuis3bucket4B4FEDA7",
                               "RegionalDomainName"
                             ]
                           },
-                          "id": "passkeysuistackcdnOrigin38D4D87DB",
+                          "id": "passkeysuipasskeysuicloudfrontOrigin3CEF03131",
                           "s3OriginConfig": {
                             "originAccessIdentity": {
                               "Fn::Join": [
@@ -563,7 +519,7 @@
                                 [
                                   "origin-access-identity/cloudfront/",
                                   {
-                                    "Ref": "oai7A77E975"
+                                    "Ref": "passkeysuioai5BF2C536"
                                   }
                                 ]
                               ]
@@ -577,14 +533,14 @@
                       ],
                       "defaultCacheBehavior": {
                         "pathPattern": "*",
-                        "targetOriginId": "passkeysuistackcdnOrigin19E6839B7",
+                        "targetOriginId": "passkeysuipasskeysuicloudfrontOrigin1D43754A7",
                         "allowedMethods": [
                           "GET",
                           "HEAD",
                           "OPTIONS"
                         ],
                         "cachePolicyId": {
-                          "Ref": "passkeyscache8AB926E4"
+                          "Ref": "passkeysuidefaultcache98C84010"
                         },
                         "compress": true,
                         "viewerProtocolPolicy": "redirect-to-https",
@@ -592,7 +548,7 @@
                           {
                             "functionArn": {
                               "Fn::GetAtt": [
-                                "sparewrite1F96A58C",
+                                "passkeysuicloudfrontviewerrequest787CDF3A",
                                 "FunctionARN"
                               ]
                             },
@@ -606,7 +562,7 @@
                       "cacheBehaviors": [
                         {
                           "pathPattern": "/api/*",
-                          "targetOriginId": "passkeysuistackcdnOrigin2E695C4D9",
+                          "targetOriginId": "passkeysuipasskeysuicloudfrontOrigin299D57844",
                           "allowedMethods": [
                             "GET",
                             "HEAD",
@@ -623,7 +579,7 @@
                         },
                         {
                           "pathPattern": "/assets/*",
-                          "targetOriginId": "passkeysuistackcdnOrigin38D4D87DB",
+                          "targetOriginId": "passkeysuipasskeysuicloudfrontOrigin3CEF03131",
                           "allowedMethods": [
                             "GET",
                             "HEAD",
@@ -634,7 +590,7 @@
                             "DELETE"
                           ],
                           "cachePolicyId": {
-                            "Ref": "assetscache4CE6717C"
+                            "Ref": "passkeysuiassetscache784FC11C"
                           },
                           "compress": true,
                           "viewerProtocolPolicy": "redirect-to-https"
@@ -647,7 +603,7 @@
                       "logging": {
                         "bucket": {
                           "Fn::GetAtt": [
-                            "cdnLoggingBucket36AD0574",
+                            "passkeysuicloudfrontLoggingBucketC4933BC2",
                             "RegionalDomainName"
                           ]
                         }
@@ -672,21 +628,21 @@
               "version": "2.127.0"
             }
           },
-          "passkeys-bucket-deployment": {
-            "id": "passkeys-bucket-deployment",
-            "path": "passkeys-ui-stack/passkeys-bucket-deployment",
+          "passkeys-ui-s3bucket-deployment": {
+            "id": "passkeys-ui-s3bucket-deployment",
+            "path": "passkeys-ui/passkeys-ui-s3bucket-deployment",
             "children": {
               "AwsCliLayer": {
                 "id": "AwsCliLayer",
-                "path": "passkeys-ui-stack/passkeys-bucket-deployment/AwsCliLayer",
+                "path": "passkeys-ui/passkeys-ui-s3bucket-deployment/AwsCliLayer",
                 "children": {
                   "Code": {
                     "id": "Code",
-                    "path": "passkeys-ui-stack/passkeys-bucket-deployment/AwsCliLayer/Code",
+                    "path": "passkeys-ui/passkeys-ui-s3bucket-deployment/AwsCliLayer/Code",
                     "children": {
                       "Stage": {
                         "id": "Stage",
-                        "path": "passkeys-ui-stack/passkeys-bucket-deployment/AwsCliLayer/Code/Stage",
+                        "path": "passkeys-ui/passkeys-ui-s3bucket-deployment/AwsCliLayer/Code/Stage",
                         "constructInfo": {
                           "fqn": "aws-cdk-lib.AssetStaging",
                           "version": "2.127.0"
@@ -694,7 +650,7 @@
                       },
                       "AssetBucket": {
                         "id": "AssetBucket",
-                        "path": "passkeys-ui-stack/passkeys-bucket-deployment/AwsCliLayer/Code/AssetBucket",
+                        "path": "passkeys-ui/passkeys-ui-s3bucket-deployment/AwsCliLayer/Code/AssetBucket",
                         "constructInfo": {
                           "fqn": "aws-cdk-lib.aws_s3.BucketBase",
                           "version": "2.127.0"
@@ -708,7 +664,7 @@
                   },
                   "Resource": {
                     "id": "Resource",
-                    "path": "passkeys-ui-stack/passkeys-bucket-deployment/AwsCliLayer/Resource",
+                    "path": "passkeys-ui/passkeys-ui-s3bucket-deployment/AwsCliLayer/Resource",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::Lambda::LayerVersion",
                       "aws:cdk:cloudformation:props": {
@@ -732,7 +688,7 @@
               },
               "CustomResourceHandler": {
                 "id": "CustomResourceHandler",
-                "path": "passkeys-ui-stack/passkeys-bucket-deployment/CustomResourceHandler",
+                "path": "passkeys-ui/passkeys-ui-s3bucket-deployment/CustomResourceHandler",
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.aws_lambda.SingletonFunction",
                   "version": "2.127.0"
@@ -740,11 +696,11 @@
               },
               "Asset1": {
                 "id": "Asset1",
-                "path": "passkeys-ui-stack/passkeys-bucket-deployment/Asset1",
+                "path": "passkeys-ui/passkeys-ui-s3bucket-deployment/Asset1",
                 "children": {
                   "Stage": {
                     "id": "Stage",
-                    "path": "passkeys-ui-stack/passkeys-bucket-deployment/Asset1/Stage",
+                    "path": "passkeys-ui/passkeys-ui-s3bucket-deployment/Asset1/Stage",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.AssetStaging",
                       "version": "2.127.0"
@@ -752,7 +708,7 @@
                   },
                   "AssetBucket": {
                     "id": "AssetBucket",
-                    "path": "passkeys-ui-stack/passkeys-bucket-deployment/Asset1/AssetBucket",
+                    "path": "passkeys-ui/passkeys-ui-s3bucket-deployment/Asset1/AssetBucket",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.aws_s3.BucketBase",
                       "version": "2.127.0"
@@ -766,11 +722,11 @@
               },
               "CustomResource": {
                 "id": "CustomResource",
-                "path": "passkeys-ui-stack/passkeys-bucket-deployment/CustomResource",
+                "path": "passkeys-ui/passkeys-ui-s3bucket-deployment/CustomResource",
                 "children": {
                   "Default": {
                     "id": "Default",
-                    "path": "passkeys-ui-stack/passkeys-bucket-deployment/CustomResource/Default",
+                    "path": "passkeys-ui/passkeys-ui-s3bucket-deployment/CustomResource/Default",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.CfnResource",
                       "version": "2.127.0"
@@ -790,15 +746,15 @@
           },
           "Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C": {
             "id": "Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C",
-            "path": "passkeys-ui-stack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C",
+            "path": "passkeys-ui/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C",
             "children": {
               "ServiceRole": {
                 "id": "ServiceRole",
-                "path": "passkeys-ui-stack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole",
+                "path": "passkeys-ui/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole",
                 "children": {
                   "ImportServiceRole": {
                     "id": "ImportServiceRole",
-                    "path": "passkeys-ui-stack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/ImportServiceRole",
+                    "path": "passkeys-ui/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/ImportServiceRole",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.Resource",
                       "version": "2.127.0"
@@ -806,7 +762,7 @@
                   },
                   "Resource": {
                     "id": "Resource",
-                    "path": "passkeys-ui-stack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/Resource",
+                    "path": "passkeys-ui/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/Resource",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::IAM::Role",
                       "aws:cdk:cloudformation:props": {
@@ -845,11 +801,11 @@
                   },
                   "DefaultPolicy": {
                     "id": "DefaultPolicy",
-                    "path": "passkeys-ui-stack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/DefaultPolicy",
+                    "path": "passkeys-ui/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/DefaultPolicy",
                     "children": {
                       "Resource": {
                         "id": "Resource",
-                        "path": "passkeys-ui-stack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/DefaultPolicy/Resource",
+                        "path": "passkeys-ui/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/DefaultPolicy/Resource",
                         "attributes": {
                           "aws:cdk:cloudformation:type": "AWS::IAM::Policy",
                           "aws:cdk:cloudformation:props": {
@@ -884,7 +840,7 @@
                                   "Resource": [
                                     {
                                       "Fn::GetAtt": [
-                                        "passkeys3bucket7C7E1BE7",
+                                        "passkeysuis3bucket4B4FEDA7",
                                         "Arn"
                                       ]
                                     },
@@ -894,7 +850,7 @@
                                         [
                                           {
                                             "Fn::GetAtt": [
-                                              "passkeys3bucket7C7E1BE7",
+                                              "passkeysuis3bucket4B4FEDA7",
                                               "Arn"
                                             ]
                                           },
@@ -942,11 +898,11 @@
               },
               "Code": {
                 "id": "Code",
-                "path": "passkeys-ui-stack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/Code",
+                "path": "passkeys-ui/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/Code",
                 "children": {
                   "Stage": {
                     "id": "Stage",
-                    "path": "passkeys-ui-stack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/Code/Stage",
+                    "path": "passkeys-ui/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/Code/Stage",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.AssetStaging",
                       "version": "2.127.0"
@@ -954,7 +910,7 @@
                   },
                   "AssetBucket": {
                     "id": "AssetBucket",
-                    "path": "passkeys-ui-stack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/Code/AssetBucket",
+                    "path": "passkeys-ui/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/Code/AssetBucket",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.aws_s3.BucketBase",
                       "version": "2.127.0"
@@ -968,7 +924,7 @@
               },
               "Resource": {
                 "id": "Resource",
-                "path": "passkeys-ui-stack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/Resource",
+                "path": "passkeys-ui/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
                   "aws:cdk:cloudformation:props": {
@@ -984,7 +940,7 @@
                     "handler": "index.handler",
                     "layers": [
                       {
-                        "Ref": "passkeysbucketdeploymentAwsCliLayerAECC7133"
+                        "Ref": "passkeysuis3bucketdeploymentAwsCliLayer9B13A847"
                       }
                     ],
                     "role": {
@@ -1008,13 +964,13 @@
               "version": "2.127.0"
             }
           },
-          "passkeys-domain": {
-            "id": "passkeys-domain",
-            "path": "passkeys-ui-stack/passkeys-domain",
+          "passkeys-ui-route53-arecord": {
+            "id": "passkeys-ui-route53-arecord",
+            "path": "passkeys-ui/passkeys-ui-route53-arecord",
             "children": {
               "Resource": {
                 "id": "Resource",
-                "path": "passkeys-ui-stack/passkeys-domain/Resource",
+                "path": "passkeys-ui/passkeys-ui-route53-arecord/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::Route53::RecordSet",
                   "aws:cdk:cloudformation:props": {
@@ -1030,7 +986,7 @@
                       },
                       "dnsName": {
                         "Fn::GetAtt": [
-                          "cdnE31FB0B1",
+                          "passkeysuicloudfrontC3FB1DFF",
                           "DomainName"
                         ]
                       }
@@ -1053,97 +1009,19 @@
           },
           "AWSCloudFrontPartitionHostedZoneIdMap": {
             "id": "AWSCloudFrontPartitionHostedZoneIdMap",
-            "path": "passkeys-ui-stack/AWSCloudFrontPartitionHostedZoneIdMap",
+            "path": "passkeys-ui/AWSCloudFrontPartitionHostedZoneIdMap",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnMapping",
               "version": "2.127.0"
             }
           },
-          "lambda-dynamodb-policy": {
-            "id": "lambda-dynamodb-policy",
-            "path": "passkeys-ui-stack/lambda-dynamodb-policy",
-            "constructInfo": {
-              "fqn": "aws-cdk-lib.Resource",
-              "version": "2.127.0"
-            }
-          },
-          "passkeys-api-role": {
-            "id": "passkeys-api-role",
-            "path": "passkeys-ui-stack/passkeys-api-role",
-            "children": {
-              "Importpasskeys-api-role": {
-                "id": "Importpasskeys-api-role",
-                "path": "passkeys-ui-stack/passkeys-api-role/Importpasskeys-api-role",
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.Resource",
-                  "version": "2.127.0"
-                }
-              },
-              "Resource": {
-                "id": "Resource",
-                "path": "passkeys-ui-stack/passkeys-api-role/Resource",
-                "attributes": {
-                  "aws:cdk:cloudformation:type": "AWS::IAM::Role",
-                  "aws:cdk:cloudformation:props": {
-                    "assumeRolePolicyDocument": {
-                      "Statement": [
-                        {
-                          "Action": "sts:AssumeRole",
-                          "Effect": "Allow",
-                          "Principal": {
-                            "Service": "lambda.amazonaws.com"
-                          }
-                        }
-                      ],
-                      "Version": "2012-10-17"
-                    },
-                    "managedPolicyArns": [
-                      {
-                        "Fn::Join": [
-                          "",
-                          [
-                            "arn:",
-                            {
-                              "Ref": "AWS::Partition"
-                            },
-                            ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-                          ]
-                        ]
-                      },
-                      {
-                        "Fn::Join": [
-                          "",
-                          [
-                            "arn:",
-                            {
-                              "Ref": "AWS::Partition"
-                            },
-                            ":iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
-                          ]
-                        ]
-                      },
-                      "arn:aws:iam::427820939238:policy/AWSLambdaDynamoDBRole"
-                    ]
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_iam.CfnRole",
-                  "version": "2.127.0"
-                }
-              }
-            },
-            "constructInfo": {
-              "fqn": "aws-cdk-lib.aws_iam.Role",
-              "version": "2.127.0"
-            }
-          },
           "CDKMetadata": {
             "id": "CDKMetadata",
-            "path": "passkeys-ui-stack/CDKMetadata",
+            "path": "passkeys-ui/CDKMetadata",
             "children": {
               "Default": {
                 "id": "Default",
-                "path": "passkeys-ui-stack/CDKMetadata/Default",
+                "path": "passkeys-ui/CDKMetadata/Default",
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.CfnResource",
                   "version": "2.127.0"
@@ -1157,7 +1035,7 @@
           },
           "BootstrapVersion": {
             "id": "BootstrapVersion",
-            "path": "passkeys-ui-stack/BootstrapVersion",
+            "path": "passkeys-ui/BootstrapVersion",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnParameter",
               "version": "2.127.0"
@@ -1165,7 +1043,7 @@
           },
           "CheckBootstrapVersion": {
             "id": "CheckBootstrapVersion",
-            "path": "passkeys-ui-stack/CheckBootstrapVersion",
+            "path": "passkeys-ui/CheckBootstrapVersion",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnRule",
               "version": "2.127.0"

@@ -4,21 +4,21 @@
     "id": "App",
     "path": "",
     "children": {
-      "passkeys-api-stack": {
-        "id": "passkeys-api-stack",
-        "path": "passkeys-api-stack",
+      "passkeys-api": {
+        "id": "passkeys-api",
+        "path": "passkeys-api",
         "children": {
-          "passkeys-log-group": {
-            "id": "passkeys-log-group",
-            "path": "passkeys-api-stack/passkeys-log-group",
+          "passkeys-api-log-group": {
+            "id": "passkeys-api-log-group",
+            "path": "passkeys-api/passkeys-api-log-group",
             "children": {
               "Resource": {
                 "id": "Resource",
-                "path": "passkeys-api-stack/passkeys-log-group/Resource",
+                "path": "passkeys-api/passkeys-api-log-group/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::Logs::LogGroup",
                   "aws:cdk:cloudformation:props": {
-                    "logGroupName": "/passkeys",
+                    "logGroupName": "/passkeys-api",
                     "retentionInDays": 7
                   }
                 },
@@ -33,37 +33,37 @@
               "version": "2.127.0"
             }
           },
-          "jwk-public-keys-ssm": {
-            "id": "jwk-public-keys-ssm",
-            "path": "passkeys-api-stack/jwk-public-keys-ssm",
+          "passkeys-api-jwk-public-keys-ssm": {
+            "id": "passkeys-api-jwk-public-keys-ssm",
+            "path": "passkeys-api/passkeys-api-jwk-public-keys-ssm",
             "constructInfo": {
               "fqn": "aws-cdk-lib.Resource",
               "version": "2.127.0"
             }
           },
-          "jwk-private-key-ssm": {
-            "id": "jwk-private-key-ssm",
-            "path": "passkeys-api-stack/jwk-private-key-ssm",
+          "passkeys-api-jwk-private-key-ssm": {
+            "id": "passkeys-api-jwk-private-key-ssm",
+            "path": "passkeys-api/passkeys-api-jwk-private-key-ssm",
             "constructInfo": {
               "fqn": "aws-cdk-lib.Resource",
               "version": "2.127.0"
             }
           },
-          "domain-zone": {
-            "id": "domain-zone",
-            "path": "passkeys-api-stack/domain-zone",
+          "passkeys-api-domain-zone": {
+            "id": "passkeys-api-domain-zone",
+            "path": "passkeys-api/passkeys-api-domain-zone",
             "constructInfo": {
               "fqn": "aws-cdk-lib.Resource",
               "version": "2.127.0"
             }
           },
-          "certificate": {
-            "id": "certificate",
-            "path": "passkeys-api-stack/certificate",
+          "passkeys-api-certificate": {
+            "id": "passkeys-api-certificate",
+            "path": "passkeys-api/passkeys-api-certificate",
             "children": {
               "Resource": {
                 "id": "Resource",
-                "path": "passkeys-api-stack/certificate/Resource",
+                "path": "passkeys-api/passkeys-api-certificate/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::CertificateManager::Certificate",
                   "aws:cdk:cloudformation:props": {
@@ -84,7 +84,7 @@
                     "tags": [
                       {
                         "key": "Name",
-                        "value": "passkeys-api-stack/certificate"
+                        "value": "passkeys-api/passkeys-api-certificate"
                       }
                     ],
                     "validationMethod": "DNS"
@@ -101,21 +101,21 @@
               "version": "2.127.0"
             }
           },
-          "lambda-dynamodb-policy": {
-            "id": "lambda-dynamodb-policy",
-            "path": "passkeys-api-stack/lambda-dynamodb-policy",
+          "passkeys-api-lambda-dynamodb-policy": {
+            "id": "passkeys-api-lambda-dynamodb-policy",
+            "path": "passkeys-api/passkeys-api-lambda-dynamodb-policy",
             "constructInfo": {
               "fqn": "aws-cdk-lib.Resource",
               "version": "2.127.0"
             }
           },
-          "passkeys-api-role": {
-            "id": "passkeys-api-role",
-            "path": "passkeys-api-stack/passkeys-api-role",
+          "passkeys-api-lambda-role": {
+            "id": "passkeys-api-lambda-role",
+            "path": "passkeys-api/passkeys-api-lambda-role",
             "children": {
-              "Importpasskeys-api-role": {
-                "id": "Importpasskeys-api-role",
-                "path": "passkeys-api-stack/passkeys-api-role/Importpasskeys-api-role",
+              "Importpasskeys-api-lambda-role": {
+                "id": "Importpasskeys-api-lambda-role",
+                "path": "passkeys-api/passkeys-api-lambda-role/Importpasskeys-api-lambda-role",
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.Resource",
                   "version": "2.127.0"
@@ -123,7 +123,7 @@
               },
               "Resource": {
                 "id": "Resource",
-                "path": "passkeys-api-stack/passkeys-api-role/Resource",
+                "path": "passkeys-api/passkeys-api-lambda-role/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::IAM::Role",
                   "aws:cdk:cloudformation:props": {
@@ -175,11 +175,11 @@
               },
               "DefaultPolicy": {
                 "id": "DefaultPolicy",
-                "path": "passkeys-api-stack/passkeys-api-role/DefaultPolicy",
+                "path": "passkeys-api/passkeys-api-lambda-role/DefaultPolicy",
                 "children": {
                   "Resource": {
                     "id": "Resource",
-                    "path": "passkeys-api-stack/passkeys-api-role/DefaultPolicy/Resource",
+                    "path": "passkeys-api/passkeys-api-lambda-role/DefaultPolicy/Resource",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::IAM::Policy",
                       "aws:cdk:cloudformation:props": {
@@ -209,10 +209,10 @@
                           ],
                           "Version": "2012-10-17"
                         },
-                        "policyName": "passkeysapiroleDefaultPolicyF64573B3",
+                        "policyName": "passkeysapilambdaroleDefaultPolicy648F25A0",
                         "roles": [
                           {
-                            "Ref": "passkeysapiroleACD0888A"
+                            "Ref": "passkeysapilambdaroleDF30F8EA"
                           }
                         ]
                       }
@@ -234,17 +234,17 @@
               "version": "2.127.0"
             }
           },
-          "passkeys-api": {
-            "id": "passkeys-api",
-            "path": "passkeys-api-stack/passkeys-api",
+          "passkeys-api-lambda": {
+            "id": "passkeys-api-lambda",
+            "path": "passkeys-api/passkeys-api-lambda",
             "children": {
               "Code": {
                 "id": "Code",
-                "path": "passkeys-api-stack/passkeys-api/Code",
+                "path": "passkeys-api/passkeys-api-lambda/Code",
                 "children": {
                   "Stage": {
                     "id": "Stage",
-                    "path": "passkeys-api-stack/passkeys-api/Code/Stage",
+                    "path": "passkeys-api/passkeys-api-lambda/Code/Stage",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.AssetStaging",
                       "version": "2.127.0"
@@ -252,7 +252,7 @@
                   },
                   "AssetBucket": {
                     "id": "AssetBucket",
-                    "path": "passkeys-api-stack/passkeys-api/Code/AssetBucket",
+                    "path": "passkeys-api/passkeys-api-lambda/Code/AssetBucket",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.aws_s3.BucketBase",
                       "version": "2.127.0"
@@ -266,7 +266,7 @@
               },
               "Resource": {
                 "id": "Resource",
-                "path": "passkeys-api-stack/passkeys-api/Resource",
+                "path": "passkeys-api/passkeys-api-lambda/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
                   "aws:cdk:cloudformation:props": {
@@ -300,13 +300,13 @@
                     ],
                     "loggingConfig": {
                       "logGroup": {
-                        "Ref": "passkeysloggroupAEBC363A"
+                        "Ref": "passkeysapiloggroup7EC17B40"
                       }
                     },
                     "memorySize": 512,
                     "role": {
                       "Fn::GetAtt": [
-                        "passkeysapiroleACD0888A",
+                        "passkeysapilambdaroleDF30F8EA",
                         "Arn"
                       ]
                     },
@@ -324,7 +324,7 @@
               },
               "AdotLayer": {
                 "id": "AdotLayer",
-                "path": "passkeys-api-stack/passkeys-api/AdotLayer",
+                "path": "passkeys-api/passkeys-api-lambda/AdotLayer",
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.Resource",
                   "version": "2.127.0"
@@ -336,13 +336,13 @@
               "version": "2.127.0"
             }
           },
-          "passkeys-api-gateway": {
-            "id": "passkeys-api-gateway",
-            "path": "passkeys-api-stack/passkeys-api-gateway",
+          "passkeys-api-http-api-gateway": {
+            "id": "passkeys-api-http-api-gateway",
+            "path": "passkeys-api/passkeys-api-http-api-gateway",
             "children": {
               "Resource": {
                 "id": "Resource",
-                "path": "passkeys-api-stack/passkeys-api-gateway/Resource",
+                "path": "passkeys-api/passkeys-api-http-api-gateway/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::ApiGatewayV2::Api",
                   "aws:cdk:cloudformation:props": {
@@ -357,25 +357,25 @@
               },
               "default": {
                 "id": "default",
-                "path": "passkeys-api-stack/passkeys-api-gateway/default",
+                "path": "passkeys-api/passkeys-api-http-api-gateway/default",
                 "children": {
                   "Resource": {
                     "id": "Resource",
-                    "path": "passkeys-api-stack/passkeys-api-gateway/default/Resource",
+                    "path": "passkeys-api/passkeys-api-http-api-gateway/default/Resource",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::ApiGatewayV2::Stage",
                       "aws:cdk:cloudformation:props": {
                         "accessLogSettings": {
                           "destinationArn": {
                             "Fn::GetAtt": [
-                              "passkeysloggroupAEBC363A",
+                              "passkeysapiloggroup7EC17B40",
                               "Arn"
                             ]
                           },
                           "format": "{\"requestId\":\"$context.requestId\",\"ip\":\"$context.identity.sourceIp\",\"caller\":\"$context.identity.caller\",\"user\":\"$context.identity.user\",\"requestTime\":\"$context.requestTime\",\"httpMethod\":\"$context.httpMethod\",\"routeKey\":\"$context.routeKey\",\"status\":\"$context.status\",\"protocol\":\"$context.protocol\",\"responseLength\":\"$context.responseLength\"}"
                         },
                         "apiId": {
-                          "Ref": "passkeysapigateway4ADE8242"
+                          "Ref": "passkeysapihttpapigatewayF81C8793"
                         },
                         "autoDeploy": true,
                         "defaultRouteSettings": {
@@ -390,21 +390,21 @@
                       "version": "2.127.0"
                     }
                   },
-                  "passkeys-api-stack--api-domain-nameundefined": {
-                    "id": "passkeys-api-stack--api-domain-nameundefined",
-                    "path": "passkeys-api-stack/passkeys-api-gateway/default/passkeys-api-stack--api-domain-nameundefined",
+                  "passkeys-api--passkeys-api-domain-nameundefined": {
+                    "id": "passkeys-api--passkeys-api-domain-nameundefined",
+                    "path": "passkeys-api/passkeys-api-http-api-gateway/default/passkeys-api--passkeys-api-domain-nameundefined",
                     "children": {
                       "Resource": {
                         "id": "Resource",
-                        "path": "passkeys-api-stack/passkeys-api-gateway/default/passkeys-api-stack--api-domain-nameundefined/Resource",
+                        "path": "passkeys-api/passkeys-api-http-api-gateway/default/passkeys-api--passkeys-api-domain-nameundefined/Resource",
                         "attributes": {
                           "aws:cdk:cloudformation:type": "AWS::ApiGatewayV2::ApiMapping",
                           "aws:cdk:cloudformation:props": {
                             "apiId": {
-                              "Ref": "passkeysapigateway4ADE8242"
+                              "Ref": "passkeysapihttpapigatewayF81C8793"
                             },
                             "domainName": {
-                              "Ref": "apidomainnameBE6EC9F3"
+                              "Ref": "passkeysapidomainname5CA6B49A"
                             },
                             "stage": "$default"
                           }
@@ -428,25 +428,25 @@
               },
               "ANY--{proxy+}": {
                 "id": "ANY--{proxy+}",
-                "path": "passkeys-api-stack/passkeys-api-gateway/ANY--{proxy+}",
+                "path": "passkeys-api/passkeys-api-http-api-gateway/ANY--{proxy+}",
                 "children": {
-                  "api-integration": {
-                    "id": "api-integration",
-                    "path": "passkeys-api-stack/passkeys-api-gateway/ANY--{proxy+}/api-integration",
+                  "passkeys-api-http-lambda-integration": {
+                    "id": "passkeys-api-http-lambda-integration",
+                    "path": "passkeys-api/passkeys-api-http-api-gateway/ANY--{proxy+}/passkeys-api-http-lambda-integration",
                     "children": {
                       "Resource": {
                         "id": "Resource",
-                        "path": "passkeys-api-stack/passkeys-api-gateway/ANY--{proxy+}/api-integration/Resource",
+                        "path": "passkeys-api/passkeys-api-http-api-gateway/ANY--{proxy+}/passkeys-api-http-lambda-integration/Resource",
                         "attributes": {
                           "aws:cdk:cloudformation:type": "AWS::ApiGatewayV2::Integration",
                           "aws:cdk:cloudformation:props": {
                             "apiId": {
-                              "Ref": "passkeysapigateway4ADE8242"
+                              "Ref": "passkeysapihttpapigatewayF81C8793"
                             },
                             "integrationType": "AWS_PROXY",
                             "integrationUri": {
                               "Fn::GetAtt": [
-                                "passkeysapiE4674618",
+                                "passkeysapilambdaA7D281FC",
                                 "Arn"
                               ]
                             },
@@ -464,16 +464,16 @@
                       "version": "2.127.0"
                     }
                   },
-                  "api-integration-Permission": {
-                    "id": "api-integration-Permission",
-                    "path": "passkeys-api-stack/passkeys-api-gateway/ANY--{proxy+}/api-integration-Permission",
+                  "passkeys-api-http-lambda-integration-Permission": {
+                    "id": "passkeys-api-http-lambda-integration-Permission",
+                    "path": "passkeys-api/passkeys-api-http-api-gateway/ANY--{proxy+}/passkeys-api-http-lambda-integration-Permission",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
                       "aws:cdk:cloudformation:props": {
                         "action": "lambda:InvokeFunction",
                         "functionName": {
                           "Fn::GetAtt": [
-                            "passkeysapiE4674618",
+                            "passkeysapilambdaA7D281FC",
                             "Arn"
                           ]
                         },
@@ -484,7 +484,7 @@
                             [
                               "arn:aws:execute-api:ap-southeast-2:427820939238:",
                               {
-                                "Ref": "passkeysapigateway4ADE8242"
+                                "Ref": "passkeysapihttpapigatewayF81C8793"
                               },
                               "/*/*/{proxy+}"
                             ]
@@ -499,12 +499,12 @@
                   },
                   "Resource": {
                     "id": "Resource",
-                    "path": "passkeys-api-stack/passkeys-api-gateway/ANY--{proxy+}/Resource",
+                    "path": "passkeys-api/passkeys-api-http-api-gateway/ANY--{proxy+}/Resource",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::ApiGatewayV2::Route",
                       "aws:cdk:cloudformation:props": {
                         "apiId": {
-                          "Ref": "passkeysapigateway4ADE8242"
+                          "Ref": "passkeysapihttpapigatewayF81C8793"
                         },
                         "authorizationType": "NONE",
                         "routeKey": "ANY /{proxy+}",
@@ -514,7 +514,7 @@
                             [
                               "integrations/",
                               {
-                                "Ref": "passkeysapigatewayANYproxyapiintegrationD3B60976"
+                                "Ref": "passkeysapihttpapigatewayANYproxypasskeysapihttplambdaintegration3B94EDD0"
                               }
                             ]
                           ]
@@ -538,13 +538,13 @@
               "version": "2.127.0"
             }
           },
-          "api-domain-name": {
-            "id": "api-domain-name",
-            "path": "passkeys-api-stack/api-domain-name",
+          "passkeys-api-domain-name": {
+            "id": "passkeys-api-domain-name",
+            "path": "passkeys-api/passkeys-api-domain-name",
             "children": {
               "Resource": {
                 "id": "Resource",
-                "path": "passkeys-api-stack/api-domain-name/Resource",
+                "path": "passkeys-api/passkeys-api-domain-name/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::ApiGatewayV2::DomainName",
                   "aws:cdk:cloudformation:props": {
@@ -552,7 +552,7 @@
                     "domainNameConfigurations": [
                       {
                         "certificateArn": {
-                          "Ref": "certificateEC031123"
+                          "Ref": "passkeysapicertificate4976D089"
                         },
                         "endpointType": "REGIONAL"
                       }
@@ -570,26 +570,26 @@
               "version": "2.127.0"
             }
           },
-          "api-domain-record": {
-            "id": "api-domain-record",
-            "path": "passkeys-api-stack/api-domain-record",
+          "passkeys-api-route53-arecord": {
+            "id": "passkeys-api-route53-arecord",
+            "path": "passkeys-api/passkeys-api-route53-arecord",
             "children": {
               "Resource": {
                 "id": "Resource",
-                "path": "passkeys-api-stack/api-domain-record/Resource",
+                "path": "passkeys-api/passkeys-api-route53-arecord/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::Route53::RecordSet",
                   "aws:cdk:cloudformation:props": {
                     "aliasTarget": {
                       "dnsName": {
                         "Fn::GetAtt": [
-                          "apidomainnameBE6EC9F3",
+                          "passkeysapidomainname5CA6B49A",
                           "RegionalDomainName"
                         ]
                       },
                       "hostedZoneId": {
                         "Fn::GetAtt": [
-                          "apidomainnameBE6EC9F3",
+                          "passkeysapidomainname5CA6B49A",
                           "RegionalHostedZoneId"
                         ]
                       }
@@ -612,11 +612,11 @@
           },
           "CDKMetadata": {
             "id": "CDKMetadata",
-            "path": "passkeys-api-stack/CDKMetadata",
+            "path": "passkeys-api/CDKMetadata",
             "children": {
               "Default": {
                 "id": "Default",
-                "path": "passkeys-api-stack/CDKMetadata/Default",
+                "path": "passkeys-api/CDKMetadata/Default",
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.CfnResource",
                   "version": "2.127.0"
@@ -630,7 +630,7 @@
           },
           "BootstrapVersion": {
             "id": "BootstrapVersion",
-            "path": "passkeys-api-stack/BootstrapVersion",
+            "path": "passkeys-api/BootstrapVersion",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnParameter",
               "version": "2.127.0"
@@ -638,7 +638,7 @@
           },
           "CheckBootstrapVersion": {
             "id": "CheckBootstrapVersion",
-            "path": "passkeys-api-stack/CheckBootstrapVersion",
+            "path": "passkeys-api/CheckBootstrapVersion",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnRule",
               "version": "2.127.0"

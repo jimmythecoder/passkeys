@@ -6,46 +6,46 @@ export class ApiStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props: cdk.StackProps) {
         super(scope, id, props);
 
-        this.tags.setTag("app", "@passkeys/api");
+        this.tags.setTag("app", id);
         this.tags.setTag("AppManagerCFNStackKey", this.stackName);
 
-        const logGroup = new cdk.aws_logs.LogGroup(this, `passkeys-log-group`, {
-            logGroupName: `/passkeys`,
+        const logGroup = new cdk.aws_logs.LogGroup(this, `${id}-log-group`, {
+            logGroupName: `/${id}`,
             removalPolicy: cdk.RemovalPolicy.DESTROY,
             retention: cdk.aws_logs.RetentionDays.ONE_WEEK,
         });
 
-        const jwksPublicKeys = cdk.aws_ssm.StringParameter.fromSecureStringParameterAttributes(this, `jwk-public-keys-ssm`, {
+        const jwksPublicKeys = cdk.aws_ssm.StringParameter.fromSecureStringParameterAttributes(this, `${id}-jwk-public-keys-ssm`, {
             parameterName: process.env.JWKS_PUBLIC_KEYS!,
             version: 1,
         });
 
-        const jwkPrivateKey = cdk.aws_ssm.StringParameter.fromSecureStringParameterAttributes(this, `jwk-private-key-ssm`, {
+        const jwkPrivateKey = cdk.aws_ssm.StringParameter.fromSecureStringParameterAttributes(this, `${id}-jwk-private-key-ssm`, {
             parameterName: process.env.JWK_PRIVATE_KEY!,
             version: 1,
         });
 
-        const zone = cdk.aws_route53.HostedZone.fromHostedZoneAttributes(this, `domain-zone`, {
+        const zone = cdk.aws_route53.HostedZone.fromHostedZoneAttributes(this, `${id}-domain-zone`, {
             hostedZoneId: process.env.AWS_DOMAIN_HOSTED_ZONE_ID!,
             zoneName: process.env.ROOT_DOMAIN!,
         });
 
-        const apiCertificate = new cdk.aws_certificatemanager.Certificate(this, "certificate", {
+        const apiCertificate = new cdk.aws_certificatemanager.Certificate(this, `${id}-certificate`, {
             domainName: process.env.ROOT_DOMAIN!,
             subjectAlternativeNames: [process.env.API_DOMAIN!],
             validation: cdk.aws_certificatemanager.CertificateValidation.fromDns(zone),
         });
 
-        const lambdaRole = new cdk.aws_iam.Role(this, `passkeys-api-role`, {
+        const lambdaRole = new cdk.aws_iam.Role(this, `${id}-lambda-role`, {
             assumedBy: new cdk.aws_iam.ServicePrincipal("lambda.amazonaws.com"),
             managedPolicies: [
                 cdk.aws_iam.ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole"),
                 cdk.aws_iam.ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSLambdaVPCAccessExecutionRole"),
-                cdk.aws_iam.ManagedPolicy.fromManagedPolicyName(this, `lambda-dynamodb-policy`, "AWSLambdaDynamoDBRole"),
+                cdk.aws_iam.ManagedPolicy.fromManagedPolicyName(this, `${id}-lambda-dynamodb-policy`, "AWSLambdaDynamoDBRole"),
             ],
         });
 
-        const apiHandler = new cdk.aws_lambda_nodejs.NodejsFunction(this, `passkeys-api`, {
+        const apiHandler = new cdk.aws_lambda_nodejs.NodejsFunction(this, `${id}-lambda`, {
             entry: `../src/lambda.mts`,
             functionName: `passkeys-api`,
             description: `Passkeys API`,
@@ -87,12 +87,12 @@ export class ApiStack extends cdk.Stack {
         jwksPublicKeys.grantRead(apiHandler);
         jwkPrivateKey.grantRead(apiHandler);
 
-        const apiGateway = new cdk.aws_apigatewayv2.HttpApi(this, `passkeys-api-gateway`, {
-            apiName: `passkeys-api`,
+        const apiGateway = new cdk.aws_apigatewayv2.HttpApi(this, `${id}-http-api-gateway`, {
+            apiName: id,
             createDefaultStage: false,
         });
 
-        const apiDomainName = new cdk.aws_apigatewayv2.DomainName(this, `api-domain-name`, {
+        const apiDomainName = new cdk.aws_apigatewayv2.DomainName(this, `${id}-domain-name`, {
             domainName: process.env.API_DOMAIN!,
             certificate: apiCertificate,
         });
@@ -129,15 +129,15 @@ export class ApiStack extends cdk.Stack {
         apiGateway.addRoutes({
             path: "/{proxy+}",
             methods: [cdk.aws_apigatewayv2.HttpMethod.ANY],
-            integration: new cdk.aws_apigatewayv2_integrations.HttpLambdaIntegration("api-integration", apiHandler),
+            integration: new cdk.aws_apigatewayv2_integrations.HttpLambdaIntegration(`${id}-http-lambda-integration`, apiHandler),
         });
 
-        new cdk.aws_route53.ARecord(this, `api-domain-record`, {
+        new cdk.aws_route53.ARecord(this, `${id}-route53-arecord`, {
             zone,
             target: cdk.aws_route53.RecordTarget.fromAlias(
                 new cdk.aws_route53_targets.ApiGatewayv2DomainProperties(apiDomainName.regionalDomainName, apiDomainName.regionalHostedZoneId),
             ),
-            recordName: "passkeys-api",
+            recordName: process.env.API_SUBDOMAIN!,
         });
     }
 }

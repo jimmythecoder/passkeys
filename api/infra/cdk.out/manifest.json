@@ -1,32 +1,32 @@
 {
   "version": "36.0.0",
   "artifacts": {
-    "passkeys-api-stack.assets": {
+    "passkeys-api.assets": {
       "type": "cdk:asset-manifest",
       "properties": {
-        "file": "passkeys-api-stack.assets.json",
+        "file": "passkeys-api.assets.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
       }
     },
-    "passkeys-api-stack": {
+    "passkeys-api": {
       "type": "aws:cloudformation:stack",
       "environment": "aws://427820939238/ap-southeast-2",
       "properties": {
-        "templateFile": "passkeys-api-stack.template.json",
+        "templateFile": "passkeys-api.template.json",
         "terminationProtection": false,
         "tags": {
-          "app": "@passkeys/api",
-          "AppManagerCFNStackKey": "passkeys-api-stack"
+          "app": "passkeys-api",
+          "AppManagerCFNStackKey": "passkeys-api"
         },
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::427820939238:role/cdk-hnb659fds-deploy-role-427820939238-ap-southeast-2",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::427820939238:role/cdk-hnb659fds-cfn-exec-role-427820939238-ap-southeast-2",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-427820939238-ap-southeast-2/f814c0e9494d1a80817ddf600fcb894026bc1f3728e0b110f31334e0e0489760.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-427820939238-ap-southeast-2/494330d4361c813c8927f048defa3439c3bfef5b226365dbaa89d20932d2204c.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
-          "passkeys-api-stack.assets"
+          "passkeys-api.assets"
         ],
         "lookupRole": {
           "arn": "arn:${AWS::Partition}:iam::427820939238:role/cdk-hnb659fds-lookup-role-427820939238-ap-southeast-2",
@@ -35,10 +35,10 @@
         }
       },
       "dependencies": [
-        "passkeys-api-stack.assets"
+        "passkeys-api.assets"
       ],
       "metadata": {
-        "/passkeys-api-stack": [
+        "/passkeys-api": [
           {
             "type": "aws:cdk:warning",
             "data": "If you are relying on AWS SDK v2 to be present in the Lambda environment already, please explicitly configure a NodeJS runtime of Node 16 or lower. [ack: @aws-cdk/aws-lambda-nodejs:sdkV2NotInRuntime]",
@@ -61,113 +61,113 @@
             "data": [
               {
                 "Key": "app",
-                "Value": "@passkeys/api"
+                "Value": "passkeys-api"
               },
               {
                 "Key": "AppManagerCFNStackKey",
-                "Value": "passkeys-api-stack"
+                "Value": "passkeys-api"
               }
             ]
           }
         ],
-        "/passkeys-api-stack/passkeys-log-group/Resource": [
+        "/passkeys-api/passkeys-api-log-group/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "passkeysloggroupAEBC363A"
+            "data": "passkeysapiloggroup7EC17B40"
           }
         ],
-        "/passkeys-api-stack/certificate/Resource": [
+        "/passkeys-api/passkeys-api-certificate/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "certificateEC031123"
+            "data": "passkeysapicertificate4976D089"
           }
         ],
-        "/passkeys-api-stack/passkeys-api-role/Resource": [
+        "/passkeys-api/passkeys-api-lambda-role/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "passkeysapiroleACD0888A"
+            "data": "passkeysapilambdaroleDF30F8EA"
           }
         ],
-        "/passkeys-api-stack/passkeys-api-role/DefaultPolicy/Resource": [
+        "/passkeys-api/passkeys-api-lambda-role/DefaultPolicy/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "passkeysapiroleDefaultPolicyF64573B3"
+            "data": "passkeysapilambdaroleDefaultPolicy648F25A0"
           }
         ],
-        "/passkeys-api-stack/passkeys-api/Resource": [
+        "/passkeys-api/passkeys-api-lambda/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "passkeysapiE4674618"
+            "data": "passkeysapilambdaA7D281FC"
           }
         ],
-        "/passkeys-api-stack/passkeys-api-gateway/Resource": [
+        "/passkeys-api/passkeys-api-http-api-gateway/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "passkeysapigateway4ADE8242"
+            "data": "passkeysapihttpapigatewayF81C8793"
           }
         ],
-        "/passkeys-api-stack/passkeys-api-gateway/default/Resource": [
+        "/passkeys-api/passkeys-api-http-api-gateway/default/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "passkeysapigatewaydefault1799EE26"
+            "data": "passkeysapihttpapigatewaydefaultE28E0DB0"
           }
         ],
-        "/passkeys-api-stack/passkeys-api-gateway/default/passkeys-api-stack--api-domain-nameundefined/Resource": [
+        "/passkeys-api/passkeys-api-http-api-gateway/default/passkeys-api--passkeys-api-domain-nameundefined/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "passkeysapigatewaydefaultpasskeysapistackapidomainnameundefined299A6E82"
+            "data": "passkeysapihttpapigatewaydefaultpasskeysapipasskeysapidomainnameundefined48604737"
           }
         ],
-        "/passkeys-api-stack/passkeys-api-gateway/ANY--{proxy+}/api-integration/Resource": [
+        "/passkeys-api/passkeys-api-http-api-gateway/ANY--{proxy+}/passkeys-api-http-lambda-integration/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "passkeysapigatewayANYproxyapiintegrationD3B60976"
+            "data": "passkeysapihttpapigatewayANYproxypasskeysapihttplambdaintegration3B94EDD0"
           }
         ],
-        "/passkeys-api-stack/passkeys-api-gateway/ANY--{proxy+}/api-integration-Permission": [
+        "/passkeys-api/passkeys-api-http-api-gateway/ANY--{proxy+}/passkeys-api-http-lambda-integration-Permission": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "passkeysapigatewayANYproxyapiintegrationPermission3F239CDC"
+            "data": "passkeysapihttpapigatewayANYproxypasskeysapihttplambdaintegrationPermission9BFC0AD7"
           }
         ],
-        "/passkeys-api-stack/passkeys-api-gateway/ANY--{proxy+}/Resource": [
+        "/passkeys-api/passkeys-api-http-api-gateway/ANY--{proxy+}/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "passkeysapigatewayANYproxy4D4DB608"
+            "data": "passkeysapihttpapigatewayANYproxy762C09F4"
           }
         ],
-        "/passkeys-api-stack/api-domain-name/Resource": [
+        "/passkeys-api/passkeys-api-domain-name/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "apidomainnameBE6EC9F3"
+            "data": "passkeysapidomainname5CA6B49A"
           }
         ],
-        "/passkeys-api-stack/api-domain-record/Resource": [
+        "/passkeys-api/passkeys-api-route53-arecord/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "apidomainrecordBFA2A62A"
+            "data": "passkeysapiroute53arecord9548F2E3"
           }
         ],
-        "/passkeys-api-stack/CDKMetadata/Default": [
+        "/passkeys-api/CDKMetadata/Default": [
           {
             "type": "aws:cdk:logicalId",
             "data": "CDKMetadata"
           }
         ],
-        "/passkeys-api-stack/BootstrapVersion": [
+        "/passkeys-api/BootstrapVersion": [
           {
             "type": "aws:cdk:logicalId",
             "data": "BootstrapVersion"
           }
         ],
-        "/passkeys-api-stack/CheckBootstrapVersion": [
+        "/passkeys-api/CheckBootstrapVersion": [
           {
             "type": "aws:cdk:logicalId",
             "data": "CheckBootstrapVersion"
           }
         ]
       },
-      "displayName": "passkeys-api-stack"
+      "displayName": "passkeys-api"
     },
     "Tree": {
       "type": "cdk:tree",

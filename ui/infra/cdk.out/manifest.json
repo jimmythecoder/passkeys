@@ -1,32 +1,32 @@
 {
   "version": "36.0.0",
   "artifacts": {
-    "passkeys-ui-stack.assets": {
+    "passkeys-ui.assets": {
       "type": "cdk:asset-manifest",
       "properties": {
-        "file": "passkeys-ui-stack.assets.json",
+        "file": "passkeys-ui.assets.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
       }
     },
-    "passkeys-ui-stack": {
+    "passkeys-ui": {
       "type": "aws:cloudformation:stack",
       "environment": "aws://427820939238/ap-southeast-2",
       "properties": {
-        "templateFile": "passkeys-ui-stack.template.json",
+        "templateFile": "passkeys-ui.template.json",
         "terminationProtection": false,
         "tags": {
-          "app": "@passkeys/ui",
-          "AppManagerCFNStackKey": "passkeys-ui-stack"
+          "app": "passkeys-ui",
+          "AppManagerCFNStackKey": "passkeys-ui"
         },
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::427820939238:role/cdk-hnb659fds-deploy-role-427820939238-ap-southeast-2",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::427820939238:role/cdk-hnb659fds-cfn-exec-role-427820939238-ap-southeast-2",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-427820939238-ap-southeast-2/aaf04b3eb505ac291a23c83436c518cba3eef2724e0ec0a2cc421ea480775568.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-427820939238-ap-southeast-2/f20d522938670b1c86e74cc88125e6395c1fbba34bcd0b970e181bb770689715.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
-          "passkeys-ui-stack.assets"
+          "passkeys-ui.assets"
         ],
         "lookupRole": {
           "arn": "arn:${AWS::Partition}:iam::427820939238:role/cdk-hnb659fds-lookup-role-427820939238-ap-southeast-2",
@@ -35,164 +35,152 @@
         }
       },
       "dependencies": [
-        "passkeys-ui-stack.assets"
+        "passkeys-ui.assets"
       ],
       "metadata": {
-        "/passkeys-ui-stack": [
+        "/passkeys-ui": [
           {
             "type": "aws:cdk:stack-tags",
             "data": [
               {
                 "Key": "app",
-                "Value": "@passkeys/ui"
+                "Value": "passkeys-ui"
               },
               {
                 "Key": "AppManagerCFNStackKey",
-                "Value": "passkeys-ui-stack"
+                "Value": "passkeys-ui"
               }
             ]
           }
         ],
-        "/passkeys-ui-stack/passkey-s3-bucket/Resource": [
+        "/passkeys-ui/passkeys-ui-s3-bucket/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "passkeys3bucket7C7E1BE7"
+            "data": "passkeysuis3bucket4B4FEDA7"
           }
         ],
-        "/passkeys-ui-stack/passkey-s3-bucket/Policy/Resource": [
+        "/passkeys-ui/passkeys-ui-s3-bucket/Policy/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "passkeys3bucketPolicyFA9D1874"
+            "data": "passkeysuis3bucketPolicy80ECF041"
           }
         ],
-        "/passkeys-ui-stack/passkey-s3-bucket/AutoDeleteObjectsCustomResource/Default": [
+        "/passkeys-ui/passkeys-ui-s3-bucket/AutoDeleteObjectsCustomResource/Default": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "passkeys3bucketAutoDeleteObjectsCustomResource19B0E9B8"
+            "data": "passkeysuis3bucketAutoDeleteObjectsCustomResource6AB2CFDA"
           }
         ],
-        "/passkeys-ui-stack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Role": [
+        "/passkeys-ui/Custom::S3AutoDeleteObjectsCustomResourceProvider/Role": [
           {
             "type": "aws:cdk:logicalId",
             "data": "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092"
           }
         ],
-        "/passkeys-ui-stack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Handler": [
+        "/passkeys-ui/Custom::S3AutoDeleteObjectsCustomResourceProvider/Handler": [
           {
             "type": "aws:cdk:logicalId",
             "data": "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F"
           }
         ],
-        "/passkeys-ui-stack/oai/Resource": [
+        "/passkeys-ui/passkeys-ui-oai/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "oai7A77E975"
+            "data": "passkeysuioai5BF2C536"
           }
         ],
-        "/passkeys-ui-stack/certificate/Resource": [
+        "/passkeys-ui/passkeys-ui-cloudfront-viewer-request/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "certificateEC031123"
+            "data": "passkeysuicloudfrontviewerrequest787CDF3A"
           }
         ],
-        "/passkeys-ui-stack/spa-rewrite/Resource": [
+        "/passkeys-ui/passkeys-ui-default-cache/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "sparewrite1F96A58C"
+            "data": "passkeysuidefaultcache98C84010"
           }
         ],
-        "/passkeys-ui-stack/passkeys-cache/Resource": [
+        "/passkeys-ui/passkeys-ui-assets-cache/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "passkeyscache8AB926E4"
+            "data": "passkeysuiassetscache784FC11C"
           }
         ],
-        "/passkeys-ui-stack/assets-cache/Resource": [
+        "/passkeys-ui/passkeys-ui-cloudfront/LoggingBucket/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "assetscache4CE6717C"
+            "data": "passkeysuicloudfrontLoggingBucketC4933BC2"
           }
         ],
-        "/passkeys-ui-stack/cdn/LoggingBucket/Resource": [
+        "/passkeys-ui/passkeys-ui-cloudfront/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "cdnLoggingBucket36AD0574"
+            "data": "passkeysuicloudfrontC3FB1DFF"
           }
         ],
-        "/passkeys-ui-stack/cdn/Resource": [
+        "/passkeys-ui/passkeys-ui-s3bucket-deployment/AwsCliLayer/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "cdnE31FB0B1"
+            "data": "passkeysuis3bucketdeploymentAwsCliLayer9B13A847"
           }
         ],
-        "/passkeys-ui-stack/passkeys-bucket-deployment/AwsCliLayer/Resource": [
+        "/passkeys-ui/passkeys-ui-s3bucket-deployment/CustomResource/Default": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "passkeysbucketdeploymentAwsCliLayerAECC7133"
+            "data": "passkeysuis3bucketdeploymentCustomResource40CAA571"
           }
         ],
-        "/passkeys-ui-stack/passkeys-bucket-deployment/CustomResource/Default": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "passkeysbucketdeploymentCustomResource2CF29C45"
-          }
-        ],
-        "/passkeys-ui-stack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/Resource": [
+        "/passkeys-ui/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265"
           }
         ],
-        "/passkeys-ui-stack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/DefaultPolicy/Resource": [
+        "/passkeys-ui/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/DefaultPolicy/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRoleDefaultPolicy88902FDF"
           }
         ],
-        "/passkeys-ui-stack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/Resource": [
+        "/passkeys-ui/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536"
           }
         ],
-        "/passkeys-ui-stack/passkeys-domain/Resource": [
+        "/passkeys-ui/passkeys-ui-route53-arecord/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "passkeysdomain7B327C17"
+            "data": "passkeysuiroute53arecord281A4A00"
           }
         ],
-        "/passkeys-ui-stack/AWSCloudFrontPartitionHostedZoneIdMap": [
+        "/passkeys-ui/AWSCloudFrontPartitionHostedZoneIdMap": [
           {
             "type": "aws:cdk:logicalId",
             "data": "AWSCloudFrontPartitionHostedZoneIdMap"
           }
         ],
-        "/passkeys-ui-stack/passkeys-api-role/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "passkeysapiroleACD0888A"
-          }
-        ],
-        "/passkeys-ui-stack/CDKMetadata/Default": [
+        "/passkeys-ui/CDKMetadata/Default": [
           {
             "type": "aws:cdk:logicalId",
             "data": "CDKMetadata"
           }
         ],
-        "/passkeys-ui-stack/BootstrapVersion": [
+        "/passkeys-ui/BootstrapVersion": [
           {
             "type": "aws:cdk:logicalId",
             "data": "BootstrapVersion"
           }
         ],
-        "/passkeys-ui-stack/CheckBootstrapVersion": [
+        "/passkeys-ui/CheckBootstrapVersion": [
           {
             "type": "aws:cdk:logicalId",
             "data": "CheckBootstrapVersion"
           }
         ]
       },
-      "displayName": "passkeys-ui-stack"
+      "displayName": "passkeys-ui"
     },
     "Tree": {
       "type": "cdk:tree",
