@@ -1,4 +1,4 @@
-import { PublicKeyCredentialCreationOptionsJSON } from "@simplewebauthn/typescript-types";
+import { PublicKeyCredentialCreationOptionsJSON } from "@simplewebauthn/types";
 
 export type Response = PublicKeyCredentialCreationOptionsJSON;
 

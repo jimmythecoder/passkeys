@@ -1,0 +1,667 @@
+{
+  "version": "tree-0.1",
+  "tree": {
+    "id": "App",
+    "path": "",
+    "children": {
+      "passkeys-api-stack": {
+        "id": "passkeys-api-stack",
+        "path": "passkeys-api-stack",
+        "children": {
+          "passkeys-log-group": {
+            "id": "passkeys-log-group",
+            "path": "passkeys-api-stack/passkeys-log-group",
+            "children": {
+              "Resource": {
+                "id": "Resource",
+                "path": "passkeys-api-stack/passkeys-log-group/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::Logs::LogGroup",
+                  "aws:cdk:cloudformation:props": {
+                    "logGroupName": "/passkeys/api",
+                    "retentionInDays": 7
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_logs.CfnLogGroup",
+                  "version": "2.127.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_logs.LogGroup",
+              "version": "2.127.0"
+            }
+          },
+          "jwk-public-keys-ssm": {
+            "id": "jwk-public-keys-ssm",
+            "path": "passkeys-api-stack/jwk-public-keys-ssm",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.Resource",
+              "version": "2.127.0"
+            }
+          },
+          "jwk-private-key-ssm": {
+            "id": "jwk-private-key-ssm",
+            "path": "passkeys-api-stack/jwk-private-key-ssm",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.Resource",
+              "version": "2.127.0"
+            }
+          },
+          "domain-zone": {
+            "id": "domain-zone",
+            "path": "passkeys-api-stack/domain-zone",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.Resource",
+              "version": "2.127.0"
+            }
+          },
+          "certificate": {
+            "id": "certificate",
+            "path": "passkeys-api-stack/certificate",
+            "children": {
+              "Resource": {
+                "id": "Resource",
+                "path": "passkeys-api-stack/certificate/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::CertificateManager::Certificate",
+                  "aws:cdk:cloudformation:props": {
+                    "domainName": "jharris.nz",
+                    "domainValidationOptions": [
+                      {
+                        "domainName": "jharris.nz",
+                        "hostedZoneId": "Z0324600191ZXCBZ5ARGI"
+                      },
+                      {
+                        "domainName": "passkeys-api.jharris.nz",
+                        "hostedZoneId": "Z0324600191ZXCBZ5ARGI"
+                      }
+                    ],
+                    "subjectAlternativeNames": [
+                      "passkeys-api.jharris.nz"
+                    ],
+                    "tags": [
+                      {
+                        "key": "Name",
+                        "value": "passkeys-api-stack/certificate"
+                      }
+                    ],
+                    "validationMethod": "DNS"
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_certificatemanager.CfnCertificate",
+                  "version": "2.127.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_certificatemanager.Certificate",
+              "version": "2.127.0"
+            }
+          },
+          "lambda-dynamodb-policy": {
+            "id": "lambda-dynamodb-policy",
+            "path": "passkeys-api-stack/lambda-dynamodb-policy",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.Resource",
+              "version": "2.127.0"
+            }
+          },
+          "passkeys-api-role": {
+            "id": "passkeys-api-role",
+            "path": "passkeys-api-stack/passkeys-api-role",
+            "children": {
+              "Importpasskeys-api-role": {
+                "id": "Importpasskeys-api-role",
+                "path": "passkeys-api-stack/passkeys-api-role/Importpasskeys-api-role",
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.Resource",
+                  "version": "2.127.0"
+                }
+              },
+              "Resource": {
+                "id": "Resource",
+                "path": "passkeys-api-stack/passkeys-api-role/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::IAM::Role",
+                  "aws:cdk:cloudformation:props": {
+                    "assumeRolePolicyDocument": {
+                      "Statement": [
+                        {
+                          "Action": "sts:AssumeRole",
+                          "Effect": "Allow",
+                          "Principal": {
+                            "Service": "lambda.amazonaws.com"
+                          }
+                        }
+                      ],
+                      "Version": "2012-10-17"
+                    },
+                    "managedPolicyArns": [
+                      {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition"
+                            },
+                            ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                          ]
+                        ]
+                      },
+                      {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition"
+                            },
+                            ":iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+                          ]
+                        ]
+                      },
+                      "arn:aws:iam::427820939238:policy/AWSLambdaDynamoDBRole"
+                    ]
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_iam.CfnRole",
+                  "version": "2.127.0"
+                }
+              },
+              "DefaultPolicy": {
+                "id": "DefaultPolicy",
+                "path": "passkeys-api-stack/passkeys-api-role/DefaultPolicy",
+                "children": {
+                  "Resource": {
+                    "id": "Resource",
+                    "path": "passkeys-api-stack/passkeys-api-role/DefaultPolicy/Resource",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::IAM::Policy",
+                      "aws:cdk:cloudformation:props": {
+                        "policyDocument": {
+                          "Statement": [
+                            {
+                              "Action": [
+                                "xray:PutTelemetryRecords",
+                                "xray:PutTraceSegments"
+                              ],
+                              "Effect": "Allow",
+                              "Resource": "*"
+                            },
+                            {
+                              "Action": [
+                                "ssm:DescribeParameters",
+                                "ssm:GetParameter",
+                                "ssm:GetParameterHistory",
+                                "ssm:GetParameters"
+                              ],
+                              "Effect": "Allow",
+                              "Resource": [
+                                "arn:aws:ssm:ap-southeast-2:427820939238:parameter/passkeys/jwk/private",
+                                "arn:aws:ssm:ap-southeast-2:427820939238:parameter/passkeys/jwks/public"
+                              ]
+                            }
+                          ],
+                          "Version": "2012-10-17"
+                        },
+                        "policyName": "passkeysapiroleDefaultPolicyF64573B3",
+                        "roles": [
+                          {
+                            "Ref": "passkeysapiroleACD0888A"
+                          }
+                        ]
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_iam.CfnPolicy",
+                      "version": "2.127.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_iam.Policy",
+                  "version": "2.127.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_iam.Role",
+              "version": "2.127.0"
+            }
+          },
+          "passkeys-api": {
+            "id": "passkeys-api",
+            "path": "passkeys-api-stack/passkeys-api",
+            "children": {
+              "Code": {
+                "id": "Code",
+                "path": "passkeys-api-stack/passkeys-api/Code",
+                "children": {
+                  "Stage": {
+                    "id": "Stage",
+                    "path": "passkeys-api-stack/passkeys-api/Code/Stage",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.AssetStaging",
+                      "version": "2.127.0"
+                    }
+                  },
+                  "AssetBucket": {
+                    "id": "AssetBucket",
+                    "path": "passkeys-api-stack/passkeys-api/Code/AssetBucket",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_s3.BucketBase",
+                      "version": "2.127.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_s3_assets.Asset",
+                  "version": "2.127.0"
+                }
+              },
+              "Resource": {
+                "id": "Resource",
+                "path": "passkeys-api-stack/passkeys-api/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
+                  "aws:cdk:cloudformation:props": {
+                    "architectures": [
+                      "arm64"
+                    ],
+                    "code": {
+                      "s3Bucket": "cdk-hnb659fds-assets-427820939238-ap-southeast-2",
+                      "s3Key": "7158f6f51cf8a7713a0e4636170f5171277c72073d6d614afeb86e3920410467.zip"
+                    },
+                    "description": "Passkeys API",
+                    "environment": {
+                      "variables": {
+                        "RP_ID": "passkeys.jharris.nz",
+                        "RP_ORIGIN": "https://passkeys.jharris.nz",
+                        "NODE_ENV": "production",
+                        "JWKS_PUBLIC_KEYS": "/passkeys/jwks/public",
+                        "JWK_PRIVATE_KEY": "/passkeys/jwk/private",
+                        "JWT_AUDIENCE": "https://passkeys.jharris.nz",
+                        "JWT_ISSUER": "passkeys.jharris.nz",
+                        "SESSION_COOKIE_DOMAIN": "passkeys.jharris.nz",
+                        "COOKIE_SECRET": "canhazpasskeys",
+                        "AWS_LAMBDA_EXEC_WRAPPER": "/opt/otel-handler",
+                        "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1"
+                      }
+                    },
+                    "functionName": "passkeys-api",
+                    "handler": "index.handler",
+                    "layers": [
+                      "arn:aws:lambda:ap-southeast-2:901920570463:layer:aws-otel-nodejs-arm64-ver-1-18-1:1"
+                    ],
+                    "loggingConfig": {
+                      "logGroup": {
+                        "Ref": "passkeysloggroupAEBC363A"
+                      }
+                    },
+                    "memorySize": 512,
+                    "role": {
+                      "Fn::GetAtt": [
+                        "passkeysapiroleACD0888A",
+                        "Arn"
+                      ]
+                    },
+                    "runtime": "nodejs20.x",
+                    "timeout": 15,
+                    "tracingConfig": {
+                      "mode": "Active"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_lambda.CfnFunction",
+                  "version": "2.127.0"
+                }
+              },
+              "AdotLayer": {
+                "id": "AdotLayer",
+                "path": "passkeys-api-stack/passkeys-api/AdotLayer",
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.Resource",
+                  "version": "2.127.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_lambda_nodejs.NodejsFunction",
+              "version": "2.127.0"
+            }
+          },
+          "passkeys-api-gateway": {
+            "id": "passkeys-api-gateway",
+            "path": "passkeys-api-stack/passkeys-api-gateway",
+            "children": {
+              "Resource": {
+                "id": "Resource",
+                "path": "passkeys-api-stack/passkeys-api-gateway/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::ApiGatewayV2::Api",
+                  "aws:cdk:cloudformation:props": {
+                    "name": "passkeys-api",
+                    "protocolType": "HTTP"
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_apigatewayv2.CfnApi",
+                  "version": "2.127.0"
+                }
+              },
+              "default": {
+                "id": "default",
+                "path": "passkeys-api-stack/passkeys-api-gateway/default",
+                "children": {
+                  "Resource": {
+                    "id": "Resource",
+                    "path": "passkeys-api-stack/passkeys-api-gateway/default/Resource",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::ApiGatewayV2::Stage",
+                      "aws:cdk:cloudformation:props": {
+                        "accessLogSettings": {
+                          "destinationArn": {
+                            "Fn::GetAtt": [
+                              "passkeysloggroupAEBC363A",
+                              "Arn"
+                            ]
+                          },
+                          "format": "{\"requestId\":\"$context.requestId\",\"ip\":\"$context.identity.sourceIp\",\"caller\":\"$context.identity.caller\",\"user\":\"$context.identity.user\",\"requestTime\":\"$context.requestTime\",\"httpMethod\":\"$context.httpMethod\",\"routeKey\":\"$context.routeKey\",\"status\":\"$context.status\",\"protocol\":\"$context.protocol\",\"responseLength\":\"$context.responseLength\"}"
+                        },
+                        "apiId": {
+                          "Ref": "passkeysapigateway4ADE8242"
+                        },
+                        "autoDeploy": true,
+                        "defaultRouteSettings": {
+                          "throttlingBurstLimit": 100,
+                          "throttlingRateLimit": 10
+                        },
+                        "stageName": "$default"
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_apigatewayv2.CfnStage",
+                      "version": "2.127.0"
+                    }
+                  },
+                  "passkeys-api-stack--api-domain-nameundefined": {
+                    "id": "passkeys-api-stack--api-domain-nameundefined",
+                    "path": "passkeys-api-stack/passkeys-api-gateway/default/passkeys-api-stack--api-domain-nameundefined",
+                    "children": {
+                      "Resource": {
+                        "id": "Resource",
+                        "path": "passkeys-api-stack/passkeys-api-gateway/default/passkeys-api-stack--api-domain-nameundefined/Resource",
+                        "attributes": {
+                          "aws:cdk:cloudformation:type": "AWS::ApiGatewayV2::ApiMapping",
+                          "aws:cdk:cloudformation:props": {
+                            "apiId": {
+                              "Ref": "passkeysapigateway4ADE8242"
+                            },
+                            "domainName": {
+                              "Ref": "apidomainnameBE6EC9F3"
+                            },
+                            "stage": "$default"
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_apigatewayv2.CfnApiMapping",
+                          "version": "2.127.0"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_apigatewayv2.ApiMapping",
+                      "version": "2.127.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_apigatewayv2.HttpStage",
+                  "version": "2.127.0"
+                }
+              },
+              "ANY--{proxy+}": {
+                "id": "ANY--{proxy+}",
+                "path": "passkeys-api-stack/passkeys-api-gateway/ANY--{proxy+}",
+                "children": {
+                  "api-integration": {
+                    "id": "api-integration",
+                    "path": "passkeys-api-stack/passkeys-api-gateway/ANY--{proxy+}/api-integration",
+                    "children": {
+                      "Resource": {
+                        "id": "Resource",
+                        "path": "passkeys-api-stack/passkeys-api-gateway/ANY--{proxy+}/api-integration/Resource",
+                        "attributes": {
+                          "aws:cdk:cloudformation:type": "AWS::ApiGatewayV2::Integration",
+                          "aws:cdk:cloudformation:props": {
+                            "apiId": {
+                              "Ref": "passkeysapigateway4ADE8242"
+                            },
+                            "integrationType": "AWS_PROXY",
+                            "integrationUri": {
+                              "Fn::GetAtt": [
+                                "passkeysapiE4674618",
+                                "Arn"
+                              ]
+                            },
+                            "payloadFormatVersion": "2.0"
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_apigatewayv2.CfnIntegration",
+                          "version": "2.127.0"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_apigatewayv2.HttpIntegration",
+                      "version": "2.127.0"
+                    }
+                  },
+                  "api-integration-Permission": {
+                    "id": "api-integration-Permission",
+                    "path": "passkeys-api-stack/passkeys-api-gateway/ANY--{proxy+}/api-integration-Permission",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
+                      "aws:cdk:cloudformation:props": {
+                        "action": "lambda:InvokeFunction",
+                        "functionName": {
+                          "Fn::GetAtt": [
+                            "passkeysapiE4674618",
+                            "Arn"
+                          ]
+                        },
+                        "principal": "apigateway.amazonaws.com",
+                        "sourceArn": {
+                          "Fn::Join": [
+                            "",
+                            [
+                              "arn:aws:execute-api:ap-southeast-2:427820939238:",
+                              {
+                                "Ref": "passkeysapigateway4ADE8242"
+                              },
+                              "/*/*/{proxy+}"
+                            ]
+                          ]
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_lambda.CfnPermission",
+                      "version": "2.127.0"
+                    }
+                  },
+                  "Resource": {
+                    "id": "Resource",
+                    "path": "passkeys-api-stack/passkeys-api-gateway/ANY--{proxy+}/Resource",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::ApiGatewayV2::Route",
+                      "aws:cdk:cloudformation:props": {
+                        "apiId": {
+                          "Ref": "passkeysapigateway4ADE8242"
+                        },
+                        "authorizationType": "NONE",
+                        "routeKey": "ANY /{proxy+}",
+                        "target": {
+                          "Fn::Join": [
+                            "",
+                            [
+                              "integrations/",
+                              {
+                                "Ref": "passkeysapigatewayANYproxyapiintegrationD3B60976"
+                              }
+                            ]
+                          ]
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_apigatewayv2.CfnRoute",
+                      "version": "2.127.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_apigatewayv2.HttpRoute",
+                  "version": "2.127.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_apigatewayv2.HttpApi",
+              "version": "2.127.0"
+            }
+          },
+          "api-domain-name": {
+            "id": "api-domain-name",
+            "path": "passkeys-api-stack/api-domain-name",
+            "children": {
+              "Resource": {
+                "id": "Resource",
+                "path": "passkeys-api-stack/api-domain-name/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::ApiGatewayV2::DomainName",
+                  "aws:cdk:cloudformation:props": {
+                    "domainName": "passkeys-api.jharris.nz",
+                    "domainNameConfigurations": [
+                      {
+                        "certificateArn": {
+                          "Ref": "certificateEC031123"
+                        },
+                        "endpointType": "REGIONAL"
+                      }
+                    ]
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_apigatewayv2.CfnDomainName",
+                  "version": "2.127.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_apigatewayv2.DomainName",
+              "version": "2.127.0"
+            }
+          },
+          "api-domain-record": {
+            "id": "api-domain-record",
+            "path": "passkeys-api-stack/api-domain-record",
+            "children": {
+              "Resource": {
+                "id": "Resource",
+                "path": "passkeys-api-stack/api-domain-record/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::Route53::RecordSet",
+                  "aws:cdk:cloudformation:props": {
+                    "aliasTarget": {
+                      "dnsName": {
+                        "Fn::GetAtt": [
+                          "apidomainnameBE6EC9F3",
+                          "RegionalDomainName"
+                        ]
+                      },
+                      "hostedZoneId": {
+                        "Fn::GetAtt": [
+                          "apidomainnameBE6EC9F3",
+                          "RegionalHostedZoneId"
+                        ]
+                      }
+                    },
+                    "hostedZoneId": "Z0324600191ZXCBZ5ARGI",
+                    "name": "passkeys-api.jharris.nz.",
+                    "type": "A"
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_route53.CfnRecordSet",
+                  "version": "2.127.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_route53.ARecord",
+              "version": "2.127.0"
+            }
+          },
+          "CDKMetadata": {
+            "id": "CDKMetadata",
+            "path": "passkeys-api-stack/CDKMetadata",
+            "children": {
+              "Default": {
+                "id": "Default",
+                "path": "passkeys-api-stack/CDKMetadata/Default",
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.CfnResource",
+                  "version": "2.127.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "constructs.Construct",
+              "version": "10.3.0"
+            }
+          },
+          "BootstrapVersion": {
+            "id": "BootstrapVersion",
+            "path": "passkeys-api-stack/BootstrapVersion",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.CfnParameter",
+              "version": "2.127.0"
+            }
+          },
+          "CheckBootstrapVersion": {
+            "id": "CheckBootstrapVersion",
+            "path": "passkeys-api-stack/CheckBootstrapVersion",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.CfnRule",
+              "version": "2.127.0"
+            }
+          }
+        },
+        "constructInfo": {
+          "fqn": "aws-cdk-lib.Stack",
+          "version": "2.127.0"
+        }
+      },
+      "Tree": {
+        "id": "Tree",
+        "path": "Tree",
+        "constructInfo": {
+          "fqn": "constructs.Construct",
+          "version": "10.3.0"
+        }
+      }
+    },
+    "constructInfo": {
+      "fqn": "aws-cdk-lib.App",
+      "version": "2.127.0"
+    }
+  }
+}

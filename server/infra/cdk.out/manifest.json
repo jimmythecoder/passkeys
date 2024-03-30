@@ -1,0 +1,179 @@
+{
+  "version": "36.0.0",
+  "artifacts": {
+    "passkeys-api-stack.assets": {
+      "type": "cdk:asset-manifest",
+      "properties": {
+        "file": "passkeys-api-stack.assets.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+      }
+    },
+    "passkeys-api-stack": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://427820939238/ap-southeast-2",
+      "properties": {
+        "templateFile": "passkeys-api-stack.template.json",
+        "terminationProtection": false,
+        "tags": {
+          "app": "@passkeys/api",
+          "AppManagerCFNStackKey": "passkeys-api-stack"
+        },
+        "validateOnSynth": false,
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::427820939238:role/cdk-hnb659fds-deploy-role-427820939238-ap-southeast-2",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::427820939238:role/cdk-hnb659fds-cfn-exec-role-427820939238-ap-southeast-2",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-427820939238-ap-southeast-2/8ec716695f0fbb1bf0e4fe04b359ba1eef920b0443ac0fd3ca7c37b22b4767fd.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
+        "additionalDependencies": [
+          "passkeys-api-stack.assets"
+        ],
+        "lookupRole": {
+          "arn": "arn:${AWS::Partition}:iam::427820939238:role/cdk-hnb659fds-lookup-role-427820939238-ap-southeast-2",
+          "requiresBootstrapStackVersion": 8,
+          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+        }
+      },
+      "dependencies": [
+        "passkeys-api-stack.assets"
+      ],
+      "metadata": {
+        "/passkeys-api-stack": [
+          {
+            "type": "aws:cdk:warning",
+            "data": "If you are relying on AWS SDK v2 to be present in the Lambda environment already, please explicitly configure a NodeJS runtime of Node 16 or lower. [ack: @aws-cdk/aws-lambda-nodejs:sdkV2NotInRuntime]",
+            "trace": [
+              "Annotations.addMessage (/Users/james/Sites/passkeys/node_modules/.pnpm/aws-cdk-lib@2.127.0_constructs@10.3.0/node_modules/aws-cdk-lib/core/lib/annotations.js:1:1608)",
+              "Annotations.addWarningV2 (/Users/james/Sites/passkeys/node_modules/.pnpm/aws-cdk-lib@2.127.0_constructs@10.3.0/node_modules/aws-cdk-lib/core/lib/annotations.js:1:825)",
+              "new Bundling (/Users/james/Sites/passkeys/node_modules/.pnpm/aws-cdk-lib@2.127.0_constructs@10.3.0/node_modules/aws-cdk-lib/aws-lambda-nodejs/lib/bundling.js:1:2955)",
+              "Bundling.bundle (/Users/james/Sites/passkeys/node_modules/.pnpm/aws-cdk-lib@2.127.0_constructs@10.3.0/node_modules/aws-cdk-lib/aws-lambda-nodejs/lib/bundling.js:1:960)",
+              "new NodejsFunction (/Users/james/Sites/passkeys/node_modules/.pnpm/aws-cdk-lib@2.127.0_constructs@10.3.0/node_modules/aws-cdk-lib/aws-lambda-nodejs/lib/function.js:1:1729)",
+              "new ApiStack (file:///Users/james/Sites/passkeys/server/infra/src/api-stack.ts:1:1811)",
+              "file:///Users/james/Sites/passkeys/server/infra/src/index.ts:2:179",
+              "ModuleJob.run (node:internal/modules/esm/module_job:222:25)",
+              "async ModuleLoader.import (node:internal/modules/esm/loader:323:24)",
+              "async loadESM (node:internal/process/esm_loader:28:7)",
+              "async handleMainPromise (node:internal/modules/run_main:113:12)"
+            ]
+          },
+          {
+            "type": "aws:cdk:stack-tags",
+            "data": [
+              {
+                "Key": "app",
+                "Value": "@passkeys/api"
+              },
+              {
+                "Key": "AppManagerCFNStackKey",
+                "Value": "passkeys-api-stack"
+              }
+            ]
+          }
+        ],
+        "/passkeys-api-stack/passkeys-log-group/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "passkeysloggroupAEBC363A"
+          }
+        ],
+        "/passkeys-api-stack/certificate/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "certificateEC031123"
+          }
+        ],
+        "/passkeys-api-stack/passkeys-api-role/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "passkeysapiroleACD0888A"
+          }
+        ],
+        "/passkeys-api-stack/passkeys-api-role/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "passkeysapiroleDefaultPolicyF64573B3"
+          }
+        ],
+        "/passkeys-api-stack/passkeys-api/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "passkeysapiE4674618"
+          }
+        ],
+        "/passkeys-api-stack/passkeys-api-gateway/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "passkeysapigateway4ADE8242"
+          }
+        ],
+        "/passkeys-api-stack/passkeys-api-gateway/default/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "passkeysapigatewaydefault1799EE26"
+          }
+        ],
+        "/passkeys-api-stack/passkeys-api-gateway/default/passkeys-api-stack--api-domain-nameundefined/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "passkeysapigatewaydefaultpasskeysapistackapidomainnameundefined299A6E82"
+          }
+        ],
+        "/passkeys-api-stack/passkeys-api-gateway/ANY--{proxy+}/api-integration/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "passkeysapigatewayANYproxyapiintegrationD3B60976"
+          }
+        ],
+        "/passkeys-api-stack/passkeys-api-gateway/ANY--{proxy+}/api-integration-Permission": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "passkeysapigatewayANYproxyapiintegrationPermission3F239CDC"
+          }
+        ],
+        "/passkeys-api-stack/passkeys-api-gateway/ANY--{proxy+}/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "passkeysapigatewayANYproxy4D4DB608"
+          }
+        ],
+        "/passkeys-api-stack/api-domain-name/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "apidomainnameBE6EC9F3"
+          }
+        ],
+        "/passkeys-api-stack/api-domain-record/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "apidomainrecordBFA2A62A"
+          }
+        ],
+        "/passkeys-api-stack/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/passkeys-api-stack/BootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BootstrapVersion"
+          }
+        ],
+        "/passkeys-api-stack/CheckBootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckBootstrapVersion"
+          }
+        ]
+      },
+      "displayName": "passkeys-api-stack"
+    },
+    "Tree": {
+      "type": "cdk:tree",
+      "properties": {
+        "file": "tree.json"
+      }
+    }
+  }
+}

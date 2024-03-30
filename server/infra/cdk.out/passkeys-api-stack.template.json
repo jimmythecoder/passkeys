@@ -1,0 +1,406 @@
+{
+ "Resources": {
+  "passkeysloggroupAEBC363A": {
+   "Type": "AWS::Logs::LogGroup",
+   "Properties": {
+    "LogGroupName": "/passkeys/api",
+    "RetentionInDays": 7
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "passkeys-api-stack/passkeys-log-group/Resource"
+   }
+  },
+  "certificateEC031123": {
+   "Type": "AWS::CertificateManager::Certificate",
+   "Properties": {
+    "DomainName": "jharris.nz",
+    "DomainValidationOptions": [
+     {
+      "DomainName": "jharris.nz",
+      "HostedZoneId": "Z0324600191ZXCBZ5ARGI"
+     },
+     {
+      "DomainName": "passkeys-api.jharris.nz",
+      "HostedZoneId": "Z0324600191ZXCBZ5ARGI"
+     }
+    ],
+    "SubjectAlternativeNames": [
+     "passkeys-api.jharris.nz"
+    ],
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "passkeys-api-stack/certificate"
+     }
+    ],
+    "ValidationMethod": "DNS"
+   },
+   "Metadata": {
+    "aws:cdk:path": "passkeys-api-stack/certificate/Resource"
+   }
+  },
+  "passkeysapiroleACD0888A": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     },
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+       ]
+      ]
+     },
+     "arn:aws:iam::427820939238:policy/AWSLambdaDynamoDBRole"
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "passkeys-api-stack/passkeys-api-role/Resource"
+   }
+  },
+  "passkeysapiroleDefaultPolicyF64573B3": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "xray:PutTelemetryRecords",
+        "xray:PutTraceSegments"
+       ],
+       "Effect": "Allow",
+       "Resource": "*"
+      },
+      {
+       "Action": [
+        "ssm:DescribeParameters",
+        "ssm:GetParameter",
+        "ssm:GetParameterHistory",
+        "ssm:GetParameters"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        "arn:aws:ssm:ap-southeast-2:427820939238:parameter/passkeys/jwk/private",
+        "arn:aws:ssm:ap-southeast-2:427820939238:parameter/passkeys/jwks/public"
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "passkeysapiroleDefaultPolicyF64573B3",
+    "Roles": [
+     {
+      "Ref": "passkeysapiroleACD0888A"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "passkeys-api-stack/passkeys-api-role/DefaultPolicy/Resource"
+   }
+  },
+  "passkeysapiE4674618": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Architectures": [
+     "arm64"
+    ],
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-427820939238-ap-southeast-2",
+     "S3Key": "7158f6f51cf8a7713a0e4636170f5171277c72073d6d614afeb86e3920410467.zip"
+    },
+    "Description": "Passkeys API",
+    "Environment": {
+     "Variables": {
+      "RP_ID": "passkeys.jharris.nz",
+      "RP_ORIGIN": "https://passkeys.jharris.nz",
+      "NODE_ENV": "production",
+      "JWKS_PUBLIC_KEYS": "/passkeys/jwks/public",
+      "JWK_PRIVATE_KEY": "/passkeys/jwk/private",
+      "JWT_AUDIENCE": "https://passkeys.jharris.nz",
+      "JWT_ISSUER": "passkeys.jharris.nz",
+      "SESSION_COOKIE_DOMAIN": "passkeys.jharris.nz",
+      "COOKIE_SECRET": "canhazpasskeys",
+      "AWS_LAMBDA_EXEC_WRAPPER": "/opt/otel-handler",
+      "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1"
+     }
+    },
+    "FunctionName": "passkeys-api",
+    "Handler": "index.handler",
+    "Layers": [
+     "arn:aws:lambda:ap-southeast-2:901920570463:layer:aws-otel-nodejs-arm64-ver-1-18-1:1"
+    ],
+    "LoggingConfig": {
+     "LogGroup": {
+      "Ref": "passkeysloggroupAEBC363A"
+     }
+    },
+    "MemorySize": 512,
+    "Role": {
+     "Fn::GetAtt": [
+      "passkeysapiroleACD0888A",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs20.x",
+    "Timeout": 15,
+    "TracingConfig": {
+     "Mode": "Active"
+    }
+   },
+   "DependsOn": [
+    "passkeysapiroleDefaultPolicyF64573B3",
+    "passkeysapiroleACD0888A"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "passkeys-api-stack/passkeys-api/Resource",
+    "aws:asset:path": "asset.7158f6f51cf8a7713a0e4636170f5171277c72073d6d614afeb86e3920410467",
+    "aws:asset:is-bundled": true,
+    "aws:asset:property": "Code"
+   }
+  },
+  "passkeysapigateway4ADE8242": {
+   "Type": "AWS::ApiGatewayV2::Api",
+   "Properties": {
+    "Name": "passkeys-api",
+    "ProtocolType": "HTTP"
+   },
+   "Metadata": {
+    "aws:cdk:path": "passkeys-api-stack/passkeys-api-gateway/Resource"
+   }
+  },
+  "passkeysapigatewaydefault1799EE26": {
+   "Type": "AWS::ApiGatewayV2::Stage",
+   "Properties": {
+    "AccessLogSettings": {
+     "DestinationArn": {
+      "Fn::GetAtt": [
+       "passkeysloggroupAEBC363A",
+       "Arn"
+      ]
+     },
+     "Format": "{\"requestId\":\"$context.requestId\",\"ip\":\"$context.identity.sourceIp\",\"caller\":\"$context.identity.caller\",\"user\":\"$context.identity.user\",\"requestTime\":\"$context.requestTime\",\"httpMethod\":\"$context.httpMethod\",\"routeKey\":\"$context.routeKey\",\"status\":\"$context.status\",\"protocol\":\"$context.protocol\",\"responseLength\":\"$context.responseLength\"}"
+    },
+    "ApiId": {
+     "Ref": "passkeysapigateway4ADE8242"
+    },
+    "AutoDeploy": true,
+    "DefaultRouteSettings": {
+     "ThrottlingBurstLimit": 100,
+     "ThrottlingRateLimit": 10
+    },
+    "StageName": "$default"
+   },
+   "DependsOn": [
+    "apidomainnameBE6EC9F3"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "passkeys-api-stack/passkeys-api-gateway/default/Resource"
+   }
+  },
+  "passkeysapigatewaydefaultpasskeysapistackapidomainnameundefined299A6E82": {
+   "Type": "AWS::ApiGatewayV2::ApiMapping",
+   "Properties": {
+    "ApiId": {
+     "Ref": "passkeysapigateway4ADE8242"
+    },
+    "DomainName": {
+     "Ref": "apidomainnameBE6EC9F3"
+    },
+    "Stage": "$default"
+   },
+   "DependsOn": [
+    "apidomainnameBE6EC9F3",
+    "passkeysapigatewaydefault1799EE26"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "passkeys-api-stack/passkeys-api-gateway/default/passkeys-api-stack--api-domain-nameundefined/Resource"
+   }
+  },
+  "passkeysapigatewayANYproxyapiintegrationD3B60976": {
+   "Type": "AWS::ApiGatewayV2::Integration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "passkeysapigateway4ADE8242"
+    },
+    "IntegrationType": "AWS_PROXY",
+    "IntegrationUri": {
+     "Fn::GetAtt": [
+      "passkeysapiE4674618",
+      "Arn"
+     ]
+    },
+    "PayloadFormatVersion": "2.0"
+   },
+   "Metadata": {
+    "aws:cdk:path": "passkeys-api-stack/passkeys-api-gateway/ANY--{proxy+}/api-integration/Resource"
+   }
+  },
+  "passkeysapigatewayANYproxyapiintegrationPermission3F239CDC": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "passkeysapiE4674618",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:ap-southeast-2:427820939238:",
+       {
+        "Ref": "passkeysapigateway4ADE8242"
+       },
+       "/*/*/{proxy+}"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "passkeys-api-stack/passkeys-api-gateway/ANY--{proxy+}/api-integration-Permission"
+   }
+  },
+  "passkeysapigatewayANYproxy4D4DB608": {
+   "Type": "AWS::ApiGatewayV2::Route",
+   "Properties": {
+    "ApiId": {
+     "Ref": "passkeysapigateway4ADE8242"
+    },
+    "AuthorizationType": "NONE",
+    "RouteKey": "ANY /{proxy+}",
+    "Target": {
+     "Fn::Join": [
+      "",
+      [
+       "integrations/",
+       {
+        "Ref": "passkeysapigatewayANYproxyapiintegrationD3B60976"
+       }
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "passkeys-api-stack/passkeys-api-gateway/ANY--{proxy+}/Resource"
+   }
+  },
+  "apidomainnameBE6EC9F3": {
+   "Type": "AWS::ApiGatewayV2::DomainName",
+   "Properties": {
+    "DomainName": "passkeys-api.jharris.nz",
+    "DomainNameConfigurations": [
+     {
+      "CertificateArn": {
+       "Ref": "certificateEC031123"
+      },
+      "EndpointType": "REGIONAL"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "passkeys-api-stack/api-domain-name/Resource"
+   }
+  },
+  "apidomainrecordBFA2A62A": {
+   "Type": "AWS::Route53::RecordSet",
+   "Properties": {
+    "AliasTarget": {
+     "DNSName": {
+      "Fn::GetAtt": [
+       "apidomainnameBE6EC9F3",
+       "RegionalDomainName"
+      ]
+     },
+     "HostedZoneId": {
+      "Fn::GetAtt": [
+       "apidomainnameBE6EC9F3",
+       "RegionalHostedZoneId"
+      ]
+     }
+    },
+    "HostedZoneId": "Z0324600191ZXCBZ5ARGI",
+    "Name": "passkeys-api.jharris.nz.",
+    "Type": "A"
+   },
+   "Metadata": {
+    "aws:cdk:path": "passkeys-api-stack/api-domain-record/Resource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/11Qy27CMBD8Fu5mS4OqngNVH1KLqvABaHGWaCGxI68DQpb/vbJDStXTzHhm12MX8Fg8w2KGF5nr+jRveQ9h61GfFF5kF1rbCIRP27w5O/RqfTATj0qT83xgjZ46NNiQg7C+n6XwHxkVYwehsm12Mn7blvU1yZFF1WK3r3FnbE1HgU2G18Foz9YoWe5QhLxAmUDJElaDPpFfodBtFML6YH4n0mZyHYuwNVFhzw16uuD1XEB4974ve06hBEluPTa53kjKnr+w79k0t9CkUrayg6fMPoynxuF04z855l5sh2w22OX1dxWVS/7TEkJZkbauzjOZbcnHqCoSOzhNKj86Fbv1mYyo0nfBUR7OxQIeC1jMjsI8d4Px3BFUI/4AocD2POsBAAA="
+   },
+   "Metadata": {
+    "aws:cdk:path": "passkeys-api-stack/CDKMetadata/Default"
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}
