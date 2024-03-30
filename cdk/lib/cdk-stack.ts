@@ -148,7 +148,7 @@ export class CdkStack extends cdk.Stack {
         });
 
         const apiHandler = new cdk.aws_lambda_nodejs.NodejsFunction(this, `passkeys-api`, {
-            entry: `../server/src/index.mts`,
+            entry: `../server/src/lambda.mts`,
             functionName: `passkeys-api`,
             description: `Passkeys API`,
             logGroup,
