@@ -1,10 +1,9 @@
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { OutputFormat } from "aws-cdk-lib/aws-lambda-nodejs";
-import { ENV } from "../types";
 
-export class CdkStack extends cdk.Stack {
-    constructor(scope: Construct, id: string, props: cdk.StackProps, config: ENV) {
+export class ApiStack extends cdk.Stack {
+    constructor(scope: Construct, id: string, props: cdk.StackProps) {
         super(scope, id, props);
 
         this.tags.setTag("app", "@passkeys/api");
@@ -17,23 +16,23 @@ export class CdkStack extends cdk.Stack {
         });
 
         const jwksPublicKeys = cdk.aws_ssm.StringParameter.fromSecureStringParameterAttributes(this, `jwk-public-keys-ssm`, {
-            parameterName: config.JWKS_PUBLIC_KEYS,
+            parameterName: process.env.JWKS_PUBLIC_KEYS!,
             version: 1,
         });
 
         const jwkPrivateKey = cdk.aws_ssm.StringParameter.fromSecureStringParameterAttributes(this, `jwk-private-key-ssm`, {
-            parameterName: config.JWK_PRIVATE_KEY,
+            parameterName: process.env.JWK_PRIVATE_KEY!,
             version: 1,
         });
 
         const zone = cdk.aws_route53.HostedZone.fromHostedZoneAttributes(this, `domain-zone`, {
-            hostedZoneId: config.AWS_DOMAIN_HOSTED_ZONE_ID,
-            zoneName: config.ROOT_DOMAIN,
+            hostedZoneId: process.env.AWS_DOMAIN_HOSTED_ZONE_ID!,
+            zoneName: process.env.ROOT_DOMAIN!,
         });
 
         const apiCertificate = new cdk.aws_certificatemanager.Certificate(this, "certificate", {
-            domainName: config.ROOT_DOMAIN,
-            subjectAlternativeNames: [config.API_DOMAIN],
+            domainName: process.env.ROOT_DOMAIN!,
+            subjectAlternativeNames: [process.env.API_DOMAIN!],
             validation: cdk.aws_certificatemanager.CertificateValidation.fromDns(zone),
         });
 
@@ -47,7 +46,7 @@ export class CdkStack extends cdk.Stack {
         });
 
         const apiHandler = new cdk.aws_lambda_nodejs.NodejsFunction(this, `passkeys-api`, {
-            entry: `../server/src/lambda.mts`,
+            entry: `../src/lambda.mts`,
             functionName: `passkeys-api`,
             description: `Passkeys API`,
             logGroup,
@@ -73,15 +72,15 @@ export class CdkStack extends cdk.Stack {
                 externalModules: ["aws-sdk", "@aws-sdk/client-ssm"],
             },
             environment: {
-                RP_ID: config.RP_ID,
-                RP_ORIGIN: config.RP_ORIGIN,
-                NODE_ENV: config.NODE_ENV,
-                JWKS_PUBLIC_KEYS: config.JWKS_PUBLIC_KEYS,
-                JWK_PRIVATE_KEY: config.JWK_PRIVATE_KEY,
-                JWT_AUDIENCE: config.JWT_AUDIENCE,
-                JWT_ISSUER: config.JWT_ISSUER,
-                SESSION_COOKIE_DOMAIN: config.SESSION_COOKIE_DOMAIN,
-                COOKIE_SECRET: config.COOKIE_SECRET,
+                RP_ID: process.env.RP_ID!,
+                RP_ORIGIN: process.env.RP_ORIGIN!,
+                NODE_ENV: process.env.NODE_ENV!,
+                JWKS_PUBLIC_KEYS: process.env.JWKS_PUBLIC_KEYS!,
+                JWK_PRIVATE_KEY: process.env.JWK_PRIVATE_KEY!,
+                JWT_AUDIENCE: process.env.JWT_AUDIENCE!,
+                JWT_ISSUER: process.env.JWT_ISSUER!,
+                SESSION_COOKIE_DOMAIN: process.env.SESSION_COOKIE_DOMAIN!,
+                COOKIE_SECRET: process.env.COOKIE_SECRET!,
             },
         });
 
@@ -94,7 +93,7 @@ export class CdkStack extends cdk.Stack {
         });
 
         const apiDomainName = new cdk.aws_apigatewayv2.DomainName(this, `api-domain-name`, {
-            domainName: config.API_DOMAIN,
+            domainName: process.env.API_DOMAIN!,
             certificate: apiCertificate,
         });
 
@@ -124,6 +123,7 @@ export class CdkStack extends cdk.Stack {
                 status: "$context.status",
                 protocol: "$context.protocol",
                 responseLength: "$context.responseLength",
+                traceId: "$context.traceId"
             }),
         };
 
@@ -143,4 +143,4 @@ export class CdkStack extends cdk.Stack {
     }
 }
 
-export default CdkStack;
+export default ApiStack;

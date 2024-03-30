@@ -1,31 +1,13 @@
 #!/usr/bin/env node
 import * as dotenv from "dotenv";
 import * as cdk from "aws-cdk-lib";
-import { CdkStack } from "../lib/cdk-stack";
+import { ApiStack } from "./api-stack";
 
-dotenv.config();
-
-export const env = {
-    AWS_REGION: process.env.AWS_REGION!,
-    ROOT_DOMAIN: process.env.ROOT_DOMAIN!,
-    API_DOMAIN: process.env.API_DOMAIN!,
-    AWS_DOMAIN_HOSTED_ZONE_ID: process.env.AWS_DOMAIN_HOSTED_ZONE_ID!,
-    RP_ID: process.env.RP_ID ?? "example.com",
-    RP_ORIGIN: process.env.RP_ORIGIN ?? "https://example.com",
-    NODE_ENV: process.env.NODE_ENV ?? "production",
-    JWKS_PUBLIC_KEYS: process.env.JWKS_PUBLIC_KEYS ?? "/passkeys/jwks/public",
-    JWK_PRIVATE_KEY: process.env.JWK_PRIVATE_KEY ?? "/passkeys/jwk/private",
-    JWT_AUDIENCE: process.env.JWT_AUDIENCE ?? "example.com",
-    JWT_ISSUER: process.env.JWT_ISSUER ?? "https://example.com",
-    SESSION_COOKIE_DOMAIN: process.env.SESSION_COOKIE_DOMAIN ?? "example.com",
-    COOKIE_SECRET: process.env.COOKIE_SECRET ?? "canhazpasskeys",
-} as const;
-
-export type ENV = typeof env;
+dotenv.config({ path: [".env.local", ".env"] });
 
 const app = new cdk.App();
 
-export default new CdkStack(
+export default new ApiStack(
     app,
     "passkeys-api-stack",
     {
@@ -43,5 +25,4 @@ export default new CdkStack(
 
         /* For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html */
     },
-    env,
 );

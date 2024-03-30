@@ -1,25 +1,13 @@
 #!/usr/bin/env node
 import * as dotenv from "dotenv";
 import * as cdk from "aws-cdk-lib";
-import { CdkStack } from "../lib/cdk-stack";
+import { UIStack } from "./ui-stack";
 
-dotenv.config({ paths: ["../../.env"]});
-
-export const env = {
-    AWS_REGION: process.env.AWS_REGION!,
-    ROOT_DOMAIN: process.env.ROOT_DOMAIN!,
-    WEB_DOMAIN: process.env.WEB_DOMAIN!,
-    API_DOMAIN: process.env.API_DOMAIN!,
-    AWS_DOMAIN_HOSTED_ZONE_ID: process.env.AWS_DOMAIN_HOSTED_ZONE_ID!,
-    CERTIFICATE_ARN: process.env.CERTIFICATE_ARN!,
-    NODE_ENV: process.env.NODE_ENV ?? "production",
-} as const;
-
-export type ENV = typeof env;
+dotenv.config({ path: [".env.local", ".env"]});
 
 const app = new cdk.App();
 
-export default new CdkStack(
+export default new UIStack(
     app,
     "passkeys-ui-stack",
     {
@@ -37,5 +25,4 @@ export default new CdkStack(
 
         /* For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html */
     },
-    env,
 );
