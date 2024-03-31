@@ -1,15 +1,43 @@
 import dynamoose from "dynamoose";
 import { Item } from "dynamoose/dist/Item";
-import type { User } from "@passkeys/types";
 
-export type AuthenticatorModelType = Item & User.Webauthn.RegisteredAuthenticator;
+/**
+ * It is strongly advised that authenticators get their own DB
+ * table, ideally with a foreign key to a specific UserModel.
+ *
+ * "SQL" tags below are suggestions for column data types and
+ * how best to store data received during registration for use
+ * in subsequent authentications.
+ */
+export type RegisteredAuthenticator = {
+    id: string;
 
-export class Authenticator implements User.Webauthn.RegisteredAuthenticator {
+    userId: string;
+
+    // SQL: Encode to base64url then store as `TEXT`. Index this column
+    credentialID: Uint8Array;
+    // SQL: Store raw bytes as `BYTEA`/`BLOB`/etc...
+    credentialPublicKey: Uint8Array;
+    // SQL: Consider `BIGINT` since some authenticators return atomic timestamps as counters
+    counter: number;
+    // SQL: `VARCHAR(32)` or similar, longest possible value is currently 12 characters
+    // Ex: 'singleDevice' | 'multiDevice'
+    credentialDeviceType: CredentialDeviceType;
+    // SQL: `BOOL` or whatever similar type is supported
+    credentialBackedUp: boolean;
+    // SQL: `VARCHAR(255)` and store string array as a CSV string
+    // Ex: ['usb' | 'ble' | 'nfc' | 'internal']
+    transports?: AuthenticatorTransport[];
+};
+
+export type CredentialDeviceType = "singleDevice" | "multiDevice";
+
+export type AuthenticatorModelType = Item & RegisteredAuthenticator;
+
+export class Authenticator implements RegisteredAuthenticator {
     public readonly id: string;
 
     public readonly userId: string;
-
-    public readonly name: string;
 
     // SQL: Encode to base64url then store as `TEXT`. Index this column
     public readonly credentialID: Uint8Array;
@@ -22,7 +50,7 @@ export class Authenticator implements User.Webauthn.RegisteredAuthenticator {
 
     // SQL: `VARCHAR(32)` or similar, longest possible value is currently 12 characters
     // Ex: 'singleDevice' | 'multiDevice'
-    public readonly credentialDeviceType: User.Webauthn.CredentialDeviceType;
+    public readonly credentialDeviceType: CredentialDeviceType;
 
     // SQL: `BOOL` or whatever similar type is supported
     public readonly credentialBackedUp: boolean;
@@ -31,7 +59,7 @@ export class Authenticator implements User.Webauthn.RegisteredAuthenticator {
     // Ex: ['usb' | 'ble' | 'nfc' | 'internal']
     transports?: AuthenticatorTransport[];
 
-    constructor(registeredAuthenticator: User.Webauthn.RegisteredAuthenticator) {
+    constructor(registeredAuthenticator: RegisteredAuthenticator) {
         this.id = registeredAuthenticator.id;
         this.userId = registeredAuthenticator.userId;
         this.credentialID = registeredAuthenticator.credentialID;
@@ -40,7 +68,6 @@ export class Authenticator implements User.Webauthn.RegisteredAuthenticator {
         this.credentialDeviceType = registeredAuthenticator.credentialDeviceType;
         this.credentialBackedUp = registeredAuthenticator.credentialBackedUp;
         this.transports = registeredAuthenticator.transports;
-        this.name = registeredAuthenticator.name;
     }
 }
 
@@ -54,13 +81,6 @@ export const UserAuthenticatorSchema = new dynamoose.Schema({
             type: "global",
             name: "userIdIndex",
         },
-    },
-    name: {
-        type: String,
-    },
-    createdAt: {
-        type: String,
-        default: Date.now,
     },
     credentialID: {
         type: Buffer,

@@ -9,12 +9,12 @@ import {
 } from "@simplewebauthn/server";
 import dynamoose from "dynamoose";
 import { isoBase64URL } from "@simplewebauthn/server/helpers";
-import { UserAccountModel, Account } from "@/models/user";
+import { UserModel, User } from "@/models/user";
 import { UserSession } from "@/models/userSession";
 import { AuthChallenge, SessionChallenge } from "@/models/challenge";
 import { Authenticator, AuthenticatorModel } from "@/models/authenticators";
 import * as Exceptions from "@passkeys/exceptions";
-import { Api } from "@passkeys/config";
+import { HttpStatusCode } from "@/constants";
 import { MAX_AUTHENTICATORS } from "@/config";
 import { schema } from "@/middleware/api/auth.schema";
 
@@ -46,7 +46,7 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
         try {
             request.session.delete();
 
-            return await reply.status(Api.HttpStatusCode.NoContent).send({ message: "Signed out" });
+            return await reply.status(HttpStatusCode.NoContent).send({ message: "Signed out" });
         } catch (error) {
             return handleError(error, reply);
         }
@@ -56,7 +56,7 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
         try {
             request.session.delete();
 
-            return await reply.status(Api.HttpStatusCode.NoContent).send({ message: "Signed out" });
+            return await reply.status(HttpStatusCode.NoContent).send({ message: "Signed out" });
         } catch (error) {
             return handleError(error, reply);
         }
@@ -70,13 +70,13 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
                 throw new Exceptions.ValidationError("UserName is required");
             }
 
-            const [userEntity] = await UserAccountModel.query("userName").eq(userName).exec();
+            const [userEntity] = await UserModel.query("userName").eq(userName).exec();
 
             if (!userEntity) {
                 throw new Exceptions.UserNotFound(`User not found`);
             }
 
-            const user = new Account(userEntity);
+            const user = new User(userEntity);
 
             const userAuthenticators = await AuthenticatorModel.query("userId").eq(user.id).exec();
 
@@ -108,7 +108,7 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
             request.session.set("sub", user.userName);
             request.session.set("challenge", challenge.toJSON());
 
-            return await reply.status(Api.HttpStatusCode.OK).send(options);
+            return await reply.status(HttpStatusCode.OK).send(options);
         } catch (error) {
             return handleError(error, reply);
         }
@@ -135,8 +135,8 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
                 throw new Exceptions.AuthenticatorNotFound(`No matching authenticators found`);
             }
 
-            const userAccountModel = await UserAccountModel.get(userAuthenticators[0].userId);
-            const user = new Account(userAccountModel);
+            const userModel = await UserModel.get(userAuthenticators[0].userId);
+            const user = new User(userModel);
 
             if (!user) {
                 throw new Exceptions.UserNotFound(`User not found`);
@@ -165,7 +165,7 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
 
             request.session.set("challenge", challenge.toJSON());
 
-            return await reply.status(Api.HttpStatusCode.OK).send(options);
+            return await reply.status(HttpStatusCode.OK).send(options);
         } catch (error) {
             return handleError(error, reply);
         }
@@ -202,13 +202,13 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
                 throw new Exceptions.ChallengeError("Missing challenge, sign-in again");
             }
 
-            const userAccountModel = await UserAccountModel.get(authenticator.userId);
+            const userModel = await UserModel.get(authenticator.userId);
 
-            if (!UserAccountModel) {
+            if (!userModel) {
                 throw new Exceptions.UserNotFound(`User not found`);
             }
 
-            const user = new Account(userAccountModel);
+            const user = new User(userModel);
 
             if (user.isLocked) {
                 throw new Exceptions.UserAccountLocked(`User is locked out`);
@@ -228,7 +228,7 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
                     throw new Exceptions.VerificationError("Verification failed");
                 }
             } catch (error) {
-                await UserAccountModel.update({ id: user.id }, { failedLoginAttempts: user.failedLoginAttempts + 1 });
+                await UserModel.update({ id: user.id }, { failedLoginAttempts: user.failedLoginAttempts + 1 });
                 throw new Exceptions.VerificationError("Verification failed");
             }
 
@@ -244,7 +244,7 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
             request.session.set("sub", user.id);
             request.session.set("roles", user.roles);
 
-            return await reply.status(Api.HttpStatusCode.Created).send({ user, session });
+            return await reply.status(HttpStatusCode.Created).send({ user, session });
         } catch (error) {
             return await handleError(error, reply);
         } finally {
@@ -265,13 +265,13 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
                 throw new Exceptions.ValidationError("UserName is required", "userName");
             }
 
-            const users = await UserAccountModel.query("userName").eq(userName).limit(1).exec();
+            const users = await UserModel.query("userName").eq(userName).limit(1).exec();
 
             if (users.length) {
                 throw new Exceptions.UserAlreadyExists(`User ${userName} already exists`);
             }
 
-            const user = new Account({
+            const user = new User({
                 userName,
                 displayName,
             });
@@ -316,7 +316,7 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
 
             request.log.debug("New user registration request", user.userName);
 
-            return await reply.status(Api.HttpStatusCode.OK).send(options);
+            return await reply.status(HttpStatusCode.OK).send(options);
         } catch (error) {
             return handleError(error, reply);
         }
@@ -324,7 +324,7 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
 
     fastify.post<{ Body: FromSchema<typeof schema.request.register.verify> }>("/register/verify", async (request, reply) => {
         try {
-            const user = new Account(request.session.get("user"));
+            const user = new User(request.session.get("user"));
             const challenge = new AuthChallenge(request.session.get("challenge"));
 
             if (!challenge.isValid()) {
@@ -347,7 +347,7 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
                 throw new Exceptions.VerificationError("Missing registration info");
             }
 
-            await UserAccountModel.create(user);
+            await UserModel.create(user);
 
             const authenticator = await AuthenticatorModel.create({
                 id: crypto.randomUUID(),
@@ -373,7 +373,7 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
             request.log.debug("New user registered", user.userName);
 
             return await reply
-                .status(Api.HttpStatusCode.Created)
+                .status(HttpStatusCode.Created)
                 .send({ user, session, credentialID: Buffer.from(authenticator.credentialID).toString("base64") });
         } catch (error) {
             return await handleError(error, reply);
