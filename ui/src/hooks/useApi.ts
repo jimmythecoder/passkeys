@@ -5,7 +5,7 @@ function isEmpty(value: unknown) {
     return value == null || value === "";
 }
 
-type Options = {
+export type Options = {
     signal?: AbortSignal;
     reviver?: (key: string, value: unknown) => unknown;
 };

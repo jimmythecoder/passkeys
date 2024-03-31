@@ -61,6 +61,44 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
         if (!browserSupportsWebAuthn()) {
             setError(new Error("WebAuthn is not supported in this browser"));
         }
+
+        const abortController = new AbortController();
+
+        if (useConditionalUI) {
+            const authenticators = JSON.parse(localStorage.getItem("authenticators") ?? "[]") as string[];
+
+            if (authenticators && authenticators.length) {
+                console.debug("Conditional UI login", authenticators);
+                passkeyApi
+                    .conditionalUI(authenticators, abortController.signal)
+                    .then((options) => {
+                        return startAuthentication(options, true).then((attResp) => {
+                            return passkeyApi.verifySignin(attResp, abortController.signal);
+                        });
+                    })
+                    .then((response) => {
+                        sessionStorage.setItem("user", JSON.stringify(response.user));
+                        sessionStorage.setItem("session", JSON.stringify(response.session));
+                        console.debug("Conditional UI login success");
+                        navigate(paths.signinSuccess);
+                    })
+                    .catch((err) => {
+                        if (err instanceof DOMException && err.name === "AbortError") {
+                            return;
+                        }
+
+                        if (err instanceof ApiException) {
+                            setError(err);
+                        }
+
+                        console.error(err);
+                    });
+            }
+        }
+
+        return () => {
+            abortController.abort();
+        };
     }, [navigate, useConditionalUI]);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
