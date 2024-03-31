@@ -14,7 +14,7 @@ enum FormInputs {
 }
 
 export const Register: React.FC<React.PropsWithChildren> = () => {
-    const [errorMsg, setErrorMsg] = useState<Error>();
+    const [errorMsg, setErrorMsg] = useState<string>();
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
@@ -58,13 +58,14 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
                 return true;
             } catch (apiError) {
                 if (apiError instanceof ApiException) {
-                    setErrorMsg(apiError);
+                    setErrorMsg(apiError.detail);
                     console.error(apiError);
                 } else if (apiError instanceof Error) {
-                    setErrorMsg(apiError);
+                    debugger;
+                    setErrorMsg(apiError.message);
                     console.error(apiError);
                 } else {
-                    setErrorMsg(new ApiException("An unknown error occurred", ApiException.Status.InternalServerError, "UnknownError"));
+                    setErrorMsg("An unknown error occurred");
                     console.error(apiError);
                 }
             }
@@ -100,7 +101,7 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
             }
         } catch (err) {
             if (err instanceof ApiException) {
-                setErrorMsg(err);
+                setErrorMsg(err.detail);
                 console.error(err);
             }
         }
@@ -109,7 +110,7 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
 
     useEffect(() => {
         if (!browserSupportsWebAuthn()) {
-            setErrorMsg(new Error("WebAuthn is not supported in this browser"));
+            setErrorMsg("WebAuthn is not supported in this browser");
         }
     }, []);
 
@@ -124,7 +125,7 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
                 <form onSubmit={handleSubmit} noValidate name="login" data-submitted={isSubmitted}>
                     {errorMsg && (
                         <div className="element form-error">
-                            <p>{errorMsg.message}</p>
+                            <p>{errorMsg}</p>
                         </div>
                     )}
 

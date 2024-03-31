@@ -27,7 +27,8 @@ export const useApi = (apiURL: string, method: HttpMethod = "GET") => {
             body,
         });
 
-        const isJSON = response.headers.get("content-type")?.includes("application/json");
+        const contentType = response.headers.get("content-type") ?? "text/plain";
+        const isJSON = contentType.includes("application/problem+json") || contentType.includes("application/json");
 
         if (!response.ok) {
             if (isJSON) {
