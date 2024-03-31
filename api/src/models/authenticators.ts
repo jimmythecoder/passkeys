@@ -60,7 +60,7 @@ export const UserAuthenticatorSchema = new dynamoose.Schema({
     },
     createdAt: {
         type: String,
-        default: Date.now,
+        default: new Date().toISOString(),
     },
     credentialID: {
         type: Buffer,

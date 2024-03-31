@@ -61,7 +61,6 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
                     setErrorMsg(apiError.detail);
                     console.error(apiError);
                 } else if (apiError instanceof Error) {
-                    debugger;
                     setErrorMsg(apiError.message);
                     console.error(apiError);
                 } else {

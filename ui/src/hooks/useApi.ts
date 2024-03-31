@@ -14,14 +14,15 @@ export type HttpMethod = "GET" | "POST" | "PUT" | "DELETE";
 
 export const useApi = (apiURL: string, method: HttpMethod = "GET") => {
     return async <T, U = void>(path: string, data?: U, options: Options = {}) => {
-        const body = !isEmpty(data) && method !== "GET" ? JSON.stringify(data) : null;
+        const hasBody = !isEmpty(data);
+        const body = hasBody && method !== "GET" ? JSON.stringify(data) : null;
         const url = `${apiURL}${path}`;
 
         const response = await fetch(url, {
             signal: options.signal,
             method,
             headers: {
-                "Content-Type": "application/json",
+                "Content-Type": hasBody || method === "GET" ? "application/json" : "text/plain",
             },
             credentials: "include",
             body,
