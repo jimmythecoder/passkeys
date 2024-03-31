@@ -1,3 +1,3 @@
-export type { Account } from "./account";
-export type { Session } from "./session";
-export type * as Authenticator from "./authenticator";
+export type { Account, Role } from "./account";
+export type { Session, Challenge } from "./session";
+export type * as Webauthn from "./webauthn";

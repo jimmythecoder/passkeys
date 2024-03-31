@@ -1,3 +1,5 @@
+export type Role = "admin" | "manager" | "editor" | "moderator" | "marketing" | "user" | "guest";
+
 export type Account = {
     /**
      * User's unique ID as GUID
@@ -17,10 +19,14 @@ export type Account = {
     /**
      * Roles the user has ("basic", "admin")
      */
-    roles: string[];
+    roles: Role[];
 
     /**
      * Is email verified?
      */
     isVerified?: boolean;
+
+    failedLoginAttempts: number;
+
+    isLocked: boolean;
 };

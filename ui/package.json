@@ -11,6 +11,8 @@
         "preview": "vite preview"
     },
     "dependencies": {
+        "@passkeys/config": "workspace:^",
+        "@passkeys/data-transfer-objects": "workspace:^",
         "@passkeys/exceptions": "workspace:^",
         "@passkeys/types": "workspace:^",
         "@simplewebauthn/browser": "^9.0.1",

@@ -14,3 +14,8 @@ export type Session = {
      */
     expiresAt: number;
 };
+
+export type Challenge = {
+    challenge: string;
+    authenticators: string[];
+};

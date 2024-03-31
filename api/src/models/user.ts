@@ -1,23 +1,14 @@
 import dynamoose from "dynamoose";
 import { Item } from "dynamoose/dist/Item";
 import { MAX_FAILED_LOGIN_ATTEMPTS } from "@/constants";
-
-export type UserType = {
-    id: string;
-    userName: string;
-    displayName: string;
-    roles: string[];
-    isVerified?: boolean;
-    failedLoginAttempts: number;
-    isLocked: boolean;
-};
+import type { User as UserTypes } from "@passkeys/types";
 
 export enum UserRoles {
     Basic = "basic",
     Admin = "admin",
 }
 
-export type UserModelType = Item & UserType;
+export type UserModelType = Item & UserTypes.Account;
 
 export class User implements User {
     public readonly id: string;
@@ -32,7 +23,7 @@ export class User implements User {
 
     public failedLoginAttempts: number;
 
-    constructor(user: Partial<UserType> = {}) {
+    constructor(user: Partial<UserTypes.Account> = {}) {
         this.id = user.id ?? crypto.randomUUID();
         this.userName = user.userName ?? this.id;
         this.displayName = user.displayName ?? "Anonymous";

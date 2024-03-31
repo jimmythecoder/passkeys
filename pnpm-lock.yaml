@@ -25,9 +25,18 @@ importers:
       '@fastify/multipart':
         specifier: ^8.2.0
         version: 8.2.0
+      '@passkeys/config':
+        specifier: workspace:^
+        version: link:../lib/config
+      '@passkeys/data-transfer-objects':
+        specifier: workspace:^
+        version: link:../lib/data-transfer-objects
       '@passkeys/exceptions':
         specifier: workspace:^
         version: link:../lib/exceptions
+      '@passkeys/types':
+        specifier: workspace:^
+        version: link:../lib/types
       '@simplewebauthn/server':
         specifier: ^9.0.3
         version: 9.0.3
@@ -166,6 +175,14 @@ importers:
         specifier: ~5.3.3
         version: 5.3.3
 
+  lib/config:
+    dependencies:
+      '@passkeys/types':
+        specifier: workspace:^
+        version: link:../types
+
+  lib/data-transfer-objects: {}
+
   lib/exceptions:
     dependencies:
       '@passkeys/types':
@@ -180,6 +197,12 @@ importers:
 
   ui:
     dependencies:
+      '@passkeys/config':
+        specifier: workspace:^
+        version: link:../lib/config
+      '@passkeys/data-transfer-objects':
+        specifier: workspace:^
+        version: link:../lib/data-transfer-objects
       '@passkeys/exceptions':
         specifier: workspace:^
         version: link:../lib/exceptions

@@ -1,0 +1,14 @@
+{
+    "name": "@passkeys/config",
+    "version": "1.0.0",
+    "description": "Application common configuration",
+    "main": "index.ts",
+    "keywords": [
+        "Config"
+    ],
+    "author": "James Harris",
+    "license": "ISC",
+    "dependencies": {
+        "@passkeys/types": "workspace:^"
+    }
+}
