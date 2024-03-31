@@ -44,6 +44,13 @@ export const usePasskeyApi = () => {
         });
     }
 
+    async function signinWith(authenticator: string) {
+        return await api<Api.Auth.Signin.GetCredentials.Response, Api.Auth.Signin.GetCredentials.ConditionalUIRequest>(
+            ApiConfig.API_ENDPOINTS.auth.signin.getAllCredentails,
+            { authenticators: [authenticator] },
+        );
+    }
+
     async function conditionalUI(authenticators: string[], signal?: AbortSignal) {
         return await api<Api.Auth.Signin.GetCredentials.Response, Api.Auth.Signin.GetCredentials.ConditionalUIRequest>(
             ApiConfig.API_ENDPOINTS.auth.signin.getAllCredentails,
@@ -62,6 +69,7 @@ export const usePasskeyApi = () => {
         getSigninCredentials,
         verifySignin,
         conditionalUI,
+        signinWith,
         signout,
     };
 };

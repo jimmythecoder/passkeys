@@ -7,3 +7,81 @@
     border: 1px solid var(--color-danger);
     border-radius: 0.5rem;
 }
+
+.saved-authenticators {
+    display: flex;
+    flex-direction: column;
+    margin: 1rem 0;
+    gap: 0.3rem;
+
+    h2 {
+        font-size: var(--font-size-large);
+        font-weight: 600;
+        margin: 0;
+        padding: 0;
+    }
+
+    ul.authenticator-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+
+        .authenticator {
+            padding: 1rem;
+            background: none;
+            text-align: left;
+            color: var(--color-primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 0.3rem;
+            border: 1px solid var(--color-neutral);
+
+            button {
+                background: none;
+
+                color: var(--color-primary);
+
+                cursor: pointer;
+                border-radius: 0.3rem;
+
+                &:hover {
+                    background-color: var(--color-neutral);
+                }
+            }
+
+            p {
+                margin: 0;
+            }
+
+            .displayName {
+                margin: 0;
+                padding: 0;
+                font-size: var(--font-size-small);
+                margin-bottom: 0.5rem;
+            }
+
+            .userName {
+                font-size: var(--font-size-small);
+            }
+
+            .authenticatorName {
+                font-size: var(--font-size-small);
+                margin-bottom: 0.5rem;
+            }
+
+            .lastLoggedInAt {
+                font-size: var(--font-size-small);
+            }
+
+            .left {
+            }
+
+            .right {
+            }
+
+            .icon {
+            }
+        }
+    }
+}

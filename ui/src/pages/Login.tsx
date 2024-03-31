@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate, NavLink } from "react-router-dom";
 import { startAuthentication, browserSupportsWebAuthn } from "@simplewebauthn/browser";
 import { ApiException } from "@passkeys/exceptions";
 import { paths } from "@/Routes";
 import { usePasskeyApi } from "@/hooks/usePasskeyApi";
+import { daysAgo } from "@/utils/browser";
 import PasskeyIcon from "@/assets/FIDO_Passkey_mark_A_reverse.png";
+import Fingerprint from "@/assets/fingerprint.svg?inline";
 import "./Login.scss";
 
 enum FormInputs {
@@ -27,7 +29,7 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
     const [isSubmitted, setIsSubmitted] = useState(false);
     const navigate = useNavigate();
     const passkeyApi = usePasskeyApi();
-    const useConditionalUI = true;
+    const useConditionalUI = useMemo(() => true, []);
 
     const api = {
         /**
@@ -84,6 +86,27 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
             }
 
             return false;
+        },
+        signinWith(authenticatorId: string) {
+            passkeyApi
+                .signinWith(authenticatorId)
+                .then((authenticationOptions) => {
+                    return startAuthentication(authenticationOptions).then((attResp) => {
+                        return passkeyApi.verifySignin(attResp);
+                    });
+                })
+                .then((response) => {
+                    sessionStorage.setItem("user", JSON.stringify(response.user));
+                    sessionStorage.setItem("session", JSON.stringify(response.session));
+                    navigate(paths.signinSuccess);
+                })
+                .catch((err) => {
+                    if (err instanceof ApiException) {
+                        setError(err);
+                    }
+
+                    console.error(err);
+                });
         },
     };
 
@@ -170,6 +193,39 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
                 </h1>
             </header>
             <main>
+                {authenticators && (
+                    <div className="saved-authenticators">
+                        <h2>Sign in again as</h2>
+
+                        <ul className="authenticator-list">
+                            {authenticators.map((authenticator) => (
+                                <li key={authenticator.authenticatorId} className="authenticator">
+                                    <div className="left">
+                                        <h4 className="displayName">{authenticator.displayName}</h4>
+                                        <p className="userName">{authenticator.userName}</p>
+                                    </div>
+                                    <div className="right">
+                                        <p className="authenticatorName">{authenticator.authenticatorName}</p>
+                                        <p className="lastLoggedInAt">
+                                            Signed in{" "}
+                                            {daysAgo(authenticator.lastLoggedInAt) ? `${daysAgo(authenticator.lastLoggedInAt)} days ago` : `today`}
+                                        </p>
+                                    </div>
+                                    <div className="icon">
+                                        <button
+                                            onClick={() => api.signinWith(authenticator.authenticatorId)}
+                                            type="button"
+                                            data-id={authenticator.authenticatorId}
+                                            className="profile"
+                                        >
+                                            <img src={Fingerprint} alt="Fingerprint" />
+                                        </button>
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
                 <form onSubmit={handleSubmit} noValidate name="login" data-submitted={isSubmitted}>
                     {error && (
                         <div className="element form-error">
