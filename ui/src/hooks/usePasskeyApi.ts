@@ -6,19 +6,21 @@ import type { AuthenticationResponseJSON, RegistrationResponseJSON } from "@simp
 export const usePasskeyApi = () => {
     const api = useApi(ApiConfig.API_PREFIX, "POST");
 
-    const getRegistrationCredentials = async function getRegistrationCredentials(displayName: string, userName: string, authenticatorName: string) {
+    const getRegistrationCredentials = async function getRegistrationCredentials(displayName: string, userName: string) {
         return await api<Api.Auth.Register.GetCredentials.Response, Api.Auth.Register.GetCredentials.Request>(
             ApiConfig.API_ENDPOINTS.auth.register.getCredentials,
             {
                 displayName,
                 userName,
-                authenticatorName,
             },
         );
     };
 
-    const verifyRegistration = async function verifyRegistration(attResp: RegistrationResponseJSON) {
-        return await api<Api.Auth.Register.Verify.Response, Api.Auth.Register.Verify.Request>(ApiConfig.API_ENDPOINTS.auth.register.verify, attResp);
+    const verifyRegistration = async function verifyRegistration(attResp: RegistrationResponseJSON, authenticatorName: string) {
+        return await api<Api.Auth.Register.Verify.Response, Api.Auth.Register.Verify.Request>(ApiConfig.API_ENDPOINTS.auth.register.verify, {
+            attResp,
+            authenticatorName,
+        });
     };
 
     const getSigninCredentials = async function getSigninCredentials(userName: string) {

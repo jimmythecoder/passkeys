@@ -27,12 +27,12 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
          * @param username Email address of the user
          * @returns Promise<boolean> True if the user was registered successfully
          */
-        async register(displayName: string, userName: string, authenticatorName: string = "Passkey") {
+        async register(displayName: string, userName: string, authenticatorName: string) {
             setLoading(true);
             setErrorMsg(undefined);
 
             try {
-                const registrationOptions = await passkeyApi.getRegistrationCredentials(displayName, userName, authenticatorName);
+                const registrationOptions = await passkeyApi.getRegistrationCredentials(displayName, userName);
 
                 performance.mark("startRegister");
 
@@ -48,7 +48,7 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
                     value: performance.getEntriesByName("register")[0].duration,
                 });
 
-                const response = await passkeyApi.verifyRegistration(attResp);
+                const response = await passkeyApi.verifyRegistration(attResp, authenticatorName);
 
                 sessionStorage.setItem("user", JSON.stringify(response.user));
                 sessionStorage.setItem("session", JSON.stringify(response.session));

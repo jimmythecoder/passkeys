@@ -10,6 +10,7 @@ import { api as authApi } from "@/middleware/api/auth";
 import { api as healthApi } from "@/middleware/api/health";
 import { api as testApi } from "@/middleware/api/test";
 import { jwtStatelessSession } from "@/plugins/jwt-stateless-session";
+import { Auth as AuthConfig } from "@passkeys/config";
 
 dotenv.config({ path: [".env", ".env.local"], override: true });
 
@@ -31,16 +32,16 @@ const init = async () => {
     } as FastifyCookieOptions);
     await app.register(jwtStatelessSession, {
         jwt: {
-            issuer: process.env.JWT_ISSUER ?? "https://localhost:3000",
-            audience: process.env.JWT_AUDIENCE ?? "localhost:3000",
+            issuer: process.env.JWT_ISSUER!,
+            audience: process.env.JWT_AUDIENCE!,
             sign: {
                 key: JSON.parse(privateKey.Value!),
-                algorithm: "EdDSA",
+                algorithm: AuthConfig.JWT_ALGORITHM,
                 expiresIn: "2h",
             },
             verify: {
                 keys: JSON.parse(publicKeys.Value!),
-                algorithms: ["EdDSA"],
+                algorithms: [AuthConfig.JWT_ALGORITHM],
             },
         },
         cookie: {

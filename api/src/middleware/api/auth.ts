@@ -252,7 +252,7 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
 
     fastify.post<{ Body: FromSchema<typeof schema.request.register.getCredentials> }>("/register", async (request, reply) => {
         try {
-            const { userName, displayName } = request.body;
+            const { userName, displayName, authenticatorName } = request.body;
 
             if (!displayName) {
                 throw new Exceptions.ValidationError("Name is required", "displayName");
@@ -329,7 +329,7 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
             }
 
             const verification = await verifyRegistrationResponse({
-                response: request.body,
+                response: request.body.attResp,
                 expectedChallenge: challenge.challenge,
                 expectedOrigin: RP_ORIGIN,
                 expectedRPID: RP_ID,
@@ -349,12 +349,13 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
             const authenticator = await AuthenticatorModel.create({
                 id: crypto.randomUUID(),
                 userId: user.id,
+                name: request.body.authenticatorName,
                 credentialID: Buffer.from(verification.registrationInfo.credentialID),
                 credentialPublicKey: Buffer.from(verification.registrationInfo.credentialPublicKey),
                 counter: verification.registrationInfo.counter,
                 credentialDeviceType: verification.registrationInfo.credentialDeviceType,
                 credentialBackedUp: verification.registrationInfo.credentialBackedUp,
-                transports: request.body.response.transports,
+                transports: request.body.attResp.response.transports,
             });
 
             const session = new UserSession({

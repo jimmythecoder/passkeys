@@ -68,38 +68,45 @@ export const schema = {
             verify: {
                 type: "object",
                 properties: {
-                    id: { type: "string" },
-                    rawId: { type: "string" },
-                    response: {
+                    authenticatorName: { type: "string" },
+                    attResp: {
                         type: "object",
                         properties: {
-                            clientDataJSON: { type: "string" },
-                            attestationObject: { type: "string" },
-                            authenticatorData: { type: "string" },
-                            transports: { type: "array", items: { enum: ["ble", "hybrid", "internal", "nfc", "usb"] } },
-                            publicKeyAlgorithm: { type: "number" },
-                            publicKey: { type: "string" },
-                        },
-                        required: ["clientDataJSON", "attestationObject"],
-                    },
-                    authenticatorAttachment: { enum: ["cross-platform", "platform"] },
-                    clientExtensionResults: {
-                        type: "object",
-                        properties: {
-                            appid: { type: "boolean" },
-                            credProps: {
+                            id: { type: "string" },
+                            rawId: { type: "string" },
+                            response: {
                                 type: "object",
                                 properties: {
-                                    rk: { type: "boolean" },
+                                    clientDataJSON: { type: "string" },
+                                    attestationObject: { type: "string" },
+                                    authenticatorData: { type: "string" },
+                                    transports: { type: "array", items: { enum: ["ble", "hybrid", "internal", "nfc", "usb"] } },
+                                    publicKeyAlgorithm: { type: "number" },
+                                    publicKey: { type: "string" },
                                 },
+                                required: ["clientDataJSON", "attestationObject"],
                             },
-                            hmacCreateSecret: { type: "boolean" },
+                            authenticatorAttachment: { enum: ["cross-platform", "platform"] },
+                            clientExtensionResults: {
+                                type: "object",
+                                properties: {
+                                    appid: { type: "boolean" },
+                                    credProps: {
+                                        type: "object",
+                                        properties: {
+                                            rk: { type: "boolean" },
+                                        },
+                                    },
+                                    hmacCreateSecret: { type: "boolean" },
+                                },
+                                required: [],
+                            },
+                            type: { enum: ["public-key"] },
                         },
-                        required: [],
+                        required: ["rawId", "id", "response", "clientExtensionResults", "type"],
                     },
-                    type: { enum: ["public-key"] },
                 },
-                required: ["rawId", "id", "response", "clientExtensionResults", "type"],
+                required: ["attResp", "authenticatorName"],
             },
         },
     },

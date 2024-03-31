@@ -1,7 +1,11 @@
-import { User } from "../../../index";
-import { RegistrationResponseJSON } from "@simplewebauthn/types";
+import type { User } from "../../../index";
+import type { RegistrationResponseJSON } from "@simplewebauthn/types";
 
-export type Request = RegistrationResponseJSON;
+export type Request = {
+    attResp: RegistrationResponseJSON;
+
+    authenticatorName: string;
+};
 
 export type Response = {
     /**
