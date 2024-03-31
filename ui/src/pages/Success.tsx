@@ -1,21 +1,21 @@
 import "./Success.scss";
 import React, { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { del } from "@/utils/api";
-import { API_ENDPOINTS } from "@/config";
 import { paths } from "@/Routes";
-import type { User, UserSession } from "@/types/user";
+import { usePasskeyApi } from "@/hooks/usePasskeyApi";
+import type { User } from "@passkeys/types";
 
 export type SuccessProps = {
     from: "signin" | "register";
 };
 
 export const Success: React.FC<React.PropsWithChildren<SuccessProps>> = (props) => {
-    const [user, setUser] = useState<User>({ roles: [] } as unknown as User);
-    const [session, setSession] = useState<UserSession>({} as UserSession);
+    const [user, setUser] = useState<User.Account>({ roles: [] } as unknown as User.Account);
+    const [session, setSession] = useState<User.Session>({} as User.Session);
     const userData = sessionStorage.getItem("user");
     const sessionData = sessionStorage.getItem("session");
     const navigate = useNavigate();
+    const passkeyApi = usePasskeyApi();
 
     useEffect(() => {
         try {
@@ -32,7 +32,7 @@ export const Success: React.FC<React.PropsWithChildren<SuccessProps>> = (props) 
 
     const handleSignout = async () => {
         try {
-            await del(API_ENDPOINTS.auth.session, {});
+            await passkeyApi.signout();
 
             sessionStorage.removeItem("user");
             sessionStorage.removeItem("session");

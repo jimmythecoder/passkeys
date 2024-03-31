@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate, NavLink } from "react-router-dom";
 import { startAuthentication, browserSupportsWebAuthn } from "@simplewebauthn/browser";
-import { post } from "@/utils/api";
-import { API_ENDPOINTS } from "@/config";
 import { ApiException } from "@passkeys/exceptions";
 import { paths } from "@/Routes";
-import "./Login.scss";
+import { usePasskeyApi } from "@/hooks/usePasskeyApi";
 import PasskeyIcon from "@/assets/FIDO_Passkey_mark_A_reverse.png";
-import type { Auth } from "@/types/api";
+import "./Login.scss";
 
 enum FormInputs {
     username = "email",
@@ -18,6 +16,7 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
     const [loading, setLoading] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
     const navigate = useNavigate();
+    const passkeyApi = usePasskeyApi();
     const useConditionalUI = true;
 
     const api = {
@@ -31,14 +30,11 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
             setError(undefined);
 
             try {
-                const authenticationOptions = await post<Auth.Signin.GetCredentials.Response, Auth.Signin.GetCredentials.Request>(
-                    API_ENDPOINTS.auth.signin.getCredentials,
-                    { userName },
-                );
+                const authenticationOptions = await passkeyApi.getSigninCredentials(userName);
 
                 // Pass the options to the authenticator and wait for a response
                 const attResp = await startAuthentication(authenticationOptions);
-                const response = await post<Auth.Signin.Verify.Response, Auth.Signin.Verify.Request>(API_ENDPOINTS.auth.signin.verify, attResp);
+                const response = await passkeyApi.verifySignin(attResp);
 
                 sessionStorage.setItem("user", JSON.stringify(response.user));
                 sessionStorage.setItem("session", JSON.stringify(response.session));

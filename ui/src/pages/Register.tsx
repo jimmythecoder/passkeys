@@ -32,7 +32,7 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
             setErrorMsg(undefined);
 
             try {
-                const registrationOptions = await passkeyApi.getCredentials(displayName, userName, authenticatorName);
+                const registrationOptions = await passkeyApi.getRegistrationCredentials(displayName, userName, authenticatorName);
 
                 performance.mark("startRegister");
 
@@ -48,7 +48,7 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
                     value: performance.getEntriesByName("register")[0].duration,
                 });
 
-                const response = await passkeyApi.verify(attResp);
+                const response = await passkeyApi.verifyRegistration(attResp);
 
                 sessionStorage.setItem("user", JSON.stringify(response.user));
                 sessionStorage.setItem("session", JSON.stringify(response.session));

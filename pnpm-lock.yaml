@@ -183,6 +183,9 @@ importers:
       '@passkeys/exceptions':
         specifier: workspace:^
         version: link:../lib/exceptions
+      '@passkeys/types':
+        specifier: workspace:^
+        version: link:../lib/types
       '@simplewebauthn/browser':
         specifier: ^9.0.1
         version: 9.0.1

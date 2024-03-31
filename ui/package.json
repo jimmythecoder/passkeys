@@ -12,6 +12,7 @@
     },
     "dependencies": {
         "@passkeys/exceptions": "workspace:^",
+        "@passkeys/types": "workspace:^",
         "@simplewebauthn/browser": "^9.0.1",
         "@simplewebauthn/types": "^9.0.1",
         "@types/gtag.js": "^0.0.19",

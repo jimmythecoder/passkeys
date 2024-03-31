@@ -1,4 +1,5 @@
 import * as Exceptions from "@passkeys/exceptions";
+import type { Api } from "@passkeys/types";
 
 function isEmpty(value: unknown) {
     return value == null || value === "";
@@ -30,7 +31,7 @@ export const useApi = (apiURL: string, method: HttpMethod = "GET") => {
 
         if (!response.ok) {
             if (isJSON) {
-                const error = (await response.json()) as Exceptions.Problem<any>;
+                const error = (await response.json()) as Api.Problem.ProblemJSON<any>;
 
                 if (Object.keys(Exceptions).includes(error.title)) {
                     throw Exceptions[error.title as keyof typeof Exceptions].fromJSON(error);
