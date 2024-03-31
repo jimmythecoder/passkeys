@@ -11,12 +11,13 @@ import { api as healthApi } from "@/middleware/api/health";
 import { api as testApi } from "@/middleware/api/test";
 import { jwtStatelessSession } from "@/plugins/jwt-stateless-session";
 
-dotenv.config({ path: [".env.local", ".env"] });
+dotenv.config({ path: [".env", ".env.local"], override: true });
 
 const USE_METADATA_SERVICE = process.env.USE_METADATA_SERVICE === "true";
 const IS_PROD = process.env.NODE_ENV === "production";
 
 const init = async () => {
+    console.debug("init server");
     const app = Fastify({
         logger: {
             level: IS_PROD ? "info" : "debug",
