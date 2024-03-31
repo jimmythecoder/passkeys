@@ -13,4 +13,6 @@ export type Response = {
      * Session details including expiry
      */
     session: User.Session;
+
+    authenticator: User.Webauthn.RegisteredAuthenticator;
 };

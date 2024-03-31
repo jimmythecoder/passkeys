@@ -90,6 +90,7 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
                 // Require users to use a previously-registered authenticator
                 allowCredentials: userAuthenticators.map((authenticator) => ({
                     id: authenticator.credentialID,
+                    name: authenticator.name,
                     type: "public-key",
                     transports: authenticator.transports,
                 })),
@@ -241,7 +242,7 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
             request.session.set("sub", user.id);
             request.session.set("roles", user.roles);
 
-            return await reply.status(ApiConfig.HttpStatusCode.Created).send({ user, session });
+            return await reply.status(ApiConfig.HttpStatusCode.Created).send({ user, session, authenticator });
         } catch (error) {
             return await handleError(error, reply);
         } finally {

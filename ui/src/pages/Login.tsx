@@ -9,10 +9,20 @@ import "./Login.scss";
 
 enum FormInputs {
     username = "email",
+    rememberMe = "rememberMe",
 }
+
+type AuthHistory = {
+    authenticatorId: string;
+    authenticatorName: string;
+    userName: string;
+    displayName: string;
+    lastLoggedInAt: string;
+};
 
 export const Login: React.FC<React.PropsWithChildren> = () => {
     const [error, setError] = useState<Error>();
+    const [authenticators, setAuthenticators] = useState<AuthHistory[]>(JSON.parse(localStorage.getItem("authenticators") ?? "[]"));
     const [loading, setLoading] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
     const navigate = useNavigate();
@@ -25,7 +35,7 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
          * @param username Users email address
          * @returns Promise<boolean> True if the user was signed in successfully
          */
-        async signin(userName: string) {
+        async signin(userName: string, rememberMe: boolean) {
             setLoading(true);
             setError(undefined);
 
@@ -34,15 +44,35 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
 
                 // Pass the options to the authenticator and wait for a response
                 const attResp = await startAuthentication(authenticationOptions);
+
                 const response = await passkeyApi.verifySignin(attResp);
 
                 sessionStorage.setItem("user", JSON.stringify(response.user));
                 sessionStorage.setItem("session", JSON.stringify(response.session));
 
-                // Save Authenticator ID so we can use Conditional UI on next login
-                localStorage.setItem("authenticators", JSON.stringify([attResp.rawId]));
+                if (rememberMe) {
+                    let updatedAuthenticators = [...authenticators];
+                    const existing = authenticators.find((a) => a.authenticatorId === attResp.rawId);
+                    if (existing) {
+                        updatedAuthenticators = authenticators.map((a) =>
+                            a.authenticatorId === attResp.rawId ? { ...a, lastUsedAt: new Date().toISOString() } : a,
+                        );
+                    } else {
+                        updatedAuthenticators.push({
+                            authenticatorId: attResp.rawId,
+                            authenticatorName: response.authenticator.name,
+                            lastLoggedInAt: new Date().toISOString(),
+                            userName: response.user.userName,
+                            displayName: response.user.displayName,
+                        });
+                    }
 
-                console.debug("Login success");
+                    localStorage.setItem("authenticators", JSON.stringify(updatedAuthenticators));
+
+                    // Save Authenticator ID so we can use Conditional UI on next login
+                    setAuthenticators(updatedAuthenticators);
+                }
+
                 return true;
             } catch (apiError) {
                 if (apiError instanceof ApiException) {
@@ -65,12 +95,13 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
         const abortController = new AbortController();
 
         if (useConditionalUI) {
-            const authenticators = JSON.parse(localStorage.getItem("authenticators") ?? "[]") as string[];
-
             if (authenticators && authenticators.length) {
                 console.debug("Conditional UI login", authenticators);
                 passkeyApi
-                    .conditionalUI(authenticators, abortController.signal)
+                    .conditionalUI(
+                        authenticators.map((authenticator) => authenticator.authenticatorId),
+                        abortController.signal,
+                    )
                     .then((options) => {
                         return startAuthentication(options, true).then((attResp) => {
                             return passkeyApi.verifySignin(attResp, abortController.signal);
@@ -115,8 +146,8 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
             }
 
             const username = (e.currentTarget.elements.namedItem(FormInputs.username) as HTMLInputElement).value;
-            const success = await api.signin(username);
-            console.debug("Login response", success);
+            const rememberMe = (e.currentTarget.elements.namedItem(FormInputs.rememberMe) as HTMLInputElement).checked;
+            const success = await api.signin(username, rememberMe);
 
             if (success) {
                 navigate(paths.signinSuccess);
@@ -157,6 +188,11 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
                             required
                         />
                         <p className="error">Your email is not valid</p>
+                    </div>
+
+                    <div className="element confirmation">
+                        <input type="checkbox" name={FormInputs.rememberMe} id={FormInputs.rememberMe} defaultChecked={true} />
+                        <label htmlFor={FormInputs.rememberMe}>Remember my details</label>
                     </div>
 
                     <div className="element">

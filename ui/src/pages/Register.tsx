@@ -13,7 +13,14 @@ enum FormInputs {
     username = "email",
 }
 
+type SavedAuthenticator = {
+    id: string;
+    name: string;
+    lastUsedAt: string;
+};
+
 export const Register: React.FC<React.PropsWithChildren> = () => {
+    const [authenticators, setAuthenticators] = useState<SavedAuthenticator[]>(JSON.parse(localStorage.getItem("authenticators") ?? "[]"));
     const [errorMsg, setErrorMsg] = useState<string>();
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -52,7 +59,9 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
 
                 sessionStorage.setItem("user", JSON.stringify(response.user));
                 sessionStorage.setItem("session", JSON.stringify(response.session));
-                localStorage.setItem("authenticators", JSON.stringify([attResp.rawId]));
+
+                setAuthenticators((prev) => [...prev, { id: attResp.rawId, name: authenticatorName, lastUsedAt: new Date().toISOString() }]);
+                localStorage.setItem("authenticators", JSON.stringify(authenticators));
 
                 console.debug("User registered");
                 return true;
