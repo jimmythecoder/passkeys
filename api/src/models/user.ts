@@ -1,8 +1,7 @@
 import dynamoose from "dynamoose";
 import { Item } from "dynamoose/dist/Item";
-import { MAX_FAILED_LOGIN_ATTEMPTS } from "@/constants";
 import type { User as UserTypes } from "@passkeys/types";
-import { Auth } from "@passkeys/config";
+import { Auth, Api } from "@passkeys/config";
 
 export type UserModelType = Item & UserTypes.Account;
 
@@ -32,7 +31,7 @@ export class User implements UserTypes.Account {
      * Whether the user is locked out.
      */
     get isLocked() {
-        return this.failedLoginAttempts >= MAX_FAILED_LOGIN_ATTEMPTS;
+        return this.failedLoginAttempts >= Api.MAX_FAILED_LOGIN_ATTEMPTS;
     }
 }
 
