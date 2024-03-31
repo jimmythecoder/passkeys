@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import type { FastifyPluginCallback } from "fastify";
 import { Unauthorized, ApiException } from "@passkeys/exceptions";
-import { HttpStatusCode } from "@/constants";
+import { Api } from "@passkeys/config";
 
 dotenv.config();
 
@@ -20,7 +20,7 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
             }
 
             console.error(error);
-            return reply.type("application/problem+json").status(HttpStatusCode.Unauthorized).send(error);
+            return reply.type("application/problem+json").status(Api.HttpStatusCode.Unauthorized).send(error);
         }
     });
 
@@ -42,7 +42,7 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
             }
 
             console.error(error);
-            return reply.type("application/problem+json").status(HttpStatusCode.Unauthorized).send(error);
+            return reply.type("application/problem+json").status(Api.HttpStatusCode.Unauthorized).send(error);
         }
     });
 

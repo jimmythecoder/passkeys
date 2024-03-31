@@ -1,34 +1,29 @@
 import dynamoose from "dynamoose";
 import { Item } from "dynamoose/dist/Item";
-import { MAX_FAILED_LOGIN_ATTEMPTS } from "@/constants";
-import type { User as UserTypes } from "@passkeys/types";
+import { Auth, Api as ApiConfig } from "@passkeys/config";
+import type { User } from "@passkeys/types";
 
-export enum UserRoles {
-    Basic = "basic",
-    Admin = "admin",
-}
+export type UserModelType = Item & User.Account;
 
-export type UserModelType = Item & UserTypes.Account;
-
-export class User implements User {
+export class Account implements User.Account {
     public readonly id: string;
 
     public readonly userName: string;
 
     public readonly displayName: string;
 
-    public readonly roles: string[];
+    public readonly roles: User.Role[];
 
     public isVerified?: boolean;
 
     public failedLoginAttempts: number;
 
-    constructor(user: Partial<UserTypes.Account> = {}) {
+    constructor(user: Partial<User.Account> = {}) {
         this.id = user.id ?? crypto.randomUUID();
         this.userName = user.userName ?? this.id;
-        this.displayName = user.displayName ?? "Anonymous";
+        this.displayName = user.displayName ?? "Guest";
         this.isVerified = user.isVerified ?? false;
-        this.roles = user.roles ?? [UserRoles.Basic];
+        this.roles = user.roles ?? [Auth.UserRoles.User];
         this.failedLoginAttempts = user.failedLoginAttempts ?? 0;
     }
 
@@ -36,7 +31,7 @@ export class User implements User {
      * Whether the user is locked out.
      */
     get isLocked() {
-        return this.failedLoginAttempts >= MAX_FAILED_LOGIN_ATTEMPTS;
+        return this.failedLoginAttempts >= ApiConfig.MAX_FAILED_LOGIN_ATTEMPTS;
     }
 }
 
@@ -68,6 +63,6 @@ export const UserSchema = new dynamoose.Schema({
     },
 });
 
-export const UserModel = dynamoose.model<UserModelType>("User", UserSchema);
+export const UserAccountModel = dynamoose.model<UserModelType>("Account", UserSchema);
 
-export default User;
+export default Account;
