@@ -1,2 +1,2 @@
-export * as Basic from "./basic";
-export * as Admin from "./admin";
+export type * as Basic from "./basic";
+export type * as Admin from "./admin";

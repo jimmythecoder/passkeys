@@ -1,1 +1,1 @@
-export * as Status from "./status";
+export type * as Status from "./status";

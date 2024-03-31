@@ -1,34 +1,6 @@
-export type Problem<T = unknown> = {
-    type: string;
-    status: number;
-    title: string;
-    detail: string;
-    context?: T;
-};
+import { Api } from "@passkeys/types";
 
-export type ProblemException<T> = Problem<T> & {
-    /**
-     * Serialize the exception to a Problem JSON object that can be sent to the client using the RFC 9457 format.
-     */
-    toJSON(): Problem<T>;
-};
-
-export type ProblemExceptionStatic = {
-    new <T>(detail: string, status: number, title: string, context?: string): ProblemException<T>;
-
-    /**
-     * HTTP status codes that best represent the status of the exception.
-     */
-    Status: Record<string, number>;
-
-    /**
-     * Revive an exception from a Problem JSON object.
-     * @param error The Problem JSON object representing the exception.
-     */
-    fromJSON<T>(error: Problem<T>): ProblemException<T>;
-};
-
-export class ApiException<T = unknown> extends Error implements ProblemException<T> {
+export class ApiException<T = unknown> extends Error implements Api.Problem.Exception<T> {
     public readonly type: string;
 
     public static Status = {
@@ -72,7 +44,7 @@ export class ApiException<T = unknown> extends Error implements ProblemException
         };
     }
 
-    public static fromJSON(error: Problem<unknown>) {
+    public static fromJSON(error: Api.Problem.ProblemJSON<unknown>) {
         return new this(error.detail, error.status, error.title, error.context);
     }
 

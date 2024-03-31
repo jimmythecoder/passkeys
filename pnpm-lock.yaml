@@ -166,7 +166,17 @@ importers:
         specifier: ~5.3.3
         version: 5.3.3
 
-  lib/exceptions: {}
+  lib/exceptions:
+    dependencies:
+      '@passkeys/types':
+        specifier: workspace:^
+        version: link:../types
+
+  lib/types:
+    dependencies:
+      '@simplewebauthn/types':
+        specifier: ^9.0.1
+        version: 9.0.1
 
   ui:
     dependencies:

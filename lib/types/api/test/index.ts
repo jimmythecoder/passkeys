@@ -1,1 +1,1 @@
-export * as Authorizer from "./authorizer/index";
+export type * as Authorizer from "./authorizer";

@@ -4,5 +4,8 @@
     "private": false,
     "version": "1.0.0",
     "type": "module",
-    "main": "index.ts"
+    "main": "index.ts",
+    "dependencies": {
+        "@passkeys/types": "workspace:^"
+    }
 }

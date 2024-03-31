@@ -1,2 +1,2 @@
-export * as GetCredentials from "./getCredentials";
-export * as Verify from "./verify";
+export type * as GetCredentials from "./getCredentials";
+export type * as Verify from "./verify";

@@ -10,5 +10,3 @@ export { UserAlreadyExists } from "./UserAlreadyExists";
 export { UserNotFound } from "./UserNotFound";
 export { ValidationError } from "./ValidationError";
 export { VerificationError } from "./VerificationError";
-
-export type { ProblemException, Problem, ProblemExceptionStatic } from "./ApiException";

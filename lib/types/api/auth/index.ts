@@ -1,2 +1,2 @@
-export * as Register from "./register/index";
-export * as Signin from "./signin/index";
+export * as Register from "./register";
+export * as Signin from "./signin";

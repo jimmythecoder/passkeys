@@ -1,4 +1,4 @@
-export type Request = null;
+export type Request = void;
 
 export type Response = {
     status: string;

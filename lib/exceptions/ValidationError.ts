@@ -1,4 +1,5 @@
-import { ApiException, Problem } from "./ApiException";
+import { ApiException } from "./ApiException";
+import type { Api } from "@passkeys/types";
 
 export class ValidationError extends ApiException<string> {
     constructor(
@@ -15,7 +16,7 @@ export class ValidationError extends ApiException<string> {
         };
     }
 
-    public static fromJSON(error: Problem<string>) {
+    public static fromJSON(error: Api.Problem.ProblemJSON<string>) {
         return new ValidationError(error.detail, error.context);
     }
 }

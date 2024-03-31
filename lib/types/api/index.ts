@@ -1,3 +1,4 @@
-export * as Health from "./health/index";
-export * as Auth from "./auth/index";
-export * as Test from "./test/index";
+export type * as Health from "./health";
+export type * as Auth from "./auth";
+export type * as Test from "./test";
+export type * as Problem from "./problem";
