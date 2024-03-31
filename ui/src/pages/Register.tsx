@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate, NavLink } from "react-router-dom";
 import { startRegistration, browserSupportsWebAuthn } from "@simplewebauthn/browser";
-import { post } from "@/utils/api";
-import { API_ENDPOINTS } from "@/config";
 import { paths } from "@/Routes";
 import PasskeyIcon from "@/assets/FIDO_Passkey_mark_A_reverse.png";
-import "./Register.scss";
-import type { Auth } from "@/types/api";
 import { ApiException } from "@passkeys/exceptions";
+import { usePasskeyApi } from "@/hooks/usePasskeyApi";
+import { getUserAgentIdentifier } from "@/utils/browser";
+import "./Register.scss";
 
 enum FormInputs {
     displayName = "displayName",
@@ -19,6 +18,7 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+    const passkeyApi = usePasskeyApi();
 
     const api = {
         /**
@@ -27,15 +27,12 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
          * @param username Email address of the user
          * @returns Promise<boolean> True if the user was registered successfully
          */
-        async register(displayName: string, userName: string) {
+        async register(displayName: string, userName: string, authenticatorName: string = "Passkey") {
             setLoading(true);
             setErrorMsg(undefined);
 
             try {
-                const registrationOptions = await post<Auth.Register.GetCredentials.Response, Auth.Register.GetCredentials.Request>(
-                    API_ENDPOINTS.auth.register.getCredentials,
-                    { displayName, userName },
-                );
+                const registrationOptions = await passkeyApi.getCredentials(displayName, userName, authenticatorName);
 
                 performance.mark("startRegister");
 
@@ -51,7 +48,7 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
                     value: performance.getEntriesByName("register")[0].duration,
                 });
 
-                const response = await post<Auth.Register.Verify.Response, Auth.Register.Verify.Request>(API_ENDPOINTS.auth.register.verify, attResp);
+                const response = await passkeyApi.verify(attResp);
 
                 sessionStorage.setItem("user", JSON.stringify(response.user));
                 sessionStorage.setItem("session", JSON.stringify(response.session));
@@ -91,9 +88,10 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
 
             const formData = new FormData(e.currentTarget);
             const displayName = formData.get(FormInputs.displayName) as string;
-            const email = formData.get(FormInputs.username) as string;
+            const username = formData.get(FormInputs.username) as string;
+            const authenticatorName = getUserAgentIdentifier();
 
-            const success = await api.register(displayName, email);
+            const success = await api.register(displayName, username, authenticatorName);
 
             if (success) {
                 console.debug("User registered");

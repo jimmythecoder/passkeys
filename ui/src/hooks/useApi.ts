@@ -9,7 +9,9 @@ type Options = {
     reviver?: (key: string, value: unknown) => unknown;
 };
 
-const jsonAPI = (apiURL: string, method = "POST") => {
+export type HttpMethod = "GET" | "POST" | "PUT" | "DELETE";
+
+export const useApi = (apiURL: string, method: HttpMethod = "GET") => {
     return async <T, U = void>(path: string, data?: U, options: Options = {}) => {
         const body = !isEmpty(data) && method !== "GET" ? JSON.stringify(data) : null;
         const url = `${apiURL}${path}`;
@@ -51,14 +53,4 @@ const jsonAPI = (apiURL: string, method = "POST") => {
     };
 };
 
-export const post = jsonAPI("/api", "POST");
-export const get = jsonAPI("/api", "GET");
-export const del = jsonAPI("/api", "DELETE");
-export const put = jsonAPI("/api", "PUT");
-
-export default {
-    get,
-    post,
-    del,
-    put,
-};
+export default useApi;

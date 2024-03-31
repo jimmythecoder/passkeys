@@ -12,4 +12,9 @@ export type Request = {
      * The display name of the user to sign in.
      */
     displayName: string;
-}
+
+    /**
+     * The name of the authenticator to register.
+     */
+    authenticatorName: string;
+};

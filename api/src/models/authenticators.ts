@@ -1,6 +1,8 @@
 import dynamoose from "dynamoose";
 import { Item } from "dynamoose/dist/Item";
 
+export type CredentialDeviceType = "singleDevice" | "multiDevice";
+
 /**
  * It is strongly advised that authenticators get their own DB
  * table, ideally with a foreign key to a specific UserModel.
@@ -13,6 +15,12 @@ export type RegisteredAuthenticator = {
     id: string;
 
     userId: string;
+
+    /**
+     * A human-readable name for the authenticator. e.g. "iPhone 15 Pro Max"
+     * @default Name based on the UserAgent string
+     */
+    name: string;
 
     // SQL: Encode to base64url then store as `TEXT`. Index this column
     credentialID: Uint8Array;
@@ -30,14 +38,14 @@ export type RegisteredAuthenticator = {
     transports?: AuthenticatorTransport[];
 };
 
-export type CredentialDeviceType = "singleDevice" | "multiDevice";
-
 export type AuthenticatorModelType = Item & RegisteredAuthenticator;
 
 export class Authenticator implements RegisteredAuthenticator {
     public readonly id: string;
 
     public readonly userId: string;
+
+    public readonly name: string;
 
     // SQL: Encode to base64url then store as `TEXT`. Index this column
     public readonly credentialID: Uint8Array;
@@ -68,6 +76,7 @@ export class Authenticator implements RegisteredAuthenticator {
         this.credentialDeviceType = registeredAuthenticator.credentialDeviceType;
         this.credentialBackedUp = registeredAuthenticator.credentialBackedUp;
         this.transports = registeredAuthenticator.transports;
+        this.name = registeredAuthenticator.name;
     }
 }
 
@@ -81,6 +90,13 @@ export const UserAuthenticatorSchema = new dynamoose.Schema({
             type: "global",
             name: "userIdIndex",
         },
+    },
+    name: {
+        type: String,
+    },
+    createdAt: {
+        type: String,
+        default: Date.now,
     },
     credentialID: {
         type: Buffer,
