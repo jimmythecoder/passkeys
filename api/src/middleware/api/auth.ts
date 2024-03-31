@@ -14,11 +14,8 @@ import { UserSession } from "@/models/userSession";
 import { AuthChallenge, SessionChallenge } from "@/models/challenge";
 import { Authenticator, AuthenticatorModel } from "@/models/authenticators";
 import * as Exceptions from "@passkeys/exceptions";
-import { HttpStatusCode } from "@/constants";
-import { MAX_AUTHENTICATORS } from "@/config";
 import { schema } from "@/middleware/api/auth.schema";
-
-dotenv.config();
+import { Api as ApiConfig, Auth as AuthConfig } from "@passkeys/config";
 
 const SESSION_LIFETIME = parseInt(process.env.SESSION_LIFETIME ?? "86400000", 10);
 const RP_ORIGIN = process.env.RP_ORIGIN ?? "http://localhost:3000";
@@ -46,7 +43,7 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
         try {
             request.session.delete();
 
-            return await reply.status(HttpStatusCode.NoContent).send({ message: "Signed out" });
+            return await reply.status(ApiConfig.HttpStatusCode.NoContent).send({ message: "Signed out" });
         } catch (error) {
             return handleError(error, reply);
         }
@@ -56,7 +53,7 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
         try {
             request.session.delete();
 
-            return await reply.status(HttpStatusCode.NoContent).send({ message: "Signed out" });
+            return await reply.status(ApiConfig.HttpStatusCode.NoContent).send({ message: "Signed out" });
         } catch (error) {
             return handleError(error, reply);
         }
@@ -108,7 +105,7 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
             request.session.set("sub", user.userName);
             request.session.set("challenge", challenge.toJSON());
 
-            return await reply.status(HttpStatusCode.OK).send(options);
+            return await reply.status(ApiConfig.HttpStatusCode.OK).send(options);
         } catch (error) {
             return handleError(error, reply);
         }
@@ -124,7 +121,7 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
                 throw new Exceptions.ValidationError("No authenticators provided");
             }
 
-            if (credentials.length > MAX_AUTHENTICATORS) {
+            if (credentials.length > AuthConfig.MAX_AUTHENTICATORS) {
                 throw new Exceptions.ValidationError("Too many authenticators provided, max 10");
             }
 
@@ -165,7 +162,7 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
 
             request.session.set("challenge", challenge.toJSON());
 
-            return await reply.status(HttpStatusCode.OK).send(options);
+            return await reply.status(ApiConfig.HttpStatusCode.OK).send(options);
         } catch (error) {
             return handleError(error, reply);
         }
@@ -244,7 +241,7 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
             request.session.set("sub", user.id);
             request.session.set("roles", user.roles);
 
-            return await reply.status(HttpStatusCode.Created).send({ user, session });
+            return await reply.status(ApiConfig.HttpStatusCode.Created).send({ user, session });
         } catch (error) {
             return await handleError(error, reply);
         } finally {
@@ -316,7 +313,7 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
 
             request.log.debug("New user registration request", user.userName);
 
-            return await reply.status(HttpStatusCode.OK).send(options);
+            return await reply.status(ApiConfig.HttpStatusCode.OK).send(options);
         } catch (error) {
             return handleError(error, reply);
         }
@@ -373,7 +370,7 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
             request.log.debug("New user registered", user.userName);
 
             return await reply
-                .status(HttpStatusCode.Created)
+                .status(ApiConfig.HttpStatusCode.Created)
                 .send({ user, session, credentialID: Buffer.from(authenticator.credentialID).toString("base64") });
         } catch (error) {
             return await handleError(error, reply);

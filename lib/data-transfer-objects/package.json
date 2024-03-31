@@ -3,6 +3,7 @@
     "version": "1.0.0",
     "description": "JSON schema definitions for the data transfer objects used in the Passkeys project.",
     "main": "index.ts",
+    "type": "module",
     "keywords": [
         "TypeScript",
         "Typings",

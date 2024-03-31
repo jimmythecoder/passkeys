@@ -17,7 +17,6 @@ const USE_METADATA_SERVICE = process.env.USE_METADATA_SERVICE === "true";
 const IS_PROD = process.env.NODE_ENV === "production";
 
 const init = async () => {
-    console.debug("init server");
     const app = Fastify({
         logger: {
             level: IS_PROD ? "info" : "debug",

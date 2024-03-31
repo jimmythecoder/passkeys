@@ -3,6 +3,7 @@
     "version": "1.0.0",
     "description": "Application common configuration",
     "main": "index.ts",
+    "type": "module",
     "keywords": [
         "Config"
     ],
