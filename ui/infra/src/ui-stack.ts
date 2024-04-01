@@ -6,6 +6,7 @@ export class UIStack extends cdk.Stack {
         super(scope, id, props);
 
         this.tags.setTag("app", id);
+        this.tags.setTag("awsApplication", "arn:aws:resource-groups:ap-southeast-2:427820939238:group/passkeys/00jzjt3ud0eyx85fwyhag3a2wc");
         this.tags.setTag("AppManagerCFNStackKey", this.stackName);
 
         const webS3Bucket = new cdk.aws_s3.Bucket(this, `${id}-s3-bucket`, {
