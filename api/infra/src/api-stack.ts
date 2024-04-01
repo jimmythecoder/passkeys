@@ -7,6 +7,7 @@ export class ApiStack extends cdk.Stack {
         super(scope, id, props);
 
         this.tags.setTag("app", id);
+        this.tags.setTag("awsApplication", "arn:aws:resource-groups:ap-southeast-2:427820939238:group/passkeys/00jzjt3ud0eyx85fwyhag3a2wc");
         this.tags.setTag("AppManagerCFNStackKey", this.stackName);
 
         const logGroup = new cdk.aws_logs.LogGroup(this, `${id}-log-group`, {
