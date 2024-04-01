@@ -7,7 +7,7 @@
     "main": "src/index.ts",
     "type": "module",
     "scripts": {
-        "start": "tsx watch src/index.ts",
+        "start": "NODE_ENV=development tsx watch src/index.ts",
         "build:tsc": "tsc && tsc-alias",
         "build:cjs": "esbuild src/index.ts --bundle --platform=node --outfile=dist/index.cjs",
         "build": "node build.js",

@@ -12,7 +12,7 @@ import { api as testApi } from "@/middleware/api/test";
 import { jwtStatelessSession } from "@/plugins/jwt-stateless-session";
 import { Auth as AuthConfig } from "@passkeys/config";
 
-dotenv.config({ path: [".env", ".env.local"], override: true });
+dotenv.config({ path: [".env", ".env.local", `.env.${process.env.NODE_ENV}`], override: true });
 
 const USE_METADATA_SERVICE = process.env.USE_METADATA_SERVICE === "true";
 const IS_PROD = process.env.NODE_ENV === "production";
@@ -66,16 +66,16 @@ const init = async () => {
             });
         }
 
-        dynamoose.aws.ddb.local(process.env.AWS_DYNAMODB_ENDPOINT);
+        // dynamoose.aws.ddb.local(process.env.AWS_DYNAMODB_ENDPOINT);
 
-        // new dynamoose.aws.ddb.DynamoDB({
-        //     endpoint: process.env.AWS_DYNAMODB_ENDPOINT,
-        //     region: process.env.AWS_REGION!,
-        //     credentials: {
-        //         accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-        //         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-        //     },
-        // });
+        new dynamoose.aws.ddb.DynamoDB({
+            endpoint: process.env.AWS_DYNAMODB_ENDPOINT,
+            region: process.env.AWS_REGION!,
+            credentials: {
+                accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+                secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+            },
+        });
     });
 
     return app;

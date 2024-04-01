@@ -18,4 +18,7 @@ esbuild.build({
     },
     entryPoints: ["./src/index.ts", "./src/lambda.mts"],
     external: ["aws-sdk", "@aws-sdk/client-ssm"],
+    define: {
+        "process.env.NODE_ENV": '"production"',
+    },
 });
