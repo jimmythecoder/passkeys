@@ -4,7 +4,7 @@ FROM base as build
 
 RUN corepack enable 
 RUN corepack prepare pnpm@latest --activate
-RUN corepack use pnpm@8.x
+RUN corepack use pnpm@latest
 
 WORKDIR /tmp
 
