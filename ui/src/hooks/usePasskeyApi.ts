@@ -1,7 +1,7 @@
 import { useApi } from "./useApi";
 import { Api as ApiConfig } from "@passkeys/config";
 import type { Api } from "@passkeys/types";
-import type { AuthenticationResponseJSON, RegistrationResponseJSON } from "@simplewebauthn/types";
+import type { AuthenticationResponseJSON, RegistrationResponseJSON } from "@simplewebauthn/browser";
 
 export const usePasskeyApi = () => {
     const api = useApi(ApiConfig.API_PREFIX, "POST");

@@ -1,5 +1,5 @@
 import { User } from "../../../index";
-import { AuthenticationResponseJSON } from "@simplewebauthn/types";
+import { AuthenticationResponseJSON } from "@simplewebauthn/server";
 
 export type Request = AuthenticationResponseJSON;
 

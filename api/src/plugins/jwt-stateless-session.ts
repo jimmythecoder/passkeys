@@ -89,7 +89,7 @@ export class Session {
 }
 
 const plugin: FastifyPluginAsync<SessionOptions> = async (fastify, opts) => {
-    fastify.decorateRequest("session", null);
+    fastify.decorateRequest("session");
 
     fastify.addHook("onRequest", async (request) => {
         request.session = new Session({}, opts);
@@ -135,7 +135,7 @@ const plugin: FastifyPluginAsync<SessionOptions> = async (fastify, opts) => {
 };
 
 export const jwtStatelessSession = fp(plugin, {
-    fastify: "4.x",
+    fastify: "5.x",
     name: "jwt-stateless-session",
 });
 

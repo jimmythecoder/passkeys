@@ -1,5 +1,5 @@
 import type { User } from "../../../index";
-import type { RegistrationResponseJSON } from "@simplewebauthn/types";
+import type { RegistrationResponseJSON } from "@simplewebauthn/server";
 
 export type Request = {
     attResp: RegistrationResponseJSON;

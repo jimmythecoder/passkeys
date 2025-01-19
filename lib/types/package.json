@@ -11,7 +11,7 @@
     ],
     "author": "James Harris",
     "license": "ISC",
-    "peerDependencies": {
-        "@simplewebauthn/types": "^9.0.1"
+    "devDependencies": {
+        "@simplewebauthn/server": "^13.1.0"
     }
 }

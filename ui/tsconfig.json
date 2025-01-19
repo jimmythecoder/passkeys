@@ -24,7 +24,7 @@
         "paths": {
             "@/*": ["./src/*"]
         },
-        "types": ["@simplewebauthn/types", "@types/gtag.js"]
+        "types": ["@types/gtag.js"]
     },
     "include": ["src"],
     "references": [{ "path": "./tsconfig.node.json" }]

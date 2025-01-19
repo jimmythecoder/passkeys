@@ -1,4 +1,4 @@
-import type { PublicKeyCredentialCreationOptionsJSON } from "@simplewebauthn/types";
+import type { PublicKeyCredentialCreationOptionsJSON } from "@simplewebauthn/server";
 
 export type Response = PublicKeyCredentialCreationOptionsJSON;
 

@@ -44,7 +44,7 @@ export const Register: React.FC<React.PropsWithChildren> = () => {
                 performance.mark("startRegister");
 
                 // Pass the options to the authenticator and wait for a response
-                const attResp = await startRegistration(registrationOptions);
+                const attResp = await startRegistration({ optionsJSON: registrationOptions });
 
                 performance.mark("endRegister");
                 performance.measure("register", "startRegister", "endRegister");

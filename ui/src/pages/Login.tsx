@@ -45,7 +45,7 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
                 const authenticationOptions = await passkeyApi.getSigninCredentials(userName);
 
                 // Pass the options to the authenticator and wait for a response
-                const attResp = await startAuthentication(authenticationOptions);
+                const attResp = await startAuthentication({ optionsJSON: authenticationOptions });
 
                 const response = await passkeyApi.verifySignin(attResp);
 
@@ -91,7 +91,7 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
             passkeyApi
                 .signinWith(authenticatorId)
                 .then((authenticationOptions) => {
-                    return startAuthentication(authenticationOptions).then((attResp) => {
+                    return startAuthentication({ optionsJSON: authenticationOptions }).then((attResp) => {
                         return passkeyApi.verifySignin(attResp);
                     });
                 })
@@ -126,7 +126,7 @@ export const Login: React.FC<React.PropsWithChildren> = () => {
                         abortController.signal,
                     )
                     .then((options) => {
-                        return startAuthentication(options, true).then((attResp) => {
+                        return startAuthentication({ optionsJSON: options, useBrowserAutofill: true }).then((attResp) => {
                             return passkeyApi.verifySignin(attResp, abortController.signal);
                         });
                     })
