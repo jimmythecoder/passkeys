@@ -8,7 +8,7 @@ import {
     verifyAuthenticationResponse,
 } from "@simplewebauthn/server";
 import dynamoose from "dynamoose";
-import { isoBase64URL } from "@simplewebauthn/server/helpers";
+import { isoBase64URL, isoUint8Array } from "@simplewebauthn/server/helpers";
 import { UserModel, User } from "@/models/user";
 import { UserSession } from "@/models/userSession";
 import { AuthChallenge, SessionChallenge } from "@/models/challenge";
@@ -89,7 +89,7 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
                 rpID: RP_ID,
                 // Require users to use a previously-registered authenticator
                 allowCredentials: userAuthenticators.map((authenticator) => ({
-                    id: authenticator.credentialID,
+                    id: isoBase64URL.fromBuffer(authenticator.credentialID),
                     name: authenticator.name,
                     type: "public-key",
                     transports: authenticator.transports,
@@ -147,7 +147,7 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
             const options = await generateAuthenticationOptions({
                 rpID: RP_ID,
                 allowCredentials: userAuthenticators.map((authenticator) => ({
-                    id: authenticator.credentialID,
+                    id: isoBase64URL.fromBuffer(authenticator.credentialID),
                     type: "public-key",
                     transports: authenticator.transports,
                 })),
@@ -218,7 +218,12 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
                     expectedChallenge: challenge.currentChallenge,
                     expectedOrigin: RP_ORIGIN,
                     expectedRPID: RP_ID,
-                    authenticator,
+                    credential: {
+                        id: isoBase64URL.fromBuffer(authenticator.credentialID),
+                        publicKey: authenticator.credentialPublicKey,
+                        counter: authenticator.counter,
+                        transports: authenticator.transports,
+                    },
                     requireUserVerification: true,
                 });
 
@@ -279,14 +284,14 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
             const options = await generateRegistrationOptions({
                 rpName: RP_NAME,
                 rpID: RP_ID,
-                userID: user.id,
+                userID: isoUint8Array.fromUTF8String(user.id),
                 userName,
                 // Don't prompt users for additional information about the authenticator
                 // (Recommended for smoother UX)
                 attestationType: USE_METADATA_SERVICE ? "direct" : "none",
                 // Prevent users from re-registering existing authenticators
                 excludeCredentials: userAuthenticators.map((authenticator) => ({
-                    id: authenticator.credentialID,
+                    id: isoBase64URL.fromBuffer(authenticator.credentialID),
                     type: "public-key",
                     // Optional
                     transports: authenticator.transports,
