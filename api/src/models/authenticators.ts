@@ -5,7 +5,7 @@ import { User } from "@passkeys/types";
 export type AuthenticatorModelType = Item & User.Webauthn.RegisteredAuthenticator;
 
 export class Authenticator implements User.Webauthn.RegisteredAuthenticator {
-    public readonly id: string;
+    public readonly id: Base64URLString;
 
     public readonly userId: string;
 

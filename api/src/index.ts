@@ -66,16 +66,16 @@ const init = async () => {
             });
         }
 
-        // dynamoose.aws.ddb.local(process.env.AWS_DYNAMODB_ENDPOINT);
+        dynamoose.aws.ddb.local(process.env.AWS_DYNAMODB_ENDPOINT);
 
-        new dynamoose.aws.ddb.DynamoDB({
-            endpoint: process.env.AWS_DYNAMODB_ENDPOINT,
-            region: process.env.AWS_REGION!,
-            credentials: {
-                accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-                secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-            },
-        });
+        // new dynamoose.aws.ddb.DynamoDB({
+        //     endpoint: process.env.AWS_DYNAMODB_ENDPOINT,
+        //     region: process.env.AWS_REGION!,
+        //     credentials: {
+        //         accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+        //         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+        //     },
+        // });
     });
 
     return app;

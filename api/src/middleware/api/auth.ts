@@ -12,7 +12,7 @@ import { isoBase64URL, isoUint8Array } from "@simplewebauthn/server/helpers";
 import { UserModel, User } from "@/models/user";
 import { UserSession } from "@/models/userSession";
 import { AuthChallenge, SessionChallenge } from "@/models/challenge";
-import { Authenticator, AuthenticatorModel } from "@/models/authenticators";
+import { type Passkey, PasskeyModel } from "@/models/passkey";
 import * as Exceptions from "@passkeys/exceptions";
 import { schema } from "@/middleware/api/auth.schema";
 import { Api as ApiConfig, Auth as AuthConfig } from "@passkeys/config";
@@ -75,9 +75,9 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
 
             const user = new User(userEntity);
 
-            const userAuthenticators = await AuthenticatorModel.query("userId").eq(user.id).exec();
+            const userPasskeys = await PasskeyModel.query("userId").eq(user.id).exec();
 
-            if (!userAuthenticators.length) {
+            if (!userPasskeys.length) {
                 throw new Exceptions.AuthenticatorNotFound(`User has no registered authenticators`);
             }
 
@@ -88,18 +88,18 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
             const options = await generateAuthenticationOptions({
                 rpID: RP_ID,
                 // Require users to use a previously-registered authenticator
-                allowCredentials: userAuthenticators.map((authenticator) => ({
-                    id: isoBase64URL.fromBuffer(authenticator.credentialID),
-                    name: authenticator.name,
+                allowCredentials: userPasskeys.map((passkey) => ({
+                    id: passkey.id,
+                    name: passkey.webauthnUserID,
                     type: "public-key",
-                    transports: authenticator.transports,
+                    transports: passkey.transports,
                 })),
                 userVerification: "preferred",
             });
 
             const challenge = new AuthChallenge({
                 challenge: options.challenge,
-                authenticators: userAuthenticators.map((authenticator) => authenticator.id),
+                authenticators: userPasskeys.map((passkey) => passkey.id),
             });
 
             request.log.info("User signing in", user.userName);
@@ -127,13 +127,13 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
             }
 
             const filter = new dynamoose.Condition().filter("credentialID").in(credentials);
-            const userAuthenticators = await AuthenticatorModel.scan(filter).exec();
+            const userPasskeys = await PasskeyModel.scan(filter).exec();
 
-            if (!userAuthenticators.length) {
+            if (!userPasskeys.length) {
                 throw new Exceptions.AuthenticatorNotFound(`No matching authenticators found`);
             }
 
-            const userModel = await UserModel.get(userAuthenticators[0].userId);
+            const userModel = await UserModel.get(userPasskeys[0].userId);
             const user = new User(userModel);
 
             if (!user) {
@@ -146,20 +146,20 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
 
             const options = await generateAuthenticationOptions({
                 rpID: RP_ID,
-                allowCredentials: userAuthenticators.map((authenticator) => ({
-                    id: isoBase64URL.fromBuffer(authenticator.credentialID),
+                allowCredentials: userPasskeys.map((passkey) => ({
+                    id: passkey.id,
                     type: "public-key",
-                    transports: authenticator.transports,
+                    transports: passkey.transports,
                 })),
                 userVerification: "preferred",
             });
 
             const challenge = new AuthChallenge({
                 challenge: options.challenge,
-                authenticators: userAuthenticators.map((authenticator) => authenticator.id),
+                authenticators: userPasskeys.map((passkey) => passkey.id),
             });
 
-            request.log.debug("User signing in with Conditional UI", userAuthenticators.map((authenticator) => authenticator.id).join(", "));
+            request.log.debug("User signing in with Conditional UI", userPasskeys.map((passkey) => passkey.id).join(", "));
 
             request.session.set("challenge", challenge.toJSON());
 
@@ -183,14 +183,14 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
                 throw new Exceptions.ValidationError("Missing credential ID");
             }
 
-            const [authenticator] = await AuthenticatorModel.query("credentialID").eq(credentialID).exec();
+            const [passkey] = await PasskeyModel.query("credentialID").eq(credentialID).exec();
 
-            if (!authenticator) {
+            if (!passkey) {
                 throw new Exceptions.AuthenticatorMismatch(`Authenticator not found`);
             }
 
             // Is this authenticator the same as the one paired with the challenge?
-            if (!jwtToken.authenticators.includes(authenticator.id)) {
+            if (!jwtToken.authenticators.includes(passkey.id)) {
                 throw new Exceptions.AuthenticatorMismatch(`Unknown authenticator used`);
             }
 
@@ -200,7 +200,7 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
                 throw new Exceptions.ChallengeError("Missing challenge, sign-in again");
             }
 
-            const userModel = await UserModel.get(authenticator.userId);
+            const userModel = await UserModel.get(passkey.userId);
 
             if (!userModel) {
                 throw new Exceptions.UserNotFound(`User not found`);
@@ -219,10 +219,10 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
                     expectedOrigin: RP_ORIGIN,
                     expectedRPID: RP_ID,
                     credential: {
-                        id: isoBase64URL.fromBuffer(authenticator.credentialID),
-                        publicKey: authenticator.credentialPublicKey,
-                        counter: authenticator.counter,
-                        transports: authenticator.transports,
+                        id: passkey.id,
+                        publicKey: passkey.publicKey,
+                        counter: passkey.counter,
+                        transports: passkey.transports,
                     },
                     requireUserVerification: true,
                 });
@@ -247,7 +247,7 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
             request.session.set("sub", user.id);
             request.session.set("roles", user.roles);
 
-            return await reply.status(ApiConfig.HttpStatusCode.Created).send({ user, session, authenticator });
+            return await reply.status(ApiConfig.HttpStatusCode.Created).send({ user, session, passkey });
         } catch (error) {
             return await handleError(error, reply);
         } finally {
@@ -279,7 +279,7 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
                 displayName,
             });
 
-            const userAuthenticators = [] as Authenticator[];
+            const userPasskeys = [] as Passkey[];
 
             const options = await generateRegistrationOptions({
                 rpName: RP_NAME,
@@ -290,11 +290,11 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
                 // (Recommended for smoother UX)
                 attestationType: USE_METADATA_SERVICE ? "direct" : "none",
                 // Prevent users from re-registering existing authenticators
-                excludeCredentials: userAuthenticators.map((authenticator) => ({
-                    id: isoBase64URL.fromBuffer(authenticator.credentialID),
+                excludeCredentials: userPasskeys.map((passkey) => ({
+                    id: passkey.id,
                     type: "public-key",
                     // Optional
-                    transports: authenticator.transports,
+                    transports: passkey.transports,
                 })),
                 authenticatorSelection: {
                     residentKey: "preferred",
@@ -352,15 +352,14 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
 
             await UserModel.create(user);
 
-            const authenticator = await AuthenticatorModel.create({
+            const passkey = await PasskeyModel.create({
                 id: crypto.randomUUID(),
                 userId: user.id,
-                name: request.body.authenticatorName,
-                credentialID: Buffer.from(verification.registrationInfo.credential.id),
-                credentialPublicKey: Buffer.from(verification.registrationInfo.credential.publicKey),
+                webauthnUserID: verification.registrationInfo.credential.id,
+                publicKey: Buffer.from(verification.registrationInfo.credential.publicKey),
                 counter: verification.registrationInfo.credential.counter,
-                credentialDeviceType: verification.registrationInfo.credentialDeviceType,
-                credentialBackedUp: verification.registrationInfo.credentialBackedUp,
+                deviceType: verification.registrationInfo.credentialDeviceType,
+                backedUp: verification.registrationInfo.credentialBackedUp,
                 transports: request.body.attResp.response.transports,
             });
 
@@ -378,7 +377,7 @@ export const api: FastifyPluginCallback = (fastify, _, next) => {
 
             return await reply
                 .status(ApiConfig.HttpStatusCode.Created)
-                .send({ user, session, credentialID: Buffer.from(authenticator.credentialID).toString("base64") });
+                .send({ user, session, credentialID: Buffer.from(passkey.webauthnUserID).toString("base64") });
         } catch (error) {
             return await handleError(error, reply);
         } finally {
