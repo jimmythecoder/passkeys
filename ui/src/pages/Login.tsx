@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { useNavigate, NavLink } from "react-router-dom";
+import { useNavigate, NavLink } from "react-router";
 import { startAuthentication, browserSupportsWebAuthn } from "@simplewebauthn/browser";
 import { ApiException } from "@passkeys/exceptions";
 import { paths } from "@/Routes";

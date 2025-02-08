@@ -57,7 +57,7 @@ export const schema = {
             },
         },
         register: {
-            getCredentials: {
+            request: {
                 type: "object",
                 properties: {
                     userName: { type: "string" },

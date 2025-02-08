@@ -1,0 +1,21 @@
+meta {
+  name: Passkey
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{origin}}{{prefix}}/auth/signin/passkey
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "userName": "james@jharris.nz"
+  }
+}
+
+docs {
+  Sign in with saved Passkey
+}

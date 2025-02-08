@@ -12,6 +12,6 @@
     "author": "James Harris",
     "license": "ISC",
     "devDependencies": {
-        "@simplewebauthn/server": "^13.1.0"
+        "@simplewebauthn/server": "^13.1.1"
     }
 }

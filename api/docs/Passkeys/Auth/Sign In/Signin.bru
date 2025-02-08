@@ -1,0 +1,21 @@
+meta {
+  name: Signin
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{origin}}{{prefix}}/auth/signin
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "userName": "{{email}}"
+  }
+}
+
+docs {
+  Sign in with username / email
+}

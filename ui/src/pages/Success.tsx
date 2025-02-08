@@ -1,6 +1,6 @@
 import "./Success.scss";
 import React, { useEffect, useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router";
 import { paths } from "@/Routes";
 import { usePasskeyApi } from "@/hooks/usePasskeyApi";
 import type { User } from "@passkeys/types";

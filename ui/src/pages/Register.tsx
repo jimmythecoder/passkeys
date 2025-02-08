@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, NavLink } from "react-router-dom";
+import { useNavigate, NavLink } from "react-router";
 import { startRegistration, browserSupportsWebAuthn } from "@simplewebauthn/browser";
 import { paths } from "@/Routes";
 import PasskeyIcon from "@/assets/FIDO_Passkey_mark_A_reverse.png";

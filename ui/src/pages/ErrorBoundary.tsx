@@ -1,4 +1,4 @@
-import { useRouteError, NavLink } from "react-router-dom";
+import { useRouteError, NavLink } from "react-router";
 import { useEffect } from "react";
 import { paths } from "@/Routes";
 import { MonitoringContext } from "@/contexts/Monitoring";

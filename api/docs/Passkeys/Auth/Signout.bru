@@ -1,0 +1,11 @@
+meta {
+  name: Signout
+  type: http
+  seq: 1
+}
+
+delete {
+  url: {{origin}}{{prefix}}/auth/session
+  body: none
+  auth: none
+}
